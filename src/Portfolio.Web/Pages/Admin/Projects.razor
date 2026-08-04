@@ -1,0 +1,96 @@
+@page "/admin/projects"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]
+@inject AdminService Admin
+@inject HttpClient Http
+@inject TranslationService T
+@implements IDisposable
+
+<PageTitle>Projects — Admin</PageTitle>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 style="font-weight:700;margin:0;">Projects</h1>
+    <button @onclick="()=>editing=new Data.Models.Project()" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ New</button>
+</div>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
+else if (editing == null)
+{
+    <div class="row g-3">
+        @foreach (var p in projects)
+        {
+            var ct = p.ContractId != null ? contracts.FirstOrDefault(c => c.Id == p.ContractId) : null;
+            <div class="col-lg-4 col-md-6">
+                <div class="card-dark p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div><strong class="text-light">@p.Title</strong>
+                        @if (ct != null) { <small style="color:#d4a04c;display:block;">📋 @ct.Title (@ct.Status)</small> }
+                        @if (!string.IsNullOrEmpty(p.ClientName)) { <small style="color:#9a9a9a;">@p.ClientName</small> }</div>
+                        @if (!p.IsPublished) { <span class="badge bg-warning text-dark">Draft</span> }
+                    </div>
+                    <small style="color:#9a9a9a;">@p.Category · @p.ShortDesc</small>
+                    <div class="mt-2 d-flex gap-2">
+                        <button @onclick="()=>Edit(p)" class="btn btn-sm btn-outline-light">Edit</button>
+                        <a href="/admin/phases/@p.Id" class="btn btn-sm btn-outline-light">📊 Phases</a>
+                        <button @onclick="()=>Delete(p.Id)" class="btn btn-sm btn-outline-danger">Del</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card-dark p-4" style="max-width:700px;">
+        <h5 class="text-light mb-3">@(editing.Id == 0 ? "New Project" : "Edit Project")</h5>
+        <div class="row g-2 mb-2">
+            <div class="col-md-8"><input @bind="editing.Title" class="form-control bg-dark text-light border-secondary" placeholder="Title" /></div>
+            <div class="col-md-4"><input @bind="editing.Slug" class="form-control bg-dark text-light border-secondary" placeholder="slug" /></div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-md-6"><input @bind="editing.Category" class="form-control bg-dark text-light border-secondary" placeholder="Category" /></div>
+            <div class="col-md-6"><input @bind="editing.ClientName" class="form-control bg-dark text-light border-secondary" placeholder="Client Name" /></div>
+        </div>
+        <div class="mb-2"><input @bind="editing.ShortDesc" class="form-control bg-dark text-light border-secondary" placeholder="Short description" /></div>
+        <div class="mb-2"><textarea @bind="editing.Description" rows="3" class="form-control bg-dark text-light border-secondary" placeholder="Full description"></textarea></div>
+        <div class="mb-2"><input @bind="editing.Technologies" class="form-control bg-dark text-light border-secondary" placeholder='Technologies JSON: ["Blazor","SQL"]' /></div>
+        <div class="row g-2 mb-2">
+            <div class="col-md-4">
+                <label class="text-light small">Contract</label>
+                <select @bind="editing.ContractId" class="form-select bg-dark text-light border-secondary">
+                    <option value="">— None —</option>
+                    @foreach (var ct in contracts) { <option value="@ct.Id">@ct.Title (@ct.Status)</option> }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="text-light small">Mockup</label>
+                <select @bind="editing.MockupClass" class="form-select bg-dark text-light border-secondary">
+                    <option value="mockup-dark">Dark</option><option value="mockup-light">Light</option><option value="mockup-brand">Brand</option>
+                </select>
+            </div>
+            <div class="col-md-4"><label class="text-light small">Rotation</label><input @bind="editing.CardRotation" class="form-control bg-dark text-light border-secondary" placeholder="-6deg, 3deg" /></div>
+        </div>
+        <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" @bind="editing.IsFeatured" id="f1" /><label class="form-check-label text-light" for="f1">Featured (shows on landing page)</label></div>
+        <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" @bind="editing.IsPublished" id="f2" /><label class="form-check-label text-light" for="f2">Published</label></div>
+        <div class="d-flex gap-2">
+            <button @onclick="Save" class="btn px-4" style="background:#d4a04c;color:#000;font-weight:600;">Save</button>
+            <button @onclick="()=>editing=null" class="btn btn-outline-light">Cancel</button>
+        </div>
+    </div>
+}
+
+<style>.card-dark{background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px;}</style>
+
+@code {
+    private List<Data.Models.Project> projects = new();
+    private List<Portfolio.Data.Models.Contract> contracts = new();
+    private Data.Models.Project? editing;
+    private bool loaded;
+
+    protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
+    private async void Load() { try { projects = await Admin.GetProjectsAsync(); contracts = await Http.GetFromJsonAsync<List<Portfolio.Data.Models.Contract>>("api/admin/contracts") ?? new(); } catch { } loaded = true; StateHasChanged(); }
+    private void Edit(Data.Models.Project p) => editing = new Data.Models.Project { Id = p.Id, Title = p.Title, Slug = p.Slug, Category = p.Category, ClientName = p.ClientName, ContractId = p.ContractId, ShortDesc = p.ShortDesc, Description = p.Description, Technologies = p.Technologies, MockupClass = p.MockupClass, CardRotation = p.CardRotation, IsFeatured = p.IsFeatured, IsPublished = p.IsPublished };
+    private async Task Save() { if (editing == null) return; if (editing.Id == 0) await Admin.CreateProjectAsync(editing); else await Admin.UpdateProjectAsync(editing.Id, editing); editing = null; Load(); }
+    private async Task Delete(int id) { await Admin.DeleteProjectAsync(id); Load(); }
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => T.OnChange -= Refresh;
+}

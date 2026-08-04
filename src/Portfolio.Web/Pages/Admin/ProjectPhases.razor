@@ -1,0 +1,94 @@
+@page "/admin/phases/{ProjectId:int}"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]
+@inject HttpClient Http
+@inject TranslationService T
+@implements IDisposable
+
+<PageTitle>Phases — Admin</PageTitle>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="/admin/projects" class="text-decoration-none" style="color:#9a9a9a;font-size:.85rem;">← Back to Projects</a>
+        <h1 style="font-weight:700;margin:0;">Phases — @projectTitle</h1>
+    </div>
+    <button @onclick="Add" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ Add Phase</button>
+</div>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
+else
+{
+    <div class="mb-3">
+        <small style="color:#9a9a9a;">Overall progress:</small>
+        <div class="progress mt-1" style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;">
+            <div class="progress-bar" style="width:@overallProgress%;background:linear-gradient(90deg,var(--accent),#e8c97a);border-radius:4px;transition:width .5s;"></div>
+        </div>
+        <small style="color:var(--accent);">@overallProgress%</small>
+    </div>
+
+    @foreach (var p in phases)
+    {
+        var pc = p.Progress + "%";
+        var bc = p.Status switch { "Completed" => "#4caf50", "InProgress" => "var(--accent)", "OnHold" => "#ff9800", _ => "#9a9a9a" };
+        <div class="card-dark p-3 mb-2">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1" style="min-width:0;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <strong style="color:@bc;">@p.Title</strong>
+                        <span class="badge" style="background:rgba(255,255,255,0.06);color:#9a9a9a;">@p.Status</span>
+                        <span style="color:#d4a04c;font-weight:600;font-size:.82rem;">@p.Progress%</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(p.Description)) { <small style="color:#9a9a9a;display:block;">@p.Description</small> }
+                    <div class="progress mt-2" style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;">
+                        <div class="progress-bar" style="width:@pc;background:@bc;border-radius:3px;transition:width .4s;"></div>
+                    </div>
+                </div>
+                <div class="d-flex gap-1 ms-2">
+                    <button @onclick="()=>Edit(p)" class="btn btn-sm btn-outline-light">Edit</button>
+                    <button @onclick="()=>Delete(p.Id)" class="btn btn-sm btn-outline-danger">Del</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (editing != null)
+    {
+        <div class="card-dark p-4 mt-3" style="max-width:600px;">
+            <h5 class="text-light mb-3">@(editing.Id == 0 ? "New" : "Edit") Phase</h5>
+            <div class="row g-2 mb-2">
+                <div class="col-md-8"><input @bind="editing.Title" class="form-control bg-dark text-light border-secondary" placeholder="Title" /></div>
+                <div class="col-md-4"><select @bind="editing.Status" class="form-select bg-dark text-light border-secondary"><option value="Pending">Pending</option><option value="InProgress">In Progress</option><option value="Completed">Completed</option><option value="OnHold">On Hold</option></select></div>
+            </div>
+            <div class="mb-2"><textarea @bind="editing.Description" rows="2" class="form-control bg-dark text-light border-secondary" placeholder="Description"></textarea></div>
+            <div class="row g-2 mb-2">
+                <div class="col-md-4"><label class="text-light small">Progress (%)</label><input @bind="editing.Progress" type="number" min="0" max="100" class="form-control bg-dark text-light border-secondary" /></div>
+                <div class="col-md-4"><label class="text-light small">Start</label><input @bind="editing.StartDate" type="date" class="form-control bg-dark text-light border-secondary" /></div>
+                <div class="col-md-4"><label class="text-light small">End</label><input @bind="editing.EndDate" type="date" class="form-control bg-dark text-light border-secondary" /></div>
+            </div>
+            <div class="d-flex gap-2"><button @onclick="Save" class="btn px-3" style="background:#d4a04c;color:#000;">Save</button><button @onclick="Cancel" class="btn btn-outline-light">Cancel</button></div>
+        </div>
+    }
+}
+
+<style>.card-dark{background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px;}</style>
+
+@code {
+    [Parameter] public int ProjectId { get; set; }
+    private List<Portfolio.Data.Models.ProjectPhase> phases = new();
+    private Portfolio.Data.Models.ProjectPhase? editing;
+    private string projectTitle = "";
+    private int overallProgress;
+    private bool loaded;
+
+    protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
+    private async void Load() {
+        try { phases = await Http.GetFromJsonAsync<List<Portfolio.Data.Models.ProjectPhase>>("api/admin/phases/" + ProjectId) ?? new(); var p = await Http.GetFromJsonAsync<Portfolio.Data.Models.Project>("api/admin/projects/" + ProjectId); if (p != null) projectTitle = p.Title; overallProgress = phases.Count > 0 ? (int)phases.Average(x => x.Progress) : 0; } catch { }
+        loaded = true; StateHasChanged();
+    }
+    private void Edit(Portfolio.Data.Models.ProjectPhase p) => editing = new Portfolio.Data.Models.ProjectPhase { Id = p.Id, ProjectId = ProjectId, Title = p.Title, Description = p.Description, Status = p.Status, Progress = p.Progress, StartDate = p.StartDate, EndDate = p.EndDate, SortOrder = p.SortOrder };
+    private void Add() => editing = new Portfolio.Data.Models.ProjectPhase { ProjectId = ProjectId, Progress = 0 };
+    private void Cancel() => editing = null;
+    private async Task Save() { if (editing == null) return; var h = editing.Id == 0 ? await Http.PostAsJsonAsync("api/admin/phases", editing) : await Http.PutAsJsonAsync("api/admin/phases/" + editing.Id, editing); if (h.IsSuccessStatusCode) { editing = null; Load(); } }
+    private async Task Delete(int id) { await Http.DeleteAsync("api/admin/phases/" + id); Load(); }
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => T.OnChange -= Refresh;
+}

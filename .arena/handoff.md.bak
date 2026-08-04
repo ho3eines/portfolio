@@ -1,0 +1,565 @@
+# PROJECT HANDOFF — Complete Knowledge Base
+> **Read this FIRST before any code change. Update it AFTER every change.**
+> This single document replaces reading all 50+ source files.
+> Last updated: 2026-08-04 (bilingual + language gate)
+
+---
+
+## ⚡ QUICK START (5 seconds)
+
+```
+Project:   Portfolio Platform (Blazor WASM + ASP.NET Core + SQL Server)
+Solution:  Portfolio.sln (3 projects: Web, Api, Data)
+Stack:     Blazor WASM → HttpClient → ASP.NET Core API → Dapper → SQL Server
+Auth:      JWT (Bearer token in LocalStorage)
+DB:        Database-First, T-SQL in wwwroot/resources/, Dapper for access
+UI:        Dark theme, Bento Grid 5-box, Gold #d4a04c accent
+Run:       cd src/Portfolio.Api && dotnet run   |   cd src/Portfolio.Web && dotnet run
+Login:     admin / Admin@123
+```
+
+---
+
+## 📂 FILE MAP (every file, what it does, when to touch it)
+
+```
+portfolio/
+│
+├── Portfolio.sln                    ← 3 projects: Web, Api, Data
+├── README.md                        ← User-facing docs
+│
+├── wwwroot/                         ← ★ STATIC PREVIEW (live on port 5173)
+│   ├── index.html                   ← Full landing page (standalone, no Blazor needed)
+│   ├── css/styles.css               ← ALL styles (responsive, animations, dark theme)
+│   ├── js/
+│   │   ├── config.js                ← Site data (name, projects, skills — for static only)
+│   │   ├── animations.js            ← ALL JS (17 animation modules, toast, scroll-spy)
+│   │   └── splash.js                ← NOT USED (removed, kept as reference)
+│   ├── images/icon-192.png          ← PWA icon
+│   ├── images/icon-512.png          ← PWA icon
+│   ├── manifest.json                ← PWA manifest
+│   ├── service-worker.js            ← PWA cache strategy
+│   ├── robots.txt                   ← SEO: allow all, sitemap pointer
+│   ├── sitemap.xml                  ← SEO: static sitemap
+│   └── resources/                   ← ★ ALL T-SQL SCRIPTS (Database-First)
+│       ├── 01-create-database.sql   ← 12 tables + indexes + stored procedures
+│       ├── 02-seed-data.sql         ← Admin user + sample content
+│       ├── 03-resource-runner.sql   ← SP: usp_ExecuteResource
+│       └── 04-error-log.sql         ← ErrorLogs table
+│
+├── src/
+│   ├── Portfolio.Data/              ← ★ SHARED LIBRARY (both Web and Api reference this)
+│   │   ├── Portfolio.Data.csproj    ← Dapper + Microsoft.Data.SqlClient
+│   │   ├── SqlConnectionFactory.cs  ← IDbConnection factory (Singleton in DI)
+│   │   ├── PortfolioDbContext.cs    ← EMPTY STUB (kept for backward compat, NOT USED)
+│   │   ├── Models/Entities.cs       ← 12 POCO classes — NO EF annotations, pure data
+│   │   └── DTOs/DTOs.cs             ← Request/Response models (LoginRequest, ApiResponse<T>, etc)
+│   │
+│   ├── Portfolio.Api/               ← ★ BACKEND API
+│   │   ├── Portfolio.Api.csproj     ← Dapper + SqlClient + JWT + Swagger
+│   │   ├── Program.cs               ← DI registration, middleware pipeline, JWT config
+│   │   ├── appsettings.json         ← Connection string, JWT keys
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.cs    ← POST login, register, refresh — GET me
+│   │   │   ├── PortfolioController.cs ← GET profile, projects, skills, exp, testimonials, settings, seo — POST contact
+│   │   │   ├── AdminController.cs   ← CRUD: profile, projects, skills, exp, testimonials, messages, settings
+│   │   │   ├── ResourcesController.cs ← GET list SQL files, POST execute/file, POST execute-all, GET history
+│   │   │   ├── SeoController.cs     ← GET robots.txt, sitemap.xml, api/seo-info
+│   │   │   └── ErrorLogController.cs ← GET list (filtered/paginated), PUT resolve, DELETE clear
+│   │   ├── Services/
+│   │   │   ├── TokenService.cs      ← JWT access token + refresh token generation
+│   │   │   ├── ErrorLogService.cs   ← Log errors/warnings/info to ErrorLogs table
+│   │   │   └── ResourceAutoStartService.cs ← ★ IHostedService: auto-execute SQL on startup
+│   │   └── Middleware/
+│   │       └── ErrorHandlingMiddleware.cs ← Catch unhandled → log → return 500 JSON
+│   │
+│   └── Portfolio.Web/               ← ★ FRONTEND (Blazor WASM)
+│       ├── Portfolio.Web.csproj     ← Blazor WASM + Blazored.LocalStorage + JwtSecurityToken
+│       ├── Program.cs               ← DI: HttpClient, LocalStorage, Auth, Services
+│       ├── App.razor                ← Router + AuthorizeRouteView + NotAuthorized handler
+│       ├── _Imports.razor           ← Global @using statements
+│       ├── Pages/
+│       │   ├── Index.razor          ← ★ Landing page: dynamic Bento Grid, SEO, JSON-LD
+│       │   ├── Auth/Login.razor     ← Login form (dark themed)
+│       │   ├── Auth/Register.razor  ← Registration form
+│       │   └── Admin/
+│       │       ├── Dashboard.razor  ← Stats cards + error count + quick links
+│       │       ├── Profile.razor    ← Edit all profile fields including SEO
+│       │       ├── Projects.razor   ← List + inline edit/create/delete
+│       │       ├── Skills.razor     ← Table with inline edit, add, delete
+│       │       ├── Experiences.razor ← Cards with inline edit form
+│       │       ├── Testimonials.razor ← Cards with inline edit
+│       │       ├── Messages.razor   ← Contact messages: read, mark read, delete
+│       │       ├── Resources.razor  ← ★ SQL file list + execute + history viewer
+│       │       └── ErrorLogs.razor  ← ★ Error list with filters, resolve, stack trace
+│       ├── Services/
+│       │   ├── AuthService.cs       ← Login/Register/Refresh/Logout + token storage
+│       │   ├── ApiAuthStateProvider.cs ← Custom JWT auth state from token claims
+│       │   ├── PortfolioService.cs  ← Public API calls (profile, projects, skills, contact)
+│       │   └── AdminService.cs      ← Admin CRUD calls (unwrap ApiResponse<T>)
+│       ├── Shared/
+│       │   ├── MainLayout.razor     ← Dual layout: public Bento Grid / admin with sidebar
+│       │   └── AdminNavLink.razor   ← Sidebar nav item with active state
+│       └── wwwroot/                 ← Copied from root wwwroot/ (static fallback assets)
+```
+
+---
+
+## 🏗 ARCHITECTURE DECISIONS (why things are the way they are)
+
+### Why 3 projects? (Web, Api, Data)
+- **Data** is shared between Web and Api — models + DTOs in one place
+- **Api** is standalone — can be deployed separately, has its own config
+- **Web** is pure Blazor WASM — no server-side rendering, no DB access
+
+### Why Dapper instead of EF Core?
+- Database-First: SQL scripts are the source of truth
+- Performance: ~3x faster, no change tracking overhead
+- Control: exact SQL, no hidden N+1 queries
+- Simplicity: SqlConnectionFactory is 11 lines vs DbContext 400+
+
+### Why Database-First?
+- SQL scripts in wwwroot/resources/ define the schema
+- ResourceAutoStartService executes them automatically on startup
+- Easy versioning: just add a new numbered .sql file
+- Resources table tracks execution history per file
+
+### Why JWT instead of session/cookie auth?
+- Blazor WASM is a SPA — stateless auth needed
+- Token stored in browser LocalStorage
+- Refresh token rotation for security
+- Roles (Admin, Editor, Viewer) in JWT claims
+
+### Why Bento Grid layout?
+- Asymmetric = premium feel, not template-based
+- Each box is independent — can be rearranged easily
+- Works well on mobile (stacks to single column)
+- Responsive without media query hacks
+
+### Why single RAF loop for animations?
+- 17 animation modules, but only ONE requestAnimationFrame call
+- All scroll handlers feed into one master loop
+- No competing RAF calls causing jank
+- GPU transforms only (scaleX, translateY, rotateX/Y)
+- Mobile: fewer modules active (no parallax/pin/glow)
+
+---
+
+## 🔌 DATA FLOW (step by step)
+
+### Public Landing Page Load
+```
+1. User opens /
+2. Blazor Index.razor → OnInitializedAsync()
+3. PortfolioService.GetProfileAsync() → GET api/portfolio/profile
+4. PortfolioController → SqlConnectionFactory.Create() → SELECT * FROM Profile
+5. Dapper maps to Profile POCO → ApiResponse<Profile> → JSON
+6. Blazor renders Bento Grid: hero with tagline, work with cards, etc.
+7. Same pattern for projects, skills, experiences, testimonials, settings
+8. JavaScript animations.js initializes: preloader, scroll-spy, back-to-top, etc.
+```
+
+### Admin CRUD (e.g., Edit Project)
+```
+1. Admin clicks "Edit" on a project card
+2. Blazor Admin/Projects.razor → opens inline edit form
+3. Admin changes title, slug, etc., clicks "Save"
+4. AdminService.UpdateProjectAsync(id, model)
+5. HttpClient.PutAsync("api/admin/projects/{id}", model)
+   Headers: Authorization: Bearer {jwt_token}
+6. AdminController.UpdateProject() → [Authorize(Roles="Admin,Editor")]
+7. Dapper: UPDATE Projects SET Title=@Title, ... WHERE Id=@Id
+8. ApiResponse<object> { success: true, message: "Updated" }
+9. Blazor refreshes list, toast: "Updated"
+```
+
+### Resource Auto-Start (on API boot)
+```
+1. API starts → ResourceAutoStartService.StartAsync()
+2. Scan wwwroot/resources/ for *.sql files (alphabetical order)
+3. For each file:
+   a. SELECT * FROM Resources WHERE FileName=@Name
+   b. If exists AND IsSuccess=1 → SKIP (log: "already executed")
+   c. Otherwise: execute SQL via Dapper
+   d. Success → INSERT/UPDATE Resources SET IsSuccess=1, ErrorMessage=NULL
+   e. Failure → INSERT/UPDATE Resources SET IsSuccess=0, ErrorMessage=full error
+4. Log summary: "X executed, Y skipped, Z failed"
+```
+
+### Error Handling Flow
+```
+Exception occurs in controller
+  → _err.LogAsync(ex, "Controller.Method")
+  → Dapper: INSERT INTO ErrorLogs (Level,Source,Message,StackTrace,...)
+  → Returns 500 + ApiResponse<object>.Fail("Friendly message")
+  → Frontend catches 500
+  → PortfolioToast.error("Could not load. Please try again.")
+
+Unhandled exception (missed by try/catch)
+  → ErrorHandlingMiddleware catches it
+  → _err.LogAsync(ex, path + method, 500)
+  → Returns 500 + {"success":false,"message":"Admin notified."}
+
+Admin checks Dashboard → sees ⚠ "3 unresolved errors"
+  → Clicks "View Errors" → /admin/errors
+  → Full details: source, stack trace, request path, timestamp
+  → Clicks ✓ to resolve → IsResolved=1, ResolvedAt=now
+```
+
+---
+
+## 🗄 DATABASE SCHEMA (logical — see .sql files for exact DDL)
+
+```
+Roles         (Id, Name, Description)
+Users         (Id, Username, Email, PasswordHash, FullName, RoleId, IsActive,
+               RefreshToken, RefreshTokenExp, LastLoginAt, CreatedAt, UpdatedAt)
+Resources     (Id, FileName, FileContent, ExecutedAt, IsSuccess, ErrorMessage,
+               CreatedAt, UpdatedAt) ★ tracks SQL script execution
+Profile       (Id, FullName, Title, TaglineLine1/2/3, Bio, Email, LinkedIn,
+               GitHub, Twitter, Location, ShowreelUrl, ProfileImageUrl,
+               ResumeFileUrl, MetaDescription, MetaKeywords, OgImageUrl,
+               GoogleAnalyticsId, SiteUrl, CreatedAt, UpdatedAt)
+Projects      (Id, Title, Slug, Description, ShortDesc, Category, ThumbnailUrl,
+               ImageUrls, LiveUrl, GitHubUrl, Technologies, MockupClass,
+               CardRotation, SortOrder, IsFeatured, IsPublished, CompletedAt,
+               CreatedAt, UpdatedAt)
+ProjectImages (Id, ProjectId, ImageUrl, AltText, SortOrder, CreatedAt)
+Skills        (Id, Name, Category, Proficiency, IconClass, IsTag, SortOrder,
+               CreatedAt, UpdatedAt)
+Experiences   (Id, Company, Role, Description, StartDate, EndDate, Location,
+               CompanyUrl, LogoUrl, SortOrder, CreatedAt, UpdatedAt)
+Testimonials  (Id, ClientName, ClientTitle, ClientAvatar, Content, Rating,
+               ProjectId, IsPublished, SortOrder, CreatedAt, UpdatedAt)
+ContactMessages (Id, Name, Email, Subject, Message, IsRead, RepliedAt, CreatedAt)
+SiteSettings  (Id, Key, Value, UpdatedAt) ★ key-value config
+ErrorLogs     (Id, Timestamp, Level, Source, Message, StackTrace, RequestPath,
+               Method, StatusCode, UserId, UserAgent, IpAddress, IsResolved,
+               ResolvedAt, ResolvedBy, CreatedAt) ★ error tracking
+```
+
+---
+
+## 🔑 CODING CONVENTIONS (follow these exactly)
+
+### C# Controllers
+```csharp
+// EVERY method follows this pattern:
+[HttpGet("endpoint")]
+public async Task<IActionResult> GetSomething() {
+    try {
+        using var c = _db.Create();  // SqlConnectionFactory
+        var data = await c.QueryAsync<Model>("SELECT * FROM Table WHERE...");
+        return Ok(ApiResponse<List<Model>>.Ok(data.ToList()));
+    } catch (Exception ex) {
+        await _err.LogAsync(ex, "Controller.Method");  // always log
+        return StatusCode(500, ApiResponse<object>.Fail("Friendly message."));
+    }
+}
+
+// For INSERT with identity:
+var id = await c.QuerySingleAsync<int>(
+    "INSERT INTO Table (...) OUTPUT INSERTED.Id VALUES (...)", model);
+
+// NEVER: string concatenation for SQL
+// ALWAYS: parameterized queries with anonymous objects
+```
+
+### Blazor Pages
+```razor
+@page "/route"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]  // if admin page
+@inject SomeService Service
+
+@* Every page has loading state *@
+@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
+else { /* content */ }
+
+@code {
+    private bool loaded;
+    protected override async Task OnInitializedAsync() {
+        try { /* load data */ } catch { /* graceful fallback */ }
+        loaded = true;
+    }
+}
+```
+
+### JavaScript
+```javascript
+// All animations in animations.js
+// Single RAF loop: function onScroll() → tick()
+// GPU transforms only: scaleX(), translateY(), rotateX/Y()
+// NEVER: width, height, top, left for animation
+// Passive listeners: { passive: true }
+// IntersectionObserver for reveal triggers
+// Check reduced motion: window.matchMedia('(prefers-reduced-motion: reduce)')
+```
+
+### CSS
+```css
+/* Mobile-first: base styles = mobile, @media (min-width) = desktop */
+/* Use CSS variables from :root */
+/* Breakpoints: 481, 769, 1025 */
+/* GPU compositing: transform: translateZ(0); backface-visibility: hidden; */
+/* Touch: touch-action: manipulation; */
+```
+
+---
+
+## 🎨 DESIGN TOKENS (global)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--bg` | `#0a0a0a` | body background |
+| `--surface` | `#141414` | .app-wrapper |
+| `--card` | `#1a1a1a` | .bento-box |
+| `--card-alt` | `#202020` | .card-inner |
+| `--text` | `#ffffff` | primary text |
+| `--text-secondary` | `#9a9a9a` | secondary text |
+| `--accent` | `#d4a04c` | gold — headings, highlights, buttons |
+| `--border` | `rgba(255,255,255,0.06)` | card borders |
+| `--border-strong` | `rgba(255,255,255,0.10)` | hero/app-wrapper borders |
+| `--font-sans` | `'Inter', ...` | body text |
+| `--font-display` | `'Playfair Display', ...` | italic gold tagline |
+
+---
+
+## 📡 API ENDPOINT REFERENCE (quick lookup)
+
+### Public (no auth)
+```
+GET  /api/portfolio/profile       → { FullName, Title, TaglineLine1-3, Bio, ... }
+GET  /api/portfolio/projects      → [ { Title, Slug, Category, ShortDesc, ... } ]
+GET  /api/portfolio/skills        → { bars: [...], tags: [...] }
+GET  /api/portfolio/experiences   → [ { Company, Role, StartDate, EndDate, ... } ]
+GET  /api/portfolio/testimonials  → [ { ClientName, Content, Rating, ... } ]
+GET  /api/portfolio/settings      → { "key": "value", ... }
+GET  /api/portfolio/seo           → { title, description, keywords, ogImage, ... }
+POST /api/portfolio/contact       ← { Name, Email, Subject, Message }
+GET  /robots.txt                  → text/plain
+GET  /sitemap.xml                 → application/xml
+GET  /api/resources               → { files: ["01-...sql", ...] }
+GET  /api/resources/history       → [ { FileName, IsSuccess, ErrorMessage, ... } ]
+```
+
+### Auth (no auth for login/register/refresh)
+```
+POST /api/auth/login              ← { Username, Password }  → { Token, RefreshToken, ... }
+POST /api/auth/register           ← { Username, Email, Password, FullName }
+POST /api/auth/refresh            ← { RefreshToken }  → { Token, RefreshToken, ... }
+GET  /api/auth/me                 → { Id, Username, Email, FullName, Role }
+```
+
+### Admin (JWT required — Admin or Editor)
+```
+GET    /api/admin/dashboard       → { TotalProjects, TotalSkills, UnreadMessages, ... }
+GET    /api/admin/profile         → Profile object
+PUT    /api/admin/profile         ← Profile object
+GET    /api/admin/projects         → [ Project, ... ]
+GET    /api/admin/projects/{id}   → Project + images
+POST   /api/admin/projects         ← Project
+PUT    /api/admin/projects/{id}   ← Project
+DELETE /api/admin/projects/{id}
+(Repeat pattern for: skills, experiences, testimonials)
+GET    /api/admin/messages         → [ ContactMessage, ... ]  (?unreadOnly=true)
+PUT    /api/admin/messages/{id}/read
+DELETE /api/admin/messages/{id}
+GET    /api/admin/settings         → [ { Key, Value }, ... ]
+PUT    /api/admin/settings/{key}   ← "value"
+GET    /api/admin/resources/history
+GET    /api/admin/errors/count    → { unresolved, total }
+```
+
+### Resource Runner (Admin for execute)
+```
+GET  /api/resources               → { files: [...], directory: "..." }
+POST /api/resources/execute/{file} ← execute one SQL file → { status }
+POST /api/resources/execute-all   ← execute all SQL files → { results: [...] }
+GET  /api/resources/history       → execution log
+```
+
+### Error Logs (Admin only)
+```
+GET    /api/admin/errors          → { total, unresolved, items: [...] }  (?level, ?unresolved, ?page, ?pageSize)
+PUT    /api/admin/errors/{id}/resolve
+PUT    /api/admin/errors/resolve-all
+DELETE /api/admin/errors/{id}
+DELETE /api/admin/errors/clear
+POST   /api/admin/errors/test     ← creates test error
+```
+
+---
+
+## 🔄 MAINTENANCE RULES
+
+### When adding a new feature:
+1. Read this handoff FIRST
+2. SQL changes → new numbered file in wwwroot/resources/
+3. New API endpoint → add to existing controller or create new one
+4. New Blazor page → add to Pages/Admin/ or Pages/
+5. New service → add to Services/
+6. New model → add to Entities.cs
+7. New DTO → add to DTOs.cs
+8. Update this handoff: add to FILE MAP, API REFERENCE, or SCHEMA
+
+### When fixing a bug:
+1. Find the file in FILE MAP above
+2. Read the relevant section in ARCHITECTURE DECISIONS
+3. Follow CODING CONVENTIONS for the fix
+4. If the fix changes behavior, update this handoff
+
+### When deploying:
+1. Run SQL scripts in order (01, 02, 03, 04)
+2. Start Portfolio.Api first (auto-executes SQL on startup)
+3. Start Portfolio.Web second
+4. Verify: / (landing page), /login, /admin (dashboard)
+
+---
+
+## ⚠️ GOTCHAS (things that will break if you forget)
+
+1. **Dapper requires exact column name match** — POCO properties must match SQL columns
+2. **ApiResponse wrapping** — AdminService unwraps with GetAsync<T>/GetListAsync<T>, don't break this
+3. **Progress bar uses scaleX** — CSS sets `transform: scaleX()` not `width`, JS must match
+4. **Skill bars use --fill** — CSS variable must be a number (like `95`) not `95%`
+5. **Mobile menu locks scroll** — body overflow hidden, remember to restore
+6. **Resource Auto-Start runs alphabetically** — name files 01-, 02-, 03- for dependency order
+7. **Refresh tokens stored in DB** — Users table has RefreshToken + RefreshTokenExp
+8. **blazor.webassembly.js loads last** — service worker registration must come after
+9. **cursor-glow is hidden on mobile** — CSS `display:none` on touch devices
+10. **ErrorLogService uses IServiceScopeFactory** — not DbContext, because it's a background service
+
+---
+
+## ✅ PRE-CHANGE CHECKLIST
+
+Before modifying any file:
+- [ ] Read this handoff to understand the system
+- [ ] Check FILE MAP for the file to modify
+- [ ] Check ARCHITECTURE DECISIONS for the pattern
+- [ ] Check CODING CONVENTIONS for syntax
+- [ ] Check API REFERENCE if adding endpoints
+- [ ] Check GOTCHAS for common pitfalls
+
+After modifying:
+- [ ] Update FILE MAP if new files added
+- [ ] Update ARCHITECTURE DECISIONS if pattern changed
+- [ ] Update API REFERENCE if endpoints changed
+- [ ] Update SCHEMA if tables changed
+- [ ] Bump "Last updated: 2026-08-04 (bilingual + language gate)
+
+---
+
+## 🌐 BILINGUAL SYSTEM (English / Persian)
+
+### How it works
+- **Translation files**: `wwwroot/lang/en.json` + `wwwroot/lang/fa.json` (9 sections each)
+- **JS engine**: `wwwroot/js/lang.js` (170 lines) — loads JSON, rewrites DOM
+- **Language switch**: button in hero header (`فا` / `EN`)
+- **Persistence**: `localStorage.getItem('lang')` — survives page reload
+- **RTL**: `html.rtl` class + CSS overrides for Persian
+
+### Adding to any element
+```html
+<span data-i18n="hero.line1">Default EN text</span>
+<input data-i18n-placeholder="contact.form_name_placeholder" placeholder="Your Name">
+```
+
+### Key translations file structure
+```
+en.json: site, nav, hero, work, about, skills, contact, admin, toasts
+fa.json: same structure, Persian values
+```
+
+### RTL CSS
+- `html.rtl` class applied by lang.js when `direction: "rtl"` in JSON
+- RTL rules in main styles.css (29 rules)
+- Font switches to Vazirmatn for Persian
+
+### Language files location
+```
+wwwroot/lang/
+├── en.json    (English — 9 sections, 4.5KB)
+└── fa.json    (Persian — 9 sections, 5.8KB)
+```
+
+---
+
+## 🌐 BILINGUAL SYSTEM (TranslationService — T pattern)
+
+### Architecture
+- **Service**: `TranslationService` (scoped) — registered in Program.cs via DI
+- **Pattern**: `@inject TranslationService T` → `@T["nav.work"]`
+- **JSON files**: `wwwroot/lang/en.json` + `wwwroot/lang/fa.json` (85 keys each)
+- **Reactivity**: `T.OnChange` event → components call `InvokeAsync(StateHasChanged)` — no page reload
+- **Persistence**: `Blazored.LocalStorage` — language survives refresh
+- **RTL**: `T.IsRtl` + `T.Direction` → applied to wrapper div `style="direction:@T.Direction"`
+- **Font**: `T.FontFamily` → Vazirmatn for Persian, Inter for English
+
+### How to add text in any Blazor page
+```razor
+@inject TranslationService T
+@implements IDisposable
+
+<span>@T["section.key"]</span>
+
+@code {
+    protected override void OnInitialized() => T.OnChange += Refresh;
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => T.OnChange -= Refresh;
+}
+```
+
+### Adding new translation keys
+1. Add key to `wwwroot/lang/en.json` (English value)
+2. Add same key to `wwwroot/lang/fa.json` (Persian value)
+3. Use `@T["section.key"]` in Blazor or `data-i18n="section.key"` in static HTML
+4. JSON structure: nested objects → `T["parent.child"]` (e.g., `T["nav.work"]`)
+
+### Components updated with T service
+- `MainLayout.razor` — direction, font, admin sidebar labels, LangSwitcher
+- `Index.razor` — all hero, nav, work, about, skills, contact, footer text
+- `LangSwitcher.razor` — standalone language toggle button
+- `Login.razor` / `Register.razor` — site name in title
+- `Admin/Dashboard.razor` — stats labels via API data (not hardcoded)
+
+### Static HTML preview
+- `wwwroot/index.html` uses `data-i18n` attributes + `wwwroot/js/lang.js`
+- lang.js loads JSON → rewrites DOM → handles RTL + font switching
+- Language switcher button auto-injected into hero header
+
+---
+
+## 🚪 LANGUAGE GATE (first-visit language selection)
+
+### Flow
+```
+First visit (no localStorage 'lang'):
+  1. App.razor → <LanguageGate> wrapper
+  2. T.LanguageSelected = false
+  3. LanguageGate.razor renders premium selection screen
+  4. User clicks 🇬🇧 or 🇮🇷
+  5. T.SetLangAsync(lang) → saves to localStorage, loads JSON
+  6. T.LanguageSelected = true
+  7. LanguageGate removes itself → Router + full site renders
+
+Return visit (localStorage has 'lang'):
+  1. T.InitAsync() reads localStorage → LanguageSelected = true
+  2. LanguageGate renders ChildContent immediately
+  3. Full site loads with saved language — no gate shown
+```
+
+### Files
+- `App.razor` — wraps entire `<Router>` in `<LanguageGate>`
+- `Shared/LanguageGate.razor` — selection UI with flag options
+- `Services/TranslationService.cs` — `LanguageSelected` property
+- `wwwroot/lang/gate.html` — standalone HTML gate (for static preview)
+- `wwwroot/index.html` — redirects to gate.html if no lang saved
+
+### Static preview flow
+```
+index.html loads → checks localStorage
+  → No 'lang' → redirect to /lang/gate.html → user selects → saved → back to /
+  → Has 'lang' → stays on index.html, lang.js applies saved language
+```

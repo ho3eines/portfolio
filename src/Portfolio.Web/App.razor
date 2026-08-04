@@ -1,0 +1,32 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@inject TranslationService T
+
+<CascadingAuthenticationState>
+    <LanguageGate>
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        <div class="d-flex align-items-center justify-content-center" style="min-height:80vh;">
+                            <div class="text-center p-5" style="background:#141414;border-radius:16px;border:1px solid rgba(255,255,255,0.08);">
+                                <h3 style="color:#d4a04c;">Access Denied</h3>
+                                <p style="color:#9a9a9a;">You must be logged in to view this page.</p>
+                                <a href="/login" class="btn px-4" style="background:#d4a04c;color:#000;font-weight:600;">Sign In</a>
+                            </div>
+                        </div>
+                    </NotAuthorized>
+                    <Authorizing>
+                        <div class="d-flex align-items-center justify-content-center" style="min-height:80vh;color:#9a9a9a;">Checking authorization...</div>
+                    </Authorizing>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not Found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <div class="text-center py-5"><p class="text-muted">Page not found.</p><a href="/">Go Home</a></div>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </LanguageGate>
+</CascadingAuthenticationState>

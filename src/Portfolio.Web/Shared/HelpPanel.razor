@@ -1,0 +1,246 @@
+@inject HttpClient Http
+@inject TranslationService T
+@implements IDisposable
+
+@if (visible)
+{
+    <div class="help-overlay" @onclick="Close"></div>
+    <aside class="help-panel @(visible ? "open" : "")">
+        <div class="help-header">
+            <h3>@data?.GetValueOrDefault("title")?.ToString()</h3>
+            <button class="help-close" @onclick="Close" aria-label="Close help">✕</button>
+        </div>
+        <div class="help-body">
+            @if (loading)
+            {
+                <div class="text-center py-5" style="color:#9a9a9a;">Loading guide...</div>
+            }
+            else if (data == null)
+            {
+                <p style="color:#9a9a9a;">No guide available for this section.</p>
+            }
+            else
+            {
+                @if (data.ContainsKey("what"))
+                {
+                    <div class="help-section">
+                        <h4>📖 What is this?</h4>
+                        <p>@data["what"]?.ToString()</p>
+                    </div>
+                }
+
+                @if (data.ContainsKey("how"))
+                {
+                    <div class="help-section">
+                        <h4>🪜 How to Use It</h4>
+                        @if (data["how"] is JsonElement howEl && howEl.ValueKind == JsonValueKind.Array)
+                        {
+                            <ol class="help-steps">
+                                @foreach (var step in howEl.EnumerateArray())
+                                {
+                                    if (step.ValueKind == JsonValueKind.Object && step.TryGetProperty("step", out var s) && step.TryGetProperty("desc", out var d))
+                                    {
+                                        <li><strong>@s.GetString()</strong><br/><span class="help-step-desc">@d.GetString()</span></li>
+                                    }
+                                    else
+                                    {
+                                        <li>@step.GetString()</li>
+                                    }
+                                }
+                            </ol>
+                        }
+                    </div>
+                }
+
+                @if (data.ContainsKey("tips"))
+                {
+                    <div class="help-section">
+                        <h4>💡 Pro Tips</h4>
+                        @if (data["tips"] is JsonElement tipsEl && tipsEl.ValueKind == JsonValueKind.Array)
+                        {
+                            <ul class="help-tips">
+                                @foreach (var tip in tipsEl.EnumerateArray())
+                                {
+                                    <li>@tip.GetString()</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                }
+
+                @if (section == "getting_started" && data.ContainsKey("steps"))
+                {
+                    <div class="help-section">
+                        <h4>🚀 Quick Start Steps</h4>
+                        @if (data["steps"] is JsonElement stEl && stEl.ValueKind == JsonValueKind.Array)
+                        {
+                            <ol class="help-steps">
+                                @foreach (var step in stEl.EnumerateArray())
+                                {
+                                    if (step.TryGetProperty("title", out var t) && step.TryGetProperty("desc", out var d))
+                                    {
+                                        <li><strong>@t.GetString()</strong><br/><span class="help-step-desc">@d.GetString()</span></li>
+                                    }
+                                }
+                            </ol>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </aside>
+}
+
+<style>
+    .help-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 998;
+    }
+    .help-panel {
+        position: fixed;
+        top: 0; right: 0;
+        width: 100%;
+        max-width: 420px;
+        height: 100vh;
+        background: #111;
+        border-left: 1px solid rgba(255,255,255,0.08);
+        color: #fff;
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1);
+        transform: translateX(0) translateZ(0);
+    }
+    .help-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        flex-shrink: 0;
+    }
+    .help-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: #d4a04c;
+    }
+    .help-close {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        border: none;
+        color: #9a9a9a;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+        touch-action: manipulation;
+    }
+    .help-close:hover { background: rgba(244,67,54,0.2); color: #f44336; }
+    .help-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+    }
+    .help-body::-webkit-scrollbar { width: 3px; }
+    .help-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .help-section {
+        margin-bottom: 24px;
+    }
+    .help-section h4 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #d4a04c;
+        margin-bottom: 10px;
+    }
+    .help-section p {
+        color: #ccc;
+        font-size: 0.88rem;
+        line-height: 1.7;
+    }
+    .help-steps {
+        padding-left: 18px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .help-steps li {
+        color: #ccc;
+        font-size: 0.85rem;
+        line-height: 1.6;
+    }
+    .help-steps li strong {
+        color: #fff;
+        display: block;
+        margin-bottom: 2px;
+    }
+    .help-step-desc {
+        color: #9a9a9a;
+    }
+    .help-tips {
+        padding-left: 18px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .help-tips li {
+        color: #9a9a9a;
+        font-size: 0.82rem;
+        line-height: 1.6;
+    }
+    .help-tips li::marker { color: #d4a04c; }
+
+    @media (max-width: 480px) {
+        .help-panel { max-width: 100%; }
+    }
+</style>
+
+@code {
+    [Parameter] public string? section { get; set; }
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+
+    private bool visible;
+    private bool loading;
+    private Dictionary<string, object?>? data;
+
+    public async Task Open(string? sec = null)
+    {
+        if (sec != null) section = sec;
+        visible = true; loading = true; data = null;
+        StateHasChanged();
+
+        var lang = T.Lang ?? "en";
+        var key = section ?? "getting_started";
+        try
+        {
+            var json = await Http.GetStringAsync($"lang/help/{lang}.json");
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            if (root.TryGetProperty(key, out var sectionData))
+            {
+                data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(sectionData.GetRawText());
+            }
+        }
+        catch { data = null; }
+        loading = false;
+    }
+
+    public async Task Close()
+    {
+        visible = false;
+        await OnClose.InvokeAsync(false);
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized() => T.OnChange += Refresh;
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => T.OnChange -= Refresh;
+}

@@ -1,0 +1,15 @@
+@inject TranslationService T
+@implements IDisposable
+
+<button type="button" class="btn-lang" @onclick="Toggle" 
+        title="@(T.Lang == "en" ? "Switch to Persian" : "Switch to English")"
+        aria-label="Switch language">
+    @(T.Lang == "en" ? "فا" : "EN")
+</button>
+
+@code {
+    protected override void OnInitialized() => T.OnChange += Refresh;
+    public void Dispose() => T.OnChange -= Refresh;
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    private async Task Toggle() => await T.ToggleAsync();
+}
