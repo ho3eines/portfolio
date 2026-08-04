@@ -1,0 +1,21 @@
+@page "/register"
+@layout MainLayout
+@inject AuthService Auth
+@inject NavigationManager Nav
+@inject TranslationService T
+
+<PageTitle>@T["site.logo"] — Register</PageTitle>
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;">
+    <div class="card-dark p-5" style="width:100%;max-width:440px;">
+        <div class="text-center mb-4"><h3 style="font-weight:700;color:#d4a04c;">Create Account</h3><p style="color:#9a9a9a;font-size:.85rem;">Join the platform</p></div>
+        <div class="mb-3"><label class="form-label text-light">Full Name</label><input @bind="fullName" class="form-control bg-dark text-light border-secondary" /></div>
+        <div class="mb-3"><label class="form-label text-light">Username</label><input @bind="username" class="form-control bg-dark text-light border-secondary" /></div>
+        <div class="mb-3"><label class="form-label text-light">Email</label><input @bind="email" type="email" class="form-control bg-dark text-light border-secondary" /></div>
+        <div class="mb-4"><label class="form-label text-light">Password</label><input @bind="password" type="password" class="form-control bg-dark text-light border-secondary" /></div>
+        @if(!string.IsNullOrEmpty(error)){<div class="alert p-2 mb-3 text-center" style="background:rgba(244,67,54,0.15);color:#f44336;border-radius:8px;">@error</div>}
+        @if(!string.IsNullOrEmpty(success)){<div class="alert p-2 mb-3 text-center" style="background:rgba(76,175,80,0.15);color:#4caf50;border-radius:8px;">@success</div>}
+        <button @onclick="HandleRegister" disabled="@loading" class="btn w-100 py-2 mb-3" style="background:#d4a04c;color:#000;font-weight:600;">@(loading?"Creating…":"Register")</button>
+        <div class="text-center" style="color:#9a9a9a;font-size:.82rem;">Already have an account? <a href="/login" style="color:#d4a04c;">Sign In</a></div>
+    </div>
+</div>
+@code{private string fullName="",username="",email="",password="",error="",success="";private bool loading;private async Task HandleRegister(){error="";success="";loading=true;try{if(await Auth.Register(username,email,password,fullName)){success="Account created!";await Task.Delay(1500);Nav.NavigateTo("/login");}else error="Registration failed.";}catch{error="Connection error.";}finally{loading=false;}}}

@@ -1,0 +1,217 @@
+@page "/"
+@layout MainLayout
+@inject PortfolioService Portfolio
+@inject IJSRuntime JS
+@inject TranslationService T
+@implements IDisposable
+
+<PageTitle>@(profile?.FullName ?? T["site.logo"]) — @(profile?.Title ?? T["hero.subtitle"])</PageTitle>
+
+<HeadContent>
+    <meta name="description" content="@(profile?.MetaDescription ?? profile?.Bio?.Truncate(160) ?? T["hero.subtitle"])" />
+    <meta name="keywords" content="@(profile?.MetaKeywords ?? "Mahbod Pour, frontend developer, Blazor, .NET")" />
+    <meta name="author" content="@(profile?.FullName ?? "Mahbod Pour")" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="@(profile?.SiteUrl ?? "https://mahbodpour.com")/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@(profile?.FullName ?? T["site.logo"]) — @(profile?.Title ?? "")" />
+    <meta property="og:description" content="@(profile?.MetaDescription ?? profile?.Bio?.Truncate(160) ?? "")" />
+    <meta property="og:image" content="@(profile?.OgImageUrl ?? $"{profile?.SiteUrl}/images/og-default.jpg")" />
+    <meta property="og:url" content="@(profile?.SiteUrl ?? "https://mahbodpour.com")/" />
+    <meta property="og:site_name" content="@(profile?.FullName ?? T["site.logo"]) Portfolio" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@(profile?.FullName ?? T["site.logo"])" />
+    <meta name="twitter:description" content="@(profile?.MetaDescription ?? profile?.Bio?.Truncate(160) ?? "")" />
+    <meta name="twitter:image" content="@(profile?.OgImageUrl ?? $"{profile?.SiteUrl}/images/og-default.jpg")" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="@(profile?.FullName ?? T["site.logo"])" />
+</HeadContent>
+
+@if (!loaded) { <div class="text-center py-5" style="color:var(--accent)">Loading…</div> }
+else
+{
+<nav class="mobile-nav" id="mobileNav">
+    <a href="#work">@T["nav.work"]</a>
+    <a href="#about">@T["nav.about"]</a>
+    <a href="#skills">@T["nav.skills"]</a>
+    <a href="#contact">@T["nav.contact"]</a>
+    <a href="/login">🔐 @T["nav.admin"]</a>
+</nav>
+
+<div class="bento-grid">
+
+    @* BOX 1 — HERO *@
+    <section class="bento-box box-hero" data-section="hero" data-pin>
+        <header class="hero-header">
+            <a href="/" class="logo" data-reveal>@(profile?.FullName ?? T["site.logo"])</a>
+            <nav class="nav-desktop" data-reveal>
+                <a href="#work" class="nav-link">@T["nav.work"]</a>
+                <a href="#about" class="nav-link">@T["nav.about"]</a>
+                <a href="#skills" class="nav-link">@T["nav.skills"]</a>
+                <a href="#contact" class="nav-link">@T["nav.contact"]</a>
+            </nav>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" data-reveal>
+                <span></span><span></span><span></span>
+            </button>
+            <LangSwitcher />
+            <a href="#contact" class="btn-pill" data-reveal>@T["nav.letsTalk"]</a>
+        </header>
+
+        <div class="hero-content">
+            <div class="hero-portrait" data-parallax data-speed="0.15">
+                <div class="portrait-frame"><div class="portrait-placeholder">
+                    <div class="portrait-silhouette">
+                        <svg viewBox="0 0 200 240" fill="none"><defs><radialGradient id="pg" cx="35%" cy="30%"><stop offset="0%" stop-color="#d4a04c" stop-opacity="0.3"/><stop offset="50%" stop-color="#1a1a1a" stop-opacity="0.8"/><stop offset="100%" stop-color="#0a0a0a" stop-opacity="1"/></radialGradient></defs><ellipse cx="100" cy="90" rx="65" ry="70" fill="url(#pg)"/><ellipse cx="100" cy="200" rx="80" ry="50" fill="url(#pg)"/></svg>
+                    </div>
+                    <div class="portrait-light"></div>
+                </div></div>
+            </div>
+            <div class="hero-text" data-reveal>
+                <h1 class="hero-title">
+                    <span class="title-line" data-text-reveal>@(profile?.TaglineLine1 ?? T["hero.line1"])</span>
+                    <span class="title-line" data-text-reveal>@(profile?.TaglineLine2 ?? T["hero.line2"])</span>
+                    <span class="title-line accent" data-text-reveal>@(profile?.TaglineLine3 ?? T["hero.line3"])</span>
+                </h1>
+                <p class="hero-subtitle">@(profile?.Title ?? T["hero.subtitle"])</p>
+                <div class="hero-actions">
+                    <a href="#work" class="btn-solid" data-magnetic><span>@T["hero.viewWork"]</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    @if (!string.IsNullOrEmpty(profile?.ShowreelUrl))
+                    {<button class="btn-outline" id="showreelBtn" data-magnetic><span class="play-icon"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M0 0l12 7-12 7V0z" fill="currentColor"/></svg></span><span>@T["hero.playShowreel"]</span></button>}
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator" data-reveal><span class="scroll-text">@T["hero.scrollExplore"]</span><span class="scroll-line"></span></div>
+        <div class="hero-progress"><span class="progress-num">01</span><div class="progress-bar"><div class="progress-fill" id="heroProgress"></div></div><span class="progress-num">05</span></div>
+    </section>
+
+    @* BOX 2 — WORK *@
+    <section class="bento-box box-work glass-panel" id="work" data-section="work">
+        <div class="box-label">@T["work.label"]</div>
+        <h2 class="box-title" data-text-reveal>@T["work.title"]</h2>
+        <p class="box-desc">@T["work.description"]</p>
+        <a href="/projects" class="btn-circle"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>@T["work.viewAll"]</span></a>
+        <div class="project-cards">
+            @foreach (var p in featuredProjects)
+            {
+                var idx = featuredProjects.IndexOf(p);
+                <div class="project-card" style="--card-rotate:@(p.CardRotation??"-2deg");--card-index:@idx;" data-project>
+                    <div class="card-inner"><div class="card-preview"><div class="card-mockup @(p.MockupClass??"mockup-dark")">
+                        <div class="mockup-dots"><span></span><span></span><span></span></div>
+                        @if(idx==0){<div class="mockup-sidebar"></div><div class="mockup-main"><div class="mockup-chart"></div><div class="mockup-row"></div><div class="mockup-row short"></div></div>}
+                        else if(idx==1){<div class="mockup-header"></div><div class="mockup-grid"><div class="mockup-stat"></div><div class="mockup-stat"></div><div class="mockup-stat"></div></div>}
+                        else{<div class="mockup-logo"></div><div class="mockup-swatches"><span style="--sw:var(--accent)"></span><span style="--sw:#fff"></span><span style="--sw:#666"></span></div>}
+                    </div></div><div class="card-footer"><span class="card-num">@(idx+1:D2)</span><span class="card-title">@p.Title</span></div></div>
+                </div>
+            }
+        </div>
+    </section>
+
+    @* BOX 3 — ABOUT *@
+    <section class="bento-box box-about" id="about" data-section="about" data-pin>
+        <div class="box-label">@T["about.label"]</div>
+        <h2 class="box-title" data-text-reveal>@T["about.title"]</h2>
+        @if(!string.IsNullOrEmpty(profile?.Bio)){<p class="box-desc">@profile.Bio</p>}
+        <div class="exp-list" data-stagger>
+            @foreach (var exp in experiences)
+            {<div class="exp-item"><div class="exp-dot"></div><div><h4>@exp.Role</h4><p class="exp-meta">@exp.Company <span class="exp-sep">·</span> @FormatDateRange(exp.StartDate, exp.EndDate)</p></div></div>}
+        </div>
+    </section>
+
+    @* BOX 4 — SKILLS *@
+    <section class="bento-box box-skills" id="skills" data-section="skills" data-pin>
+        <div class="box-label">@T["skills.label"]</div>
+        <h2 class="box-title" data-text-reveal>@T["skills.title"]</h2>
+        <div class="skills-grid" data-stagger>
+            @foreach(var s in skillBars){<div class="skill-item"><div class="skill-header"><span class="skill-name">@s.Name</span><span class="skill-pct">@s.Proficiency%</span></div><div class="skill-bar"><div class="skill-fill" style="--fill:@s.Proficiency"></div></div></div>}
+        </div>
+        <div class="tech-tags">@foreach(var t in skillTags){<span>@t.Name</span>}</div>
+    </section>
+
+    @* BOX 5 — CONTACT *@
+    <section class="bento-box box-contact" id="contact" data-section="contact" data-pin>
+        <div class="contact-split">
+            <div class="testimonial-section" data-reveal>
+                <div class="box-label">@T["contact.testimonials_label"]</div>
+                <h2 class="box-title">@T["contact.testimonials_title"]</h2>
+                <div class="testimonial-carousel" id="testimonialCarousel"><div class="testimonial-track" id="testimonialTrack">
+                    @foreach(var t in testimonials){<div class="testimonial-slide"><div class="testimonial-stars">@new string('★',t.Rating)</div><blockquote>"@t.Content"</blockquote><cite><strong>@t.ClientName</strong><span>@t.ClientTitle</span></cite></div>}
+                </div></div>
+                <div class="testimonial-dots" id="testimonialDots">@for(int i=0;i<testimonials.Count;i++){<span class="dot @(i==0?"active":"")"></span>}</div>
+            </div>
+            <div class="contact-form-section" data-reveal>
+                <h2 class="box-title">@T["contact.form_title"]</h2>
+                <p class="box-desc">@T["contact.form_subtitle"]</p>
+                <EditForm Model="@contactForm" OnValidSubmit="HandleContact" class="contact-form">
+                    <DataAnnotationsValidator />
+                    <div class="form-row">
+                        <div class="form-group"><InputText @bind-Value="contactForm.Name" placeholder="@T["contact.form_name_placeholder"]" /><label>@T["contact.form_name"]</label></div>
+                        <div class="form-group"><InputText @bind-Value="contactForm.Email" placeholder="@T["contact.form_email_placeholder"]" /><label>@T["contact.form_email"]</label></div>
+                    </div>
+                    <div class="form-group"><InputText @bind-Value="contactForm.Subject" placeholder="@T["contact.form_subject_placeholder"]" /><label>@T["contact.form_subject"]</label></div>
+                    <div class="form-group"><InputTextArea @bind-Value="contactForm.Message" rows="4" placeholder="@T["contact.form_message_placeholder"]" /><label>@T["contact.form_message"]</label></div>
+                    <ValidationSummary class="text-danger small mb-2" />
+                    <button type="submit" class="btn-solid" data-magnetic><span>@T["contact.form_send"]</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                </EditForm>
+                @if (contactSent) { <div class="mt-3" style="color:var(--accent)">@T["contact.form_sent"]</div> }
+            </div>
+        </div>
+        <footer class="site-footer"><div class="footer-line"></div><div class="footer-content">
+            <span>© @DateTime.Now.Year @(profile?.FullName??"Mahbod Pour"). @T["contact.footer_copyright"]</span>
+            <div class="footer-social">
+                @if(!string.IsNullOrEmpty(profile?.LinkedIn)){<a href="@profile.LinkedIn">@T["contact.footer_linkedin"]</a><span class="footer-dot">·</span>}
+                @if(!string.IsNullOrEmpty(profile?.GitHub)){<a href="@profile.GitHub">@T["contact.footer_github"]</a><span class="footer-dot">·</span>}
+                @if(!string.IsNullOrEmpty(profile?.Twitter)){<a href="@profile.Twitter">@T["contact.footer_twitter"]</a>}
+            </div>
+        </div></footer>
+    </section>
+</div>
+
+@if(profile!=null){<script type="application/ld+json">{ "@@context":"https://schema.org","@@type":"Person","name":"@profile.FullName","jobTitle":"@profile.Title","url":"@(profile.SiteUrl??"https://mahbodpour.com")","image":"@(profile.OgImageUrl??"")","sameAs":[@string.Join(",",new[]{profile.LinkedIn,profile.GitHub,profile.Twitter}.Where(x=>!string.IsNullOrEmpty(x)).Select(x=>$"\"{x}\""))],"knowsAbout":[@string.Join(",",skillBars.Select(s=>$"\"{s.Name}\""))]}</script>}
+}
+
+@code {
+    private Profile? profile;
+    private List<Project> featuredProjects = new();
+    private List<Skill> skillBars = new(), skillTags = new();
+    private List<Experience> experiences = new();
+    private List<Testimonial> testimonials = new();
+    private Dictionary<string, object?> settings = new();
+    private ContactMessage contactForm = new();
+    private bool loaded, contactSent;
+
+    protected override void OnInitialized() => T.OnChange += Refresh;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await Portfolio.GetProfileAsync();
+            var projs = await Portfolio.GetProjectsAsync();
+            featuredProjects = projs.Where(p => p.IsFeatured).OrderBy(p => p.SortOrder).Take(3).ToList();
+            (skillBars, skillTags) = await Portfolio.GetSkillsAsync();
+            experiences = await Portfolio.GetExperiencesAsync();
+            testimonials = await Portfolio.GetTestimonialsAsync();
+            settings = await Portfolio.GetSettingsAsync();
+        }
+        catch { }
+        loaded = true;
+    }
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private async Task HandleContact()
+    {
+        try { await Portfolio.SubmitContactAsync(contactForm); contactSent = true; contactForm = new(); await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.success('" + T["contact.form_sent"] + "')"); }
+        catch { await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.error('" + T["contact.form_error"] + "')"); }
+    }
+
+    private async Task PlayShowreel() => await JS.InvokeVoidAsync("portfolio.showreel");
+
+    private static string FormatDateRange(DateTime start, DateTime? end) => start.Year + " — " + (end?.Year.ToString() ?? "Present");
+
+    public void Dispose() => T.OnChange -= Refresh;
+}

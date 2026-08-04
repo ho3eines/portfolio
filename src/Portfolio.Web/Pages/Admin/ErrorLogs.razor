@@ -1,0 +1,115 @@
+@page "/admin/errors"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin")]
+@inject HttpClient Http
+
+<PageTitle>Error Logs — Admin</PageTitle>
+<h1 style="font-weight:700;margin-bottom:8px;">🔍 Error Logs</h1>
+<p style="color:#9a9a9a;font-size:.85rem;">All application errors with full context for debugging.</p>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> return; }
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <button @onclick="()=>Filter(null)" class="btn btn-sm me-2" style="background:@(filter=="All"?"var(--accent)":"transparent");color:@(filter=="All"?"#000":"#fff");border:1px solid rgba(255,255,255,0.2);">All (@total)</button>
+        <button @onclick="()=>Filter("Error")" class="btn btn-sm me-2" style="background:@(filter=="Error"?"#f44336":"transparent");color:@(filter=="Error"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Errors</button>
+        <button @onclick="()=>Filter("Warning")" class="btn btn-sm me-2" style="background:@(filter=="Warning"?"#ff9800":"transparent");color:@(filter=="Warning"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Warnings</button>
+        <button @onclick="()=>Filter("Unresolved")" class="btn btn-sm" style="background:@(filter=="Unresolved"?"#d4a04c":"transparent");color:@(filter=="Unresolved"?"#000":"#fff");border:1px solid rgba(255,255,255,0.2);">🔴 Unresolved (@unresolved)</button>
+    </div>
+    <div class="d-flex gap-2">
+        <button @onclick="ResolveAll" class="btn btn-sm btn-outline-success" disabled="@(unresolved==0)">✓ Resolve All</button>
+        <button @onclick="ClearAll" class="btn btn-sm btn-outline-danger">🗑 Clear All</button>
+    </div>
+</div>
+
+@if (items.Count == 0)
+{
+    <div class="text-center py-5" style="color:#9a9a9a;">✅ No errors found. Everything is running smoothly!</div>
+}
+else
+{
+    @foreach (var e in items)
+    {
+        var bg = e.IsResolved ? "#141414" : "rgba(244,67,54,0.06)";
+        var border = e.IsResolved ? "rgba(255,255,255,0.06)" : "rgba(244,67,54,0.2)";
+        var badge = e.Level == "Error" ? "bg-danger" : e.Level == "Warning" ? "bg-warning text-dark" : "bg-secondary";
+
+        <div class="mb-2 p-3 rounded-3" style="background:@bg;border:1px solid @border;">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div class="flex-grow-1" style="min-width:0;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge @badge" style="font-size:.7rem;">@e.Level</span>
+                        <small style="color:#d4a04c;">@e.Source</small>
+                        @if (e.StatusCode != null) { <small style="color:#9a9a9a;">HTTP @e.StatusCode</small> }
+                        <small style="color:#9a9a9a;">@e.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                    </div>
+                    <div style="color:#ccc;font-size:.85rem;word-break:break-word;">@e.Message</div>
+                    @if (!string.IsNullOrEmpty(e.RequestPath))
+                    {
+                        <small style="color:#9a9a9a;">📍 @e.Method @e.RequestPath</small>
+                    }
+                    @if (!string.IsNullOrEmpty(e.StackTrace))
+                    {
+                        <details class="mt-2">
+                            <summary style="color:#9a9a9a;font-size:.75rem;cursor:pointer;">Stack Trace</summary>
+                            <pre class="mt-1 p-2 rounded-2" style="background:#0a0a0a;color:#f44336;font-size:.7rem;max-height:200px;overflow:auto;">@e.StackTrace</pre>
+                        </details>
+                    }
+                </div>
+                <div class="d-flex gap-1">
+                    @if (!e.IsResolved)
+                    {
+                        <button @onclick="()=>Resolve(e.Id)" class="btn btn-sm btn-outline-success">✓</button>
+                    }
+                    else
+                    {
+                        <small style="color:#4caf50;">Resolved by @e.ResolvedBy</small>
+                    }
+                    <button @onclick="()=>Delete(e.Id)" class="btn btn-sm btn-outline-danger">🗑</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (total > pageSize)
+    {
+        <div class="d-flex justify-content-center gap-2 mt-3">
+            <button @onclick="()=>Page(-1)" disabled="@(page<=1)" class="btn btn-sm btn-outline-light">← Prev</button>
+            <span style="color:#9a9a9a;">Page @page of @Math.Ceiling((double)total/pageSize)</span>
+            <button @onclick="()=>Page(1)" disabled="@(page*pageSize>=total)" class="btn btn-sm btn-outline-light">Next →</button>
+        </div>
+    }
+}
+
+@code {
+    private List<ErrorItem> items = new();
+    private int total, unresolved, page = 1, pageSize = 30;
+    private string filter = "All";
+    private bool loaded;
+
+    protected override async Task OnInitializedAsync() => await Load();
+
+    private async Task Load()
+    {
+        try
+        {
+            var q = "api/admin/errors?page=" + page + "&pageSize=" + pageSize;
+            if (filter == "Error" || filter == "Warning") q += "&level=" + filter;
+            if (filter == "Unresolved") q += "&unresolved=true";
+            var resp = await Http.GetFromJsonAsync<ErrorListResponse>(q);
+            if (resp != null) { items = resp.items; total = resp.total; unresolved = resp.unresolved; }
+        }
+        catch { items = new(); }
+        loaded = true;
+    }
+
+    private async Task Filter(string? f) { filter = f ?? "All"; page = 1; await Load(); }
+    private async Task Page(int dir) { page += dir; if (page < 1) page = 1; await Load(); }
+    private async Task Resolve(int id) { await Http.PutAsync("api/admin/errors/" + id + "/resolve", null); await Load(); }
+    private async Task ResolveAll() { await Http.PutAsync("api/admin/errors/resolve-all", null); await Load(); }
+    private async Task Delete(int id) { await Http.DeleteAsync("api/admin/errors/" + id); await Load(); }
+    private async Task ClearAll() { await Http.DeleteAsync("api/admin/errors/clear"); await Load(); }
+
+    public class ErrorItem { public int Id { get; set; } public DateTime Timestamp { get; set; } public string Level { get; set; } = ""; public string? Source { get; set; } public string Message { get; set; } = ""; public string? StackTrace { get; set; } public string? RequestPath { get; set; } public string? Method { get; set; } public int? StatusCode { get; set; } public bool IsResolved { get; set; } public string? ResolvedBy { get; set; } }
+    public class ErrorListResponse { public List<ErrorItem> items { get; set; } = new(); public int total { get; set; } public int page { get; set; } public int unresolved { get; set; } }
+}

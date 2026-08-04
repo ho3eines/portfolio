@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mahbod Pour — Frontend Developer &amp; UI/UX Enthusiast | Frankfurt</title>
+<meta name="description" content="Mahbod Pour — Frontend Developer &amp; UI/UX Enthusiast based in Frankfurt. Crafting digital experiences with Blazor, .NET, and modern web technologies.">
+<meta name="keywords" content="Mahbod Pour, frontend developer, Blazor, .NET, web developer Frankfurt, UI/UX, ASP.NET Core, C#">
+<meta name="author" content="Mahbod Pour">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="canonical" href="https://mahbodpour.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mahbod Pour — Frontend Developer &amp; UI/UX Enthusiast">
+<meta property="og:description" content="Crafting Digital Experiences That Inspire. Building beautiful, performant, and accessible web experiences with Blazor, .NET &amp; modern web technologies.">
+<meta property="og:image" content="https://mahbodpour.com/images/icon-512.png">
+<meta property="og:url" content="https://mahbodpour.com/">
+<meta property="og:site_name" content="Mahbod Pour Portfolio">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mahbod Pour — Frontend Developer &amp; UI/UX Enthusiast">
+<meta name="twitter:description" content="Crafting Digital Experiences That Inspire. Blazor, .NET, modern web.">
+<meta name="twitter:image" content="https://mahbodpour.com/images/icon-512.png">
+
+<!-- PWA / Mobile -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mahbod Pour">
+
+<!-- PWA Manifest + Icons -->
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/icon-192.png">
+<meta name="msapplication-TileImage" content="/images/icon-192.png">
+<meta name="msapplication-TileColor" content="#0a0a0a">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+
+<!-- Styles -->
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ============================================================
+     APP WRAPPER — Card container with rounded corners
+     ============================================================ -->
+<div class="app-wrapper" id="app">
+
+  <!-- Mobile Navigation Overlay -->
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+    <a href="/login" class="admin-link">🔐 Admin</a>
+  </nav>
+
+  <!-- BENTO GRID -->
+  <main class="bento-grid">
+
+    <!-- ==========================================================
+         BOX 1 — HERO (Top-Left, Largest)
+         ========================================================== -->
+    <section class="bento-box box-hero" data-section="hero" data-box="hero" data-pin>
+      <header class="hero-header">
+        <a href="#" class="logo" data-reveal>Mahbod Pour</a>
+
+        <!-- Desktop Nav -->
+        <nav class="nav-desktop" data-reveal>
+          <a href="#work" class="nav-link" data-i18n="nav.work">Work</a>
+          <a href="#about" class="nav-link" data-i18n="nav.about">About</a>
+          <a href="#skills" class="nav-link" data-i18n="nav.skills">Skills</a>
+          <a href="#contact" class="nav-link" data-i18n="nav.contact">Contact</a>
+        </nav>
+
+        <!-- Mobile Hamburger -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" data-reveal>
+          <span></span><span></span><span></span>
+        </button>
+
+        <a href="#contact" class="btn-pill" data-reveal data-i18n="nav.letsTalk">Let's Talk</a>
+      </header>
+
+      <!-- Hero Content -->
+      <div class="hero-content">
+        <div class="hero-portrait" data-parallax data-speed="0.15">
+          <div class="portrait-frame">
+            <div class="portrait-placeholder">
+              <div class="portrait-silhouette">
+                <svg viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <defs>
+                    <radialGradient id="portraitGrad" cx="35%" cy="30%">
+                      <stop offset="0%" stop-color="#d4a04c" stop-opacity="0.3"/>
+                      <stop offset="50%" stop-color="#1a1a1a" stop-opacity="0.8"/>
+                      <stop offset="100%" stop-color="#0a0a0a" stop-opacity="1"/>
+                    </radialGradient>
+                  </defs>
+                  <ellipse cx="100" cy="90" rx="65" ry="70" fill="url(#portraitGrad)"/>
+                  <ellipse cx="100" cy="200" rx="80" ry="50" fill="url(#portraitGrad)"/>
+                </svg>
+              </div>
+              <div class="portrait-light"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-text" data-reveal>
+          <h1 class="hero-title">
+            <span class="title-line" data-text-reveal data-i18n="hero.line1" data-text-reveal>Crafting Digital</span>
+            <span class="title-line" data-text-reveal data-i18n="hero.line2" data-text-reveal>Experiences</span>
+            <span class="title-line accent" data-text-reveal data-i18n="hero.line3" data-text-reveal>That Inspire</span>
+          </h1>
+          <p class="hero-subtitle" data-i18n="hero.subtitle">Frontend Developer &amp; UI/UX Enthusiast — building beautiful, performant, and accessible web experiences.</p>
+          <div class="hero-actions">
+            <a href="#work" class="btn-solid" data-magnetic>
+              <span data-i18n="hero.viewWork">View My Work</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <button class="btn-outline" id="showreelBtn" aria-label="Play showreel" data-magnetic>
+              <span class="play-icon">
+                <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M0 0l12 7-12 7V0z" fill="currentColor"/></svg>
+              </span>
+              <span data-i18n="hero.playShowreel">Play Showreel</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-indicator" data-reveal>
+        <span class="scroll-text" data-i18n="hero.scrollExplore">SCROLL TO EXPLORE</span>
+        <span class="scroll-line"></span>
+      </div>
+
+      <div class="hero-progress">
+        <span class="progress-num">01</span>
+        <div class="progress-bar"><div class="progress-fill" id="heroProgress"></div></div>
+        <span class="progress-num">05</span>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         BOX 2 — SELECTED WORK (Top-Right)
+         ========================================================== -->
+    <section class="bento-box box-work glass-panel" id="work" data-box="work">
+      <div class="box-label" data-i18n="work.label">SELECTED WORK</div>
+      <h2 class="box-title" data-text-reveal data-text-reveal data-i18n="work.title">Turning Ideas<br>Into Impact</h2>
+      <p class="box-desc" data-i18n="work.description">Each project is a unique challenge, approached with meticulous attention to detail and a deep commitment to craft.</p>
+      <a href="#" class="btn-circle">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="work.viewAll">View All Projects</span>
+      </a>
+
+      <div class="project-cards">
+        <div class="project-card" style="--card-rotate: -6deg; --card-index: 0;" data-project>
+          <div class="card-inner">
+            <div class="card-preview">
+              <div class="card-mockup mockup-dark">
+                <div class="mockup-dots"><span></span><span></span><span></span></div>
+                <div class="mockup-sidebar"></div>
+                <div class="mockup-main">
+                  <div class="mockup-chart"></div>
+                  <div class="mockup-row"></div>
+                  <div class="mockup-row short"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-num">01</span>
+              <span class="card-title" data-i18n="work.project_card_01">Fintech Dashboard</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" style="--card-rotate: 3deg; --card-index: 1;" data-project>
+          <div class="card-inner">
+            <div class="card-preview">
+              <div class="card-mockup mockup-light">
+                <div class="mockup-dots"><span></span><span></span><span></span></div>
+                <div class="mockup-header"></div>
+                <div class="mockup-grid">
+                  <div class="mockup-stat"></div>
+                  <div class="mockup-stat"></div>
+                  <div class="mockup-stat"></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-num">02</span>
+              <span class="card-title" data-i18n="work.project_card_02">SaaS Platform</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="project-card" style="--card-rotate: -2deg; --card-index: 2;" data-project>
+          <div class="card-inner">
+            <div class="card-preview">
+              <div class="card-mockup mockup-brand">
+                <div class="mockup-logo"></div>
+                <div class="mockup-swatches">
+                  <span style="--sw:var(--accent)"></span>
+                  <span style="--sw:#fff"></span>
+                  <span style="--sw:#666"></span>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-num">03</span>
+              <span class="card-title" data-i18n="work.project_card_03">Brand Identity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         BOX 3 — ABOUT ME
+         ========================================================== -->
+    <section class="bento-box box-about" data-section="about" id="about" data-box="about" data-pin>
+      <div class="box-label" data-i18n="about.label">ABOUT ME</div>
+      <h2 class="box-title" data-text-reveal data-text-reveal data-i18n="about.title">The Mind Behind<br>The Pixels</h2>
+      <p class="box-desc" data-scrub="0.1">I am a frontend developer and UI/UX enthusiast based in Frankfurt, Germany. My journey into tech started with a fascination for how things work — and evolved into a passion for building digital experiences that feel alive.</p>
+      <p class="box-desc" data-scrub="0.3">With over <strong data-counter="5" data-suffix="+" style="color:var(--accent);">5</strong> years of experience, I specialize in crafting performant web applications using modern .NET and JavaScript ecosystems.</p>
+
+      <div class="exp-list" data-stagger>
+        <div class="exp-item">
+          <div class="exp-dot"></div>
+          <div>
+            <h4>Senior Frontend Developer</h4>
+            <p class="exp-meta">TechCorp GmbH <span class="exp-sep">·</span> 2023 — Present</p>
+          </div>
+        </div>
+        <div class="exp-item">
+          <div class="exp-dot"></div>
+          <div>
+            <h4>Full-Stack Developer</h4>
+            <p class="exp-meta">DigitalWave Agency <span class="exp-sep">·</span> 2021 — 2023</p>
+          </div>
+        </div>
+        <div class="exp-item">
+          <div class="exp-dot"></div>
+          <div>
+            <h4>Junior Developer</h4>
+            <p class="exp-meta">StartupHub <span class="exp-sep">·</span> 2019 — 2020</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         BOX 4 — SKILLS
+         ========================================================== -->
+    <section class="bento-box box-skills" data-section="skills" id="skills" data-box="skills" data-pin>
+      <div class="box-label" data-i18n="skills.label">TOOLKIT</div>
+      <h2 class="box-title" data-text-reveal data-text-reveal data-i18n="skills.title">Technologies<br>I Work With</h2>
+
+      <div class="skills-grid" data-stagger>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">HTML5 / CSS3</span><span class="skill-pct">95%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:95"></div></div>
+        </div>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">C# / .NET</span><span class="skill-pct">92%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:92"></div></div>
+        </div>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">JavaScript</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:90"></div></div>
+        </div>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">ASP.NET Core</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:90"></div></div>
+        </div>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">Blazor WASM</span><span class="skill-pct">88%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:88"></div></div>
+        </div>
+        <div class="skill-item" data-reveal>
+          <div class="skill-header"><span class="skill-name">Tailwind CSS</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="--fill:90"></div></div>
+        </div>
+      </div>
+
+      <div class="tech-tags">
+        <span>React</span><span>TypeScript</span><span>SQL Server</span>
+        <span>Entity Framework</span><span>Bootstrap</span><span>Git</span>
+        <span>Figma</span><span>Docker</span><span>Azure</span>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         BOX 5 — CONTACT + TESTIMONIALS (Bottom)
+         ========================================================== -->
+    <section class="bento-box box-contact" data-section="contact" id="contact" data-box="contact" data-pin>
+      <div class="contact-split">
+        <!-- Testimonials -->
+        <div class="testimonial-section" data-reveal>
+          <div class="box-label" data-i18n="contact.testimonials_label">TESTIMONIALS</div>
+          <h2 class="box-title" data-i18n="contact.testimonials_title">What People<br>Say About Me</h2>
+          <div class="testimonial-carousel" id="testimonialCarousel">
+            <div class="testimonial-track" id="testimonialTrack">
+              <div class="testimonial-slide">
+                <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+                <blockquote>"Mahbod is one of the most talented developers I have worked with. His attention to detail and ability to translate complex requirements into elegant solutions is exceptional."</blockquote>
+                <cite><strong>Alex Schmidt</strong><span>CTO, TechCorp GmbH</span></cite>
+              </div>
+              <div class="testimonial-slide">
+                <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+                <blockquote>"Working with Mahbod was a game-changer for our team. He consistently delivered pixel-perfect implementations ahead of schedule."</blockquote>
+                <cite><strong>Sarah Müller</strong><span>Product Manager, DigitalWave</span></cite>
+              </div>
+              <div class="testimonial-slide">
+                <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+                <blockquote>"Mahbod brings a rare combination of technical excellence and creative vision. He doesn't just write code — he crafts experiences."</blockquote>
+                <cite><strong>Dr. Reza Karimi</strong><span>Founder, StartupHub</span></cite>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-dots" id="testimonialDots">
+            <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="contact-form-section" data-reveal>
+          <h2 class="box-title">Let&apos;s Build<br>Something Great</h2>
+          <p class="box-desc">Have a project in mind? I&apos;d love to hear about it.</p>
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <input type="text" id="name" required placeholder="Your Name" data-i18n-placeholder="contact.form_name_placeholder" autocomplete="name">
+                <label for="name" data-i18n="contact.form_name">Name</label>
+              </div>
+              <div class="form-group">
+                <input type="email" id="email" required placeholder="your@email.com" data-i18n-placeholder="contact.form_email_placeholder" autocomplete="email">
+                <label for="email" data-i18n="contact.form_email">Email</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <input type="text" id="subject" placeholder="Project Inquiry" data-i18n-placeholder="contact.form_subject_placeholder">
+              <label for="subject" data-i18n="contact.form_subject">Subject</label>
+            </div>
+            <div class="form-group">
+              <textarea id="message" rows="4" required placeholder="Tell me about your project..." data-i18n-placeholder="contact.form_message_placeholder"></textarea>
+              <label for="message" data-i18n="contact.form_message">Message</label>
+            </div>
+            <button type="submit" class="btn-solid" data-magnetic>
+              <span data-i18n="contact.form_send">Send Message</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div class="footer-line"></div>
+        <div class="footer-content">
+          <span>&copy; 2026 Mahbod Pour. <span data-i18n="contact.footer_copyright">All rights reserved.</span></span>
+          <div class="footer-social">
+            <a href="#" aria-label="LinkedIn" data-i18n="contact.footer_linkedin">LinkedIn</a>
+            <span class="footer-dot">·</span>
+            <a href="#" aria-label="GitHub" data-i18n="contact.footer_github">GitHub</a>
+            <span class="footer-dot">·</span>
+            <a href="#" aria-label="Twitter" data-i18n="contact.footer_twitter">Twitter</a>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+  </main>
+
+</div><!-- /app-wrapper -->
+
+<!-- Cursor glow (desktop only) -->
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Mahbod Pour",
+  "jobTitle": "Frontend Developer & UI/UX Enthusiast",
+  "url": "https://mahbodpour.com",
+  "description": "Passionate frontend developer and UI/UX enthusiast dedicated to building beautiful, performant, and accessible web experiences.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Frankfurt am Main",
+    "addressCountry": "DE"
+  },
+  "sameAs": [
+    "https://linkedin.com/in/mahbodpour",
+    "https://github.com/mahbodpour"
+  ],
+  "knowsAbout": [
+    "Blazor WebAssembly","ASP.NET Core","C#",".NET","SQL Server","HTML5","CSS3","JavaScript","TypeScript","React","Tailwind CSS","Bootstrap","Entity Framework","Git","Figma","Azure"
+  ]
+}
+</script>
+
+<!-- Scripts -->
+<script>
+  if (!localStorage.getItem("lang")) { window.location.href = "/lang/gate.html"; }
+</script>
+<script src="js/config.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/lang.js"></script>
+
+<!-- PWA — Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((reg) => console.log('⚡ PWA: Service Worker registered —', reg.scope))
+        .catch((err) => console.log('PWA: SW registration failed —', err));
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+{
+  "site": {
+    "title": "Mahbod Pour — Frontend Developer & UI/UX Enthusiast",
+    "logo": "Mahbod Pour",
+    "lang": "en",
+    "direction": "ltr"
+  },
+  "nav": {
+    "work": "Work",
+    "about": "About",
+    "skills": "Skills",
+    "contact": "Contact",
+    "letsTalk": "Let's Talk",
+    "admin": "Admin"
+  },
+  "hero": {
+    "line1": "Crafting Digital",
+    "line2": "Experiences",
+    "line3": "That Inspire",
+    "subtitle": "Frontend Developer & UI/UX Enthusiast — building beautiful, performant, and accessible web experiences.",
+    "viewWork": "View My Work",
+    "playShowreel": "Play Showreel",
+    "scrollExplore": "SCROLL TO EXPLORE"
+  },
+  "work": {
+    "label": "SELECTED WORK",
+    "title": "Turning Ideas Into Impact",
+    "description": "Each project is a unique challenge, approached with meticulous attention to detail and a deep commitment to craft.",
+    "viewAll": "View All Projects",
+    "project_card_01": "Fintech Dashboard",
+    "project_card_02": "SaaS Platform",
+    "project_card_03": "Brand Identity"
+  },
+  "about": {
+    "label": "ABOUT ME",
+    "title": "The Mind Behind The Pixels",
+    "bio_1": "I am a frontend developer and UI/UX enthusiast based in Frankfurt. My journey into tech started with a fascination for how things work — and evolved into a passion for building digital experiences that feel alive.",
+    "bio_2": "With over 5 years of experience, I specialize in crafting performant web applications using modern .NET and JavaScript ecosystems.",
+    "exp_1_role": "Senior Frontend Developer",
+    "exp_1_company": "TechCorp GmbH",
+    "exp_1_period": "2023 — Present",
+    "exp_2_role": "Full-Stack Developer",
+    "exp_2_company": "DigitalWave Agency",
+    "exp_2_period": "2021 — 2023",
+    "exp_3_role": "Junior Developer",
+    "exp_3_company": "StartupHub",
+    "exp_3_period": "2019 — 2020"
+  },
+  "skills": {
+    "label": "TOOLKIT",
+    "title": "Technologies I Work With"
+  },
+  "contact": {
+    "testimonials_label": "TESTIMONIALS",
+    "testimonials_title": "What People Say About Me",
+    "testimonial_1_name": "Alex Schmidt",
+    "testimonial_1_role": "CTO, TechCorp GmbH",
+    "testimonial_1_text": "Mahbod is one of the most talented developers I have worked with. His attention to detail and ability to translate complex requirements into elegant solutions is exceptional.",
+    "testimonial_2_name": "Sarah Mueller",
+    "testimonial_2_role": "Product Manager, DigitalWave",
+    "testimonial_2_text": "Working with Mahbod was a game-changer for our team. He consistently delivered pixel-perfect implementations ahead of schedule.",
+    "testimonial_3_name": "Dr. Reza Karimi",
+    "testimonial_3_role": "Founder, StartupHub",
+    "testimonial_3_text": "Mahbod brings a rare combination of technical excellence and creative vision. He doesn't just write code — he crafts experiences.",
+    "form_title": "Let's Build Something Great",
+    "form_subtitle": "Have a project in mind? I'd love to hear about it.",
+    "form_name": "Name",
+    "form_email": "Email",
+    "form_subject": "Subject",
+    "form_message": "Message",
+    "form_name_placeholder": "Your Name",
+    "form_email_placeholder": "your@email.com",
+    "form_subject_placeholder": "Project Inquiry",
+    "form_message_placeholder": "Tell me about your project...",
+    "form_send": "Send Message",
+    "form_sending": "Sending...",
+    "form_sent": "Message sent! I will get back to you soon.",
+    "form_error": "Could not send message. Please try again or email me directly.",
+    "footer_copyright": "All rights reserved.",
+    "footer_linkedin": "LinkedIn",
+    "footer_github": "GitHub",
+    "footer_twitter": "Twitter"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "dashboard_loading": "Loading stats...",
+    "total_projects": "Projects",
+    "total_skills": "Skills",
+    "unread_messages": "Unread Messages",
+    "total_testimonials": "Testimonials",
+    "errors_warning": "unresolved error(s) detected. Check the error logs to investigate.",
+    "errors_ok": "All systems operational — no unresolved errors.",
+    "view_errors": "View Errors",
+    "edit_profile": "Edit Profile",
+    "run_sql": "Run SQL Scripts",
+    "view_messages": "Messages",
+    "error_logs": "Error Logs"
+  },
+  "toasts": {
+    "error_load": "Could not load data. Please try again.",
+    "success_save": "Saved successfully.",
+    "success_delete": "Deleted successfully.",
+    "language_changed": "Language changed to English"
+  }
+}

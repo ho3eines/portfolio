@@ -1,0 +1,380 @@
+{
+  "getting_started": {
+    "title": "🎓 Welcome to Your Admin Panel!",
+    "intro": "This is your personal dashboard to manage everything on your portfolio website. Don't worry — I'll guide you through every section step by step.",
+    "steps": [
+      {
+        "title": "1. Start with your Profile",
+        "desc": "Go to Profile and fill in your name, title, bio, and links. This is what visitors see first on your site."
+      },
+      {
+        "title": "2. Add your Skills",
+        "desc": "Go to Skills and add the technologies you know. Set a proficiency level (0-100%) for each one."
+      },
+      {
+        "title": "3. Create a Contract",
+        "desc": "Go to Contracts and create a contract for each client project. Add the client name, amount, and dates."
+      },
+      {
+        "title": "4. Add a Project",
+        "desc": "Go to Projects and create a new project. Link it to a contract, describe what you built, and mark it as Featured to show it on your landing page."
+      },
+      {
+        "title": "5. Track Progress with Phases",
+        "desc": "Inside each project, click 'Phases' to add stages like Design, Development, Testing. Update progress as you work."
+      },
+      {
+        "title": "6. Check Messages",
+        "desc": "Go to Messages to read contact form submissions from visitors. Mark them as read when you've responded."
+      }
+    ]
+  },
+  "dashboard": {
+    "title": "📊 Dashboard — Your Overview",
+    "what": "The Dashboard shows you a quick summary of everything in your portfolio.",
+    "how": [
+      "Each card shows a count: how many projects, skills, unread messages, and testimonials you have.",
+      "If there are unresolved errors, you'll see a red warning box — click 'View Errors' to investigate.",
+      "Use the quick action buttons to jump directly to Profile, SQL Scripts, Messages, or Error Logs."
+    ],
+    "tips": [
+      "Check the Dashboard first whenever you log in — it tells you what needs attention.",
+      "Green checkmark means everything is running smoothly.",
+      "Red warning means there's an error that needs your attention."
+    ]
+  },
+  "profile": {
+    "title": "👤 Profile — Your Identity",
+    "what": "This is where you define who you are. Everything here appears on your public landing page.",
+    "how": [
+      {
+        "step": "Full Name",
+        "desc": "Your complete name — e.g., 'Mahbod Pour'"
+      },
+      {
+        "step": "Title / Role",
+        "desc": "Your job title — e.g., 'Frontend Developer & UI/UX Enthusiast'"
+      },
+      {
+        "step": "Hero Tagline",
+        "desc": "Three lines of text that appear in the hero section. The third line will be gold and italic."
+      },
+      {
+        "step": "Bio",
+        "desc": "A paragraph about yourself — your experience, passion, and what you do."
+      },
+      {
+        "step": "Links & Location",
+        "desc": "Your email, location, LinkedIn, GitHub, Twitter — these appear in the footer."
+      },
+      {
+        "step": "SEO Settings",
+        "desc": "This is how Google sees your site. Write a short description (150-160 characters) and keywords. The OG Image is what shows when someone shares your site link."
+      },
+      {
+        "step": "Click Save",
+        "desc": "Your changes go live immediately on the website!"
+      }
+    ],
+    "tips": [
+      "The Meta Description is very important for Google — make it compelling!",
+      "Keep the tagline short and impactful — visitors read this first.",
+      "Update your profile photo URL if you have one."
+    ]
+  },
+  "projects": {
+    "title": "📁 Projects — Your Work Showcase",
+    "what": "Projects are pieces of work you've done. Featured projects appear on your landing page as playing-card style previews.",
+    "how": [
+      {
+        "step": "Click '+ New'",
+        "desc": "Start by creating a new project."
+      },
+      {
+        "step": "Title & Slug",
+        "desc": "Title is the project name. Slug is the URL-friendly version (e.g., 'my-project')."
+      },
+      {
+        "step": "Category & Client",
+        "desc": "Pick a category (Web App, SaaS, Design) and enter the client name."
+      },
+      {
+        "step": "Short Description",
+        "desc": "One line that summarizes what the project is about."
+      },
+      {
+        "step": "Full Description",
+        "desc": "A detailed paragraph about what you built, technologies used, and the outcome."
+      },
+      {
+        "step": "Technologies",
+        "desc": "Enter as JSON — e.g., [\"Blazor\",\"SQL Server\",\"Chart.js\"]"
+      },
+      {
+        "step": "Contract",
+        "desc": "Link to a contract you've created — this connects the project to a client."
+      },
+      {
+        "step": "Mockup Style",
+        "desc": "Choose how the preview card looks: Dark (dark UI), Light (bright UI), or Brand (logo + colors)."
+      },
+      {
+        "step": "Card Rotation",
+        "desc": "How the card tilts on the page — try '-6deg', '3deg', or '-2deg'."
+      },
+      {
+        "step": "Featured Toggle",
+        "desc": "Turn ON to show this project on your landing page. Only 3 projects are shown."
+      },
+      {
+        "step": "Published Toggle",
+        "desc": "Turn ON when you're ready for the world to see it. Turn OFF to hide it."
+      }
+    ],
+    "tips": [
+      "Only Featured projects appear on the landing page — mark your 3 best ones!",
+      "After creating a project, click '📊 Phases' to track your progress step by step.",
+      "The mockup style changes how the card looks — experiment to find the best fit."
+    ]
+  },
+  "contracts": {
+    "title": "📋 Contracts — Client Agreements",
+    "what": "Contracts are agreements with clients. You can track client names, project amounts, and contract status.",
+    "how": [
+      {
+        "step": "Click '+ Add Contract'",
+        "desc": "Create a new contract for a client project."
+      },
+      {
+        "step": "Title",
+        "desc": "A descriptive name for the contract — e.g., 'Website Redesign for TechCorp'."
+      },
+      {
+        "step": "Status",
+        "desc": "Pending = not started yet. Active = working on it. Completed = done. Cancelled = didn't happen."
+      },
+      {
+        "step": "Client Name & Email",
+        "desc": "Who this contract is for."
+      },
+      {
+        "step": "Amount & Currency",
+        "desc": "The project value — in EUR, USD, or IRR."
+      },
+      {
+        "step": "Start & End Dates",
+        "desc": "When the project starts and ends."
+      },
+      {
+        "step": "Description & Notes",
+        "desc": "Any extra details about the agreement or special notes."
+      }
+    ],
+    "tips": [
+      "Link contracts to projects in the Projects section — this connects everything together.",
+      "Use the Status field to track which contracts are active vs completed.",
+      "The client name will appear on the project card in the admin panel."
+    ]
+  },
+  "phases": {
+    "title": "📊 Phases — Track Project Progress",
+    "what": "Phases break a project into smaller steps. Each phase has its own progress percentage.",
+    "how": [
+      {
+        "step": "Click '+ Add Phase'",
+        "desc": "Add a new phase to your project — e.g., 'Design', 'Development', 'Testing', 'Launch'."
+      },
+      {
+        "step": "Title",
+        "desc": "The name of the phase."
+      },
+      {
+        "step": "Status",
+        "desc": "Pending = not started. In Progress = working on it. Completed = done. On Hold = paused."
+      },
+      {
+        "step": "Progress (%)",
+        "desc": "How much of this phase is complete — 0% to 100%. The overall progress bar at the top shows the average of all phases."
+      },
+      {
+        "step": "Start & End Dates",
+        "desc": "When you plan to start and finish this phase."
+      }
+    ],
+    "tips": [
+      "Keep phases small and focused — it's easier to track progress.",
+      "Update the progress percentage regularly to see your project moving forward.",
+      "The overall progress bar gives you a quick view of how the project is going."
+    ]
+  },
+  "skills": {
+    "title": "⚡ Skills — Your Toolkit",
+    "what": "Skills show visitors what technologies and tools you know. They appear as progress bars and tag labels on your landing page.",
+    "how": [
+      {
+        "step": "Click '+ Add Skill'",
+        "desc": "Create a new skill entry."
+      },
+      {
+        "step": "Name",
+        "desc": "The technology name — e.g., 'C# / .NET', 'React', 'Docker'."
+      },
+      {
+        "step": "Category",
+        "desc": "Group it — e.g., 'Frontend', 'Backend', 'Database', 'DevOps'."
+      },
+      {
+        "step": "Proficiency",
+        "desc": "How good you are (0-100). This creates the progress bar on your site."
+      },
+      {
+        "step": "Type: Skill Bar vs Tag",
+        "desc": "Skill Bar = shows a progress bar with percentage. Tag = shows as a simple label (for things like Git, Figma, Azure)."
+      }
+    ],
+    "tips": [
+      "Use Skill Bars for your main technologies (the ones with progress bars).",
+      "Use Tags for tools and platforms that don't need a percentage.",
+      "Order matters — skills appear in the order you create them."
+    ]
+  },
+  "experiences": {
+    "title": "💼 Experiences — Your Work History",
+    "what": "Experiences show your career timeline on the 'About Me' section of your landing page.",
+    "how": [
+      {
+        "step": "Click '+ Add'",
+        "desc": "Add a new work experience."
+      },
+      {
+        "step": "Company & Role",
+        "desc": "Where you worked and your job title."
+      },
+      {
+        "step": "Description",
+        "desc": "What you did there — key achievements and responsibilities."
+      },
+      {
+        "step": "Start & End Dates",
+        "desc": "Leave End Date empty if you still work there — it will show 'Present'."
+      }
+    ],
+    "tips": [
+      "List experiences from most recent to oldest.",
+      "Keep descriptions concise and achievement-focused.",
+      "Leave End Date empty for your current job."
+    ]
+  },
+  "testimonials": {
+    "title": "💬 Testimonials — What People Say",
+    "what": "Testimonials are quotes from clients or colleagues. They appear in the contact section of your landing page as a rotating carousel.",
+    "how": [
+      {
+        "step": "Click '+ Add'",
+        "desc": "Add a new testimonial."
+      },
+      {
+        "step": "Client Name & Title",
+        "desc": "Who said it — e.g., 'Alex Schmidt, CTO at TechCorp'."
+      },
+      {
+        "step": "Content",
+        "desc": "The quote itself — keep it genuine and impactful."
+      },
+      {
+        "step": "Rating",
+        "desc": "1 to 5 stars — 5 is the best."
+      }
+    ],
+    "tips": [
+      "Ask real clients for quotes — authentic testimonials build trust.",
+      "Keep testimonials focused on results and collaboration.",
+      "The carousel rotates automatically every 4.5 seconds on the landing page."
+    ]
+  },
+  "messages": {
+    "title": "✉️ Messages — Contact Form Submissions",
+    "what": "When someone fills out the contact form on your website, their message appears here.",
+    "how": [
+      {
+        "step": "View Messages",
+        "desc": "Click 'All' to see everything, or 'Unread' to see only new messages."
+      },
+      {
+        "step": "Mark as Read",
+        "desc": "Click 'Mark Read' after you've responded to the sender."
+      },
+      {
+        "step": "Delete",
+        "desc": "Remove messages you no longer need."
+      }
+    ],
+    "tips": [
+      "Check this section regularly — visitors might be reaching out with project opportunities!",
+      "The Dashboard shows you how many unread messages you have.",
+      "Respond to messages via email — the sender's email is shown on each message."
+    ]
+  },
+  "resources": {
+    "title": "🗄️ Resources — SQL Script Runner",
+    "what": "This is where you execute SQL scripts that set up and maintain your database.",
+    "how": [
+      {
+        "step": "Click a file name",
+        "desc": "Each file is a database script. Click to execute it."
+      },
+      {
+        "step": "Or click 'Run All Files'",
+        "desc": "Executes all scripts in order (01 → 02 → 03 → 04 → 05)."
+      },
+      {
+        "step": "Check the History",
+        "desc": "The table on the right shows which files ran successfully (✓ OK) and which failed (✗ ERROR)."
+      },
+      {
+        "step": "View Error Details",
+        "desc": "If a file failed, hover over the error column to see what went wrong."
+      }
+    ],
+    "tips": [
+      "Scripts run automatically when the API starts — you usually don't need to run them manually.",
+      "Only run files if you've added new SQL scripts or need to re-run a failed one.",
+      "Files are named 01-, 02-, etc. — they must run in order."
+    ]
+  },
+  "errors": {
+    "title": "🔍 Error Logs — Find & Fix Problems",
+    "what": "This shows every error that happened in your application. Use it to understand what went wrong and when.",
+    "how": [
+      {
+        "step": "Filter Errors",
+        "desc": "Click 'All' to see everything. 'Errors' for critical issues. 'Warnings' for less serious. 'Unresolved' for things that still need attention."
+      },
+      {
+        "step": "Read the Details",
+        "desc": "Each entry shows: what happened (Message), where it happened (Source), when (Timestamp), and which page (Request Path)."
+      },
+      {
+        "step": "Expand Stack Trace",
+        "desc": "Click 'Stack Trace' to see the technical details — useful for developers debugging issues."
+      },
+      {
+        "step": "Resolve",
+        "desc": "Click ✓ after you've fixed the problem. This marks it as resolved."
+      },
+      {
+        "step": "Resolve All",
+        "desc": "If you've fixed everything, click 'Resolve All' to mark all as done."
+      },
+      {
+        "step": "Clear All",
+        "desc": "Remove all error logs — use this when you want a fresh start."
+      }
+    ],
+    "tips": [
+      "The Dashboard warns you when there are unresolved errors — check it regularly.",
+      "Stack traces are technical — share them with your developer if you need help.",
+      "Resolving errors doesn't delete them — it just marks them as handled."
+    ]
+  }
+}

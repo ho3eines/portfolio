@@ -1,0 +1,46 @@
+@page "/admin/messages"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]
+@inject AdminService Admin
+
+<PageTitle>Messages — Admin</PageTitle>
+<h1 style="font-weight:700;margin-bottom:24px;">Contact Messages (@unread unread)</h1>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+else
+{
+    <div class="mb-3">
+        <button @onclick="LoadAll" class="btn btn-sm btn-outline-light me-2">All</button>
+        <button @onclick="LoadUnread" class="btn btn-sm" style="background:#d4a04c;color:#000;">Unread</button>
+    </div>
+
+    @foreach (var m in messages)
+    {
+        <div class="card-dark p-3 mb-2 @(m.IsRead ? "" : "border-warning")" style="@(m.IsRead ? "" : "border-color:#d4a04c !important;")">
+            <div class="d-flex justify-content-between">
+                <div><strong class="text-light">@m.Name</strong> <small style="color:#9a9a9a;">@m.Email</small></div>
+                <div class="d-flex gap-2 align-items-center">
+                    <small style="color:#9a9a9a;">@m.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                    @if (!m.IsRead) { <button @onclick="()=>MarkRead(m.Id)" class="btn btn-sm btn-outline-warning">Mark Read</button> }
+                    <button @onclick="()=>Delete(m.Id)" class="btn btn-sm btn-outline-danger">Del</button>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(m.Subject)) { <div style="color:#d4a04c;font-weight:500;margin-top:4px;">@m.Subject</div> }
+            <div style="color:#ccc;margin-top:4px;">@m.Message</div>
+        </div>
+    }
+}
+
+<style>.card-dark { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px; }</style>
+
+@code {
+    private List<Data.Models.ContactMessage> messages = new();
+    private int unread;
+    private bool loaded, showUnread;
+
+    protected override async Task OnInitializedAsync() { messages = await Admin.GetMessagesAsync(); unread = messages.Count(m=>!m.IsRead); loaded = true; }
+    private async Task LoadAll() { messages = await Admin.GetMessagesAsync(); showUnread = false; }
+    private async Task LoadUnread() { messages = await Admin.GetMessagesAsync(true); showUnread = true; }
+    private async Task MarkRead(int id) { await Admin.MarkReadAsync(id); messages = await Admin.GetMessagesAsync(showUnread); unread = messages.Count(m=>!m.IsRead); }
+    private async Task Delete(int id) { await Admin.DeleteMessageAsync(id); messages = await Admin.GetMessagesAsync(showUnread); unread = messages.Count(m=>!m.IsRead); }
+}

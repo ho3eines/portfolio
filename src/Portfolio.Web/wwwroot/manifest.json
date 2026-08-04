@@ -1,0 +1,59 @@
+{
+  "name": "Mahbod Pour — Portfolio",
+  "short_name": "Mahbod Pour",
+  "description": "Frontend Developer & UI/UX Enthusiast — Crafting Digital Experiences That Inspire",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0a0a0a",
+  "background_color": "#0a0a0a",
+  "categories": ["portfolio", "personal", "development"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1440x900",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Projects",
+      "short_name": "Projects",
+      "description": "See Mahbod's featured work",
+      "url": "/#work"
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "url": "/#contact"
+    }
+  ],
+  "related_applications": [],
+  "iarc_rating_id": "",
+  "display_override": ["standalone", "minimal-ui"]
+}

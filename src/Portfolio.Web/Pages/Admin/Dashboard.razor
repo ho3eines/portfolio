@@ -1,0 +1,74 @@
+@page "/admin"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]
+@inject AdminService Admin
+@inject HttpClient Http
+
+<PageTitle>Dashboard — Admin</PageTitle>
+<h1 style="font-weight:700;margin-bottom:24px;">Dashboard</h1>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-num">@totalProjects</div><div class="stat-label">Projects</div></div></div>
+        <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-num">@totalSkills</div><div class="stat-label">Skills</div></div></div>
+        <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-num" style="color:@(unreadMessages>0?"#f44336":"#d4a04c")">@unreadMessages</div><div class="stat-label">Unread Messages</div></div></div>
+        <div class="col-lg-3 col-md-6"><div class="stat-card"><div class="stat-num">@totalTestimonials</div><div class="stat-label">Testimonials</div></div></div>
+    </div>
+
+    @if (unresolvedErrors > 0)
+    {
+        <div class="alert d-flex justify-content-between align-items-center mb-4" style="background:rgba(244,67,54,0.12);border:1px solid rgba(244,67,54,0.3);border-radius:12px;color:#fff;">
+            <div>
+                <strong>⚠ @unresolvedErrors unresolved error(s)</strong> detected.
+                <small class="ms-2" style="color:#9a9a9a;">Check the error logs to investigate.</small>
+            </div>
+            <a href="/admin/errors" class="btn btn-sm" style="background:#f44336;color:#fff;font-weight:600;">View Errors →</a>
+        </div>
+    }
+    else
+    {
+        <div class="alert mb-4" style="background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);border-radius:12px;color:#4caf50;">
+            ✅ All systems operational — no unresolved errors.
+        </div>
+    }
+
+    <div class="quick-actions">
+        <a href="/admin/profile" class="btn btn-outline-light btn-sm me-2">Edit Profile</a>
+        <a href="/admin/resources" class="btn btn-outline-light btn-sm me-2">Run SQL Scripts</a>
+        <a href="/admin/messages" class="btn btn-outline-warning btn-sm me-2">Messages (@unreadMessages)</a>
+        <a href="/admin/errors" class="btn btn-outline-danger btn-sm">Error Logs</a>
+    </div>
+}
+
+<style>
+    .stat-card { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;transition:border-color .3s; }
+    .stat-card:hover { border-color:#d4a04c; }
+    .stat-num { font-size:2.4rem;font-weight:800;color:#d4a04c;line-height:1.2; }
+    .stat-label { color:#9a9a9a;font-size:.82rem;margin-top:4px;text-transform:uppercase;letter-spacing:.1em; }
+</style>
+
+@code {
+    private int totalProjects, totalSkills, totalMessages, unreadMessages, totalTestimonials, unresolvedErrors;
+    private bool loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            totalProjects = (await Admin.GetProjectsAsync()).Count;
+            totalSkills = (await Admin.GetSkillsAsync()).Count;
+            var msgs = await Admin.GetMessagesAsync();
+            totalMessages = msgs.Count; unreadMessages = msgs.Count(m => !m.IsRead);
+            totalTestimonials = (await Admin.GetTestimonialsAsync()).Count;
+
+            var errResp = await Http.GetFromJsonAsync<ErrorCountResp>("api/admin/errors/count");
+            unresolvedErrors = errResp?.unresolved ?? 0;
+        }
+        catch { }
+        loaded = true;
+    }
+
+    private class ErrorCountResp { public int unresolved { get; set; } public int total { get; set; } }
+}

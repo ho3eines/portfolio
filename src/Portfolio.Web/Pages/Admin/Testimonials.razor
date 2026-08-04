@@ -1,0 +1,50 @@
+@page "/admin/testimonials"
+@layout MainLayout
+@attribute [Authorize(Roles = "Admin,Editor")]
+@inject AdminService Admin
+
+<PageTitle>Testimonials — Admin</PageTitle>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 style="font-weight:700;margin:0;">Testimonials</h1>
+    <button @onclick="Add" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ Add</button>
+</div>
+
+@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+else
+{
+    @foreach (var t in testimonials) {
+        <div class="card-dark p-3 mb-2 d-flex justify-content-between align-items-start">
+            <div>
+                <strong class="text-light">@t.ClientName</strong> <span style="color:#d4a04c;">@new string('★', t.Rating)</span>
+                <div style="color:#9a9a9a;font-size:.82rem;">@t.ClientTitle</div>
+                <div style="color:#ccc;margin-top:4px;">"@t.Content"</div>
+            </div>
+            <div class="d-flex gap-1"><button @onclick="()=>Edit(t)" class="btn btn-sm btn-outline-light">Edit</button><button @onclick="()=>Delete(t.Id)" class="btn btn-sm btn-outline-danger">Del</button></div>
+        </div>
+    }
+
+    @if (editing != null)
+    {
+        <div class="card-dark p-4 mt-3" style="max-width:600px;">
+            <h5 class="text-light mb-3">@(editing.Id==0?"New":"Edit") Testimonial</h5>
+            <div class="row mb-2"><div class="col"><input @bind="editing.ClientName" class="form-control bg-dark text-light border-secondary" placeholder="Client Name" /></div><div class="col"><input @bind="editing.ClientTitle" class="form-control bg-dark text-light border-secondary" placeholder="Title" /></div></div>
+            <div class="mb-2"><textarea @bind="editing.Content" rows="3" class="form-control bg-dark text-light border-secondary" placeholder="Testimonial text"></textarea></div>
+            <div class="mb-2"><label class="text-light small">Rating</label><input @bind="editing.Rating" type="number" min="1" max="5" class="form-control bg-dark text-light border-secondary" style="width:80px;" /></div>
+            <div class="d-flex gap-2"><button @onclick="Save" class="btn px-3" style="background:#d4a04c;color:#000;">Save</button><button @onclick="Cancel" class="btn btn-outline-light">Cancel</button></div>
+        </div>
+    }
+}
+
+<style>.card-dark { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px; }</style>
+
+@code {
+    private List<Data.Models.Testimonial> testimonials = new();
+    private Data.Models.Testimonial? editing;
+    private bool loaded;
+    protected override async Task OnInitializedAsync() { testimonials = await Admin.GetTestimonialsAsync(); loaded = true; }
+    private void Edit(Data.Models.Testimonial t) => editing = new() { Id=t.Id, ClientName=t.ClientName, ClientTitle=t.ClientTitle, Content=t.Content, Rating=t.Rating };
+    private void Add() => editing = new Data.Models.Testimonial { Rating=5 };
+    private void Cancel() => editing = null;
+    private async Task Save() { if (editing==null)return; if (editing.Id==0) await Admin.CreateTestimonialAsync(editing); else await Admin.UpdateTestimonialAsync(editing.Id, editing); editing=null;testimonials=await Admin.GetTestimonialsAsync(); }
+    private async Task Delete(int id) { await Admin.DeleteTestimonialAsync(id); testimonials=await Admin.GetTestimonialsAsync(); }
+}

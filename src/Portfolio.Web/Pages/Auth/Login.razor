@@ -1,0 +1,22 @@
+@page "/login"
+@layout MainLayout
+@inject AuthService Auth
+@inject NavigationManager Nav
+@inject TranslationService T
+
+<PageTitle>@T["site.logo"] — Login</PageTitle>
+<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;">
+    <div class="card-dark p-5" style="width:100%;max-width:440px;">
+        <div class="text-center mb-4"><h3 style="font-weight:700;color:#d4a04c;">@T["site.logo"]</h3><p style="color:#9a9a9a;font-size:.85rem;">Admin Login</p></div>
+        <div class="mb-3"><label class="form-label text-light">Username</label><input @bind="username" class="form-control bg-dark text-light border-secondary" placeholder="admin" /></div>
+        <div class="mb-4"><label class="form-label text-light">Password</label><input @bind="password" type="password" class="form-control bg-dark text-light border-secondary" /></div>
+        @if(!string.IsNullOrEmpty(error)){<div class="alert p-2 mb-3 text-center" style="background:rgba(244,67,54,0.15);color:#f44336;border-radius:8px;">@error</div>}
+        <button @onclick="HandleLogin" disabled="@loading" class="btn w-100 py-2 mb-3" style="background:#d4a04c;color:#000;font-weight:600;">@(loading?"Signing in…":"Sign In")</button>
+        <div class="text-center" style="color:#9a9a9a;font-size:.82rem;">Don't have an account? <a href="/register" style="color:#d4a04c;">Register</a></div>
+    </div>
+</div>
+<style>.card-dark{background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:16px;}</style>
+@code {
+    private string username="",password="",error="";private bool loading;
+    private async Task HandleLogin(){error="";loading=true;try{var r=await Auth.Login(username,password);if(r!=null){Nav.NavigateTo("/admin");return;}error="Invalid credentials.";}catch{error="Connection error.";}finally{loading=false;}}
+}
