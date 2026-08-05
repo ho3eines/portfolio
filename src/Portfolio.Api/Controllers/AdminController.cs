@@ -49,7 +49,6 @@ public class AdminController : ControllerBase
 
     [HttpGet("resources/history")] public async Task<IActionResult> ResourceHistory() { try{using var c=_db.Create();return Ok(ApiResponse<List<Resource>>.Ok((await c.QueryAsync<Resource>("SELECT * FROM Resources ORDER BY ExecutedAt DESC")).ToList()));}catch(Exception ex){await _err.LogAsync(ex,"Admin.ResourceHistory");return StatusCode(500,ApiResponse<object>.Fail("Error."));} }
     [HttpGet("errors/count")] public async Task<IActionResult> ErrorCount() { try{using var c=_db.Create();return Ok(new{unresolved=await c.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM ErrorLogs WHERE IsResolved=0"),total=await c.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM ErrorLogs")});}catch{return Ok(new{unresolved=0,total=0});} }
-}
 
     // ===== CONTRACTS =====
     [HttpGet("contracts")] public async Task<IActionResult> GetContracts() { try { using var c = _db.Create(); return Ok(ApiResponse<List<Contract>>.Ok((await c.QueryAsync<Contract>("SELECT * FROM Contracts ORDER BY CreatedAt DESC")).ToList())); } catch (Exception ex) { await _err.LogAsync(ex, "Admin.GetContracts"); return StatusCode(500, ApiResponse<object>.Fail("Error.")); } }
@@ -65,3 +64,4 @@ public class AdminController : ControllerBase
 
     // ===== PROJECT DETAIL (with phases summary) =====
     [HttpGet("projects/{id}/detail")] public async Task<IActionResult> GetProjectDetail(int id) { try { using var c = _db.Create(); var project = await c.QueryFirstOrDefaultAsync<Project>("SELECT * FROM Projects WHERE Id=@Id", new { Id = id }); if (project == null) return NotFound(); var phases = (await c.QueryAsync<ProjectPhase>("SELECT * FROM ProjectPhases WHERE ProjectId=@Pid ORDER BY SortOrder", new { Pid = id })).ToList(); var contract = project.ContractId != null ? await c.QueryFirstOrDefaultAsync<Contract>("SELECT * FROM Contracts WHERE Id=@Id", new { Id = project.ContractId }) : null; return Ok(new { project, phases, contract, totalPhases = phases.Count, completedPhases = phases.Count(p => p.Status == "Completed") }); } catch (Exception ex) { await _err.LogAsync(ex, "Admin.GetProjectDetail(" + id + ")"); return StatusCode(500, ApiResponse<object>.Fail("Error.")); } }
+}

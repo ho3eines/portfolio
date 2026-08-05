@@ -12,9 +12,9 @@
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
         <button @onclick="()=>Filter(null)" class="btn btn-sm me-2" style="background:@(filter=="All"?"var(--accent)":"transparent");color:@(filter=="All"?"#000":"#fff");border:1px solid rgba(255,255,255,0.2);">All (@total)</button>
-        <button @onclick="()=>Filter("Error")" class="btn btn-sm me-2" style="background:@(filter=="Error"?"#f44336":"transparent");color:@(filter=="Error"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Errors</button>
-        <button @onclick="()=>Filter("Warning")" class="btn btn-sm me-2" style="background:@(filter=="Warning"?"#ff9800":"transparent");color:@(filter=="Warning"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Warnings</button>
-        <button @onclick="()=>Filter("Unresolved")" class="btn btn-sm" style="background:@(filter=="Unresolved"?"#d4a04c":"transparent");color:@(filter=="Unresolved"?"#000":"#fff");border:1px solid rgba(255,255,255,0.2);">🔴 Unresolved (@unresolved)</button>
+        <button @onclick='()=>Filter("Error")' class="btn btn-sm me-2" style="background:@(filter=="Error"?"#f44336":"transparent");color:@(filter=="Error"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Errors</button>
+        <button @onclick='()=>Filter("Warning")' class="btn btn-sm me-2" style="background:@(filter=="Warning"?"#ff9800":"transparent");color:@(filter=="Warning"?"#fff":"#fff");border:1px solid rgba(255,255,255,0.2);">Warnings</button>
+        <button @onclick='()=>Filter("Unresolved")' class="btn btn-sm" style="background:@(filter=="Unresolved"?"#d4a04c":"transparent");color:@(filter=="Unresolved"?"#000":"#fff");border:1px solid rgba(255,255,255,0.2);">🔴 Unresolved (@unresolved)</button>
     </div>
     <div class="d-flex gap-2">
         <button @onclick="ResolveAll" class="btn btn-sm btn-outline-success" disabled="@(unresolved==0)">✓ Resolve All</button>
@@ -75,7 +75,7 @@ else
     {
         <div class="d-flex justify-content-center gap-2 mt-3">
             <button @onclick="()=>Page(-1)" disabled="@(page<=1)" class="btn btn-sm btn-outline-light">← Prev</button>
-            <span style="color:#9a9a9a;">Page @page of @Math.Ceiling((double)total/pageSize)</span>
+            <span style="color:#9a9a9a;">Page @(page) of @Math.Ceiling((double)total/pageSize)</span>
             <button @onclick="()=>Page(1)" disabled="@(page*pageSize>=total)" class="btn btn-sm btn-outline-light">Next →</button>
         </div>
     }
