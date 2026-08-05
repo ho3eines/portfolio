@@ -104,7 +104,7 @@ else
                         @if(idx==0){<div class="mockup-sidebar"></div><div class="mockup-main"><div class="mockup-chart"></div><div class="mockup-row"></div><div class="mockup-row short"></div></div>}
                         else if(idx==1){<div class="mockup-header"></div><div class="mockup-grid"><div class="mockup-stat"></div><div class="mockup-stat"></div><div class="mockup-stat"></div></div>}
                         else{<div class="mockup-logo"></div><div class="mockup-swatches"><span style="--sw:var(--accent)"></span><span style="--sw:#fff"></span><span style="--sw:#666"></span></div>}
-                    </div></div><div class="card-footer"><span class="card-num">@(idx+1:D2)</span><span class="card-title">@p.Title</span></div></div>
+                    </div></div><div class="card-footer"><span class="card-num">@((idx+1).ToString("D2"))</span><span class="card-title">@p.Title</span></div></div>
                 </div>
             }
         </div>
@@ -138,7 +138,7 @@ else
                 <div class="box-label">@T["contact.testimonials_label"]</div>
                 <h2 class="box-title">@T["contact.testimonials_title"]</h2>
                 <div class="testimonial-carousel" id="testimonialCarousel"><div class="testimonial-track" id="testimonialTrack">
-                    @foreach(var t in testimonials){<div class="testimonial-slide"><div class="testimonial-stars">@new string('★',t.Rating)</div><blockquote>"@t.Content"</blockquote><cite><strong>@t.ClientName</strong><span>@t.ClientTitle</span></cite></div>}
+                    @foreach(var t in testimonials){<div class="testimonial-slide"><div class="testimonial-stars">@(new string('★', t.Rating))</div><blockquote>"@t.Content"</blockquote><cite><strong>@t.ClientName</strong><span>@t.ClientTitle</span></cite></div>}
                 </div></div>
                 <div class="testimonial-dots" id="testimonialDots">@for(int i=0;i<testimonials.Count;i++){<span class="dot @(i==0?"active":"")"></span>}</div>
             </div>
