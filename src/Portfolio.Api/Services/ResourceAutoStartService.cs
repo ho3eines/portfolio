@@ -25,6 +25,25 @@ public class ResourceAutoStartService : IHostedService
         int executed = 0, skipped = 0, failed = 0;
         using var db = _conn.Create();
 
+        // ── Ensure the Resources tracking table exists BEFORE we query it. ──
+        // On a fresh DB the table doesn't exist yet (01-create-database.sql creates it),
+        // so without this guard the `SELECT * FROM Resources` below would throw
+        // "Invalid object name 'Resources'" and crash the whole app at startup.
+        await db.ExecuteAsync(@"
+IF OBJECT_ID('dbo.Resources','U') IS NULL
+CREATE TABLE [dbo].[Resources](
+    [Id]           INT IDENTITY(1,1) NOT NULL,
+    [FileName]     NVARCHAR(500)    NOT NULL,
+    [FileContent]  NVARCHAR(MAX)    NULL,
+    [ExecutedAt]   DATETIME2(7)     NOT NULL DEFAULT SYSUTCDATETIME(),
+    [IsSuccess]    BIT              NOT NULL DEFAULT 0,
+    [ErrorMessage] NVARCHAR(MAX)    NULL,
+    [CreatedAt]    DATETIME2(7)     NOT NULL DEFAULT SYSUTCDATETIME(),
+    [UpdatedAt]    DATETIME2(7)     NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT [PK_Resources] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [UQ_Resources_FileName] UNIQUE ([FileName])
+);");
+
         foreach (var filePath in files)
         {
             var fileName = Path.GetFileName(filePath); ct.ThrowIfCancellationRequested();
@@ -35,7 +54,13 @@ public class ResourceAutoStartService : IHostedService
             try
             {
                 var sql = await File.ReadAllTextAsync(filePath, ct);
-                await db.ExecuteAsync(sql);
+                // SQL files use "GO" batch separators (an SSMS/SQLCMD command, not T-SQL).
+                // Dapper cannot parse "GO", so split the file into statements and run each one.
+                var batches = System.Text.RegularExpressions.Regex.Split(sql, @"(?im)^\s*GO\s*$")
+                                .Select(b => b.Trim()).Where(b => b.Length > 0).ToArray();
+                if (batches.Length == 0) { _log.LogWarning("'{File}' has no executable statements — skipping", fileName); skipped++; continue; }
+                foreach (var batch in batches)
+                    await db.ExecuteAsync(batch);
                 var now = DateTime.UtcNow;
                 if (existing != null)
                     await db.ExecuteAsync("UPDATE Resources SET FileContent=@Sql,IsSuccess=1,ErrorMessage=NULL,ExecutedAt=@Now,UpdatedAt=@Now WHERE FileName=@Name", new { Sql = sql, Now = now, Name = fileName });

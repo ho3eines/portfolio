@@ -1,0 +1,36 @@
+﻿# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.vscode/
+*.suo
+*.sdf
+*.cache
+*.VC.db
+
+# Node
+node_modules/
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code / Editors
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp
+*.tmp
+*.temp

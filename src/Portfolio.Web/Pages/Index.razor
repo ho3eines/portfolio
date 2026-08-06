@@ -39,7 +39,7 @@ else
     <a href="#about">@T["nav.about"]</a>
     <a href="#skills">@T["nav.skills"]</a>
     <a href="#contact">@T["nav.contact"]</a>
-    <a href="/login">🔐 @T["nav.admin"]</a>
+    <a href="/login" class="admin-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> @T["nav.admin"]</a>
 </nav>
 
 <div class="bento-grid">
@@ -53,6 +53,7 @@ else
                 <a href="#about" class="nav-link">@T["nav.about"]</a>
                 <a href="#skills" class="nav-link">@T["nav.skills"]</a>
                 <a href="#contact" class="nav-link">@T["nav.contact"]</a>
+                <a href="/login" class="nav-link nav-admin"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>@T["nav.admin"]</span></a>
             </nav>
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" data-reveal>
                 <span></span><span></span><span></span>
@@ -165,6 +166,8 @@ else
                 @if(!string.IsNullOrEmpty(profile?.LinkedIn)){<a href="@profile.LinkedIn">@T["contact.footer_linkedin"]</a><span class="footer-dot">·</span>}
                 @if(!string.IsNullOrEmpty(profile?.GitHub)){<a href="@profile.GitHub">@T["contact.footer_github"]</a><span class="footer-dot">·</span>}
                 @if(!string.IsNullOrEmpty(profile?.Twitter)){<a href="@profile.Twitter">@T["contact.footer_twitter"]</a>}
+                <span class="footer-dot">·</span>
+                <a href="/login" class="footer-admin"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>@T["nav.admin"]</span></a>
             </div>
         </div></footer>
     </section>
@@ -196,12 +199,90 @@ else
             experiences = await Portfolio.GetExperiencesAsync();
             testimonials = await Portfolio.GetTestimonialsAsync();
             settings = await Portfolio.GetSettingsAsync();
-        }
+                }
         catch { }
+
+        // ── Never render an empty page: fall back to bundled demo data
+        //    when the API/DB is unavailable, so the site always has content. ──
+        if (profile == null) profile = DefaultProfile;
+        if (featuredProjects.Count == 0) featuredProjects = DefaultProjects.ToList();
+        if (skillBars.Count == 0) skillBars = DefaultSkills.ToList();
+        if (skillTags.Count == 0) skillTags = DefaultSkillTags.ToList();
+        if (experiences.Count == 0) experiences = DefaultExperiences.ToList();
+        if (testimonials.Count == 0) testimonials = DefaultTestimonials.ToList();
+
         loaded = true;
     }
 
+        // ── Bundled fallback content (kept in sync with wwwroot/js/config.js) ──
+    private static readonly Profile DefaultProfile = new()
+    {
+        FullName = "Mahbod Pour",
+        Title = "Frontend Developer & UI/UX Enthusiast",
+        TaglineLine1 = "Crafting Digital",
+        TaglineLine2 = "Experiences",
+        TaglineLine3 = "That Inspire",
+        Bio = "Passionate frontend developer and UI/UX enthusiast dedicated to building beautiful, performant, and accessible web experiences.",
+        Email = "mahbod@example.com",
+        Location = "Frankfurt am Main, Germany",
+        LinkedIn = "https://linkedin.com/in/mahbodpour",
+        GitHub = "https://github.com/mahbodpour",
+        Twitter = "https://twitter.com/mahbodpour",
+        SiteUrl = "https://mahbodpour.com",
+        MetaDescription = "Frontend Developer & UI/UX Enthusiast based in Frankfurt. Crafting digital experiences with Blazor, .NET, and modern web technologies.",
+        MetaKeywords = "Mahbod Pour, frontend developer, Blazor, .NET, UI/UX, ASP.NET Core, C#"
+    };
+    private static readonly List<Project> DefaultProjects = new()
+    {
+        new Project { Id = 1, Title = "Fintech Dashboard", Slug = "fintech-dashboard", ShortDesc = "Real-time financial analytics with interactive charts and portfolio tracking.", Category = "Web Application", Technologies = "[\"Blazor WASM\",\"ASP.NET Core\",\"SQL Server\",\"Chart.js\",\"SignalR\"]", MockupClass = "mockup-dark", CardRotation = "-6deg", IsFeatured = true },
+        new Project { Id = 2, Title = "SaaS Platform", Slug = "saas-platform", ShortDesc = "Multi-tenant SaaS platform with subscription billing and team management.", Category = "SaaS", Technologies = "[\"React\",\".NET Core\",\"PostgreSQL\",\"Stripe\",\"Redis\"]", MockupClass = "mockup-light", CardRotation = "3deg", IsFeatured = true },
+        new Project { Id = 3, Title = "Brand Identity System", Slug = "brand-identity", ShortDesc = "Complete brand identity and design system for a tech startup.", Category = "Design", Technologies = "[\"Figma\",\"CSS\",\"Storybook\",\"Design Tokens\"]", MockupClass = "mockup-brand", CardRotation = "-2deg", IsFeatured = true }
+    };
+
+        private static readonly List<Skill> DefaultSkills = new()
+    {
+        new Skill { Id = 1, Name = "HTML5 / CSS3", Category = "Frontend", Proficiency = 95, IsTag = false, SortOrder = 1 },
+        new Skill { Id = 2, Name = "C# / .NET", Category = "Backend", Proficiency = 92, IsTag = false, SortOrder = 2 },
+        new Skill { Id = 3, Name = "JavaScript", Category = "Frontend", Proficiency = 90, IsTag = false, SortOrder = 3 },
+        new Skill { Id = 4, Name = "ASP.NET Core", Category = "Backend", Proficiency = 90, IsTag = false, SortOrder = 4 },
+        new Skill { Id = 5, Name = "Blazor WASM", Category = "Frontend", Proficiency = 88, IsTag = false, SortOrder = 5 },
+        new Skill { Id = 6, Name = "SQL Server", Category = "Database", Proficiency = 85, IsTag = false, SortOrder = 6 },
+        new Skill { Id = 7, Name = "Tailwind CSS", Category = "Frontend", Proficiency = 90, IsTag = false, SortOrder = 7 }
+    };
+    private static readonly List<Skill> DefaultSkillTags = new()
+    {
+        new Skill { Id = 9, Name = "React", Category = "Frontend", Proficiency = 85, IsTag = true, SortOrder = 9 },
+        new Skill { Id = 10, Name = "TypeScript", Category = "Frontend", Proficiency = 82, IsTag = true, SortOrder = 10 },
+        new Skill { Id = 11, Name = "Bootstrap", Category = "Frontend", Proficiency = 88, IsTag = true, SortOrder = 11 },
+        new Skill { Id = 12, Name = "Git", Category = "DevOps", Proficiency = 92, IsTag = true, SortOrder = 12 },
+        new Skill { Id = 13, Name = "Figma", Category = "Design", Proficiency = 80, IsTag = true, SortOrder = 13 },
+        new Skill { Id = 14, Name = "Azure", Category = "Cloud", Proficiency = 75, IsTag = true, SortOrder = 14 }
+    };
+    private static readonly List<Experience> DefaultExperiences = new()
+    {
+        new Experience { Id = 1, Company = "TechCorp GmbH", Role = "Senior Frontend Developer", Description = "Leading frontend architecture for a flagship SaaS product. Reduced bundle size by 40% through code splitting and mentoring junior developers.", StartDate = new DateTime(2023, 3, 1), EndDate = null, Location = "Frankfurt, Germany", SortOrder = 1 },
+        new Experience { Id = 2, Company = "DigitalWave Agency", Role = "Full-Stack Developer", Description = "Delivered 15+ client projects. Introduced CI/CD pipelines that cut deployment time by 60%.", StartDate = new DateTime(2021, 1, 1), EndDate = new DateTime(2023, 2, 28), Location = "Berlin, Germany", SortOrder = 2 },
+        new Experience { Id = 3, Company = "StartupHub", Role = "Junior Developer", Description = "Built responsive web apps with ASP.NET Core & React in an agile team of 8.", StartDate = new DateTime(2019, 6, 1), EndDate = new DateTime(2020, 12, 31), Location = "Tehran, Iran", SortOrder = 3 }
+    };
+    private static readonly List<Testimonial> DefaultTestimonials = new()
+    {
+        new Testimonial { Id = 1, ClientName = "Alex Schmidt", ClientTitle = "CTO, TechCorp GmbH", Content = "Mahbod is one of the most talented developers I have worked with. His attention to detail and ability to translate complex requirements into elegant solutions is exceptional.", Rating = 5, SortOrder = 1 },
+        new Testimonial { Id = 2, ClientName = "Sarah Müller", ClientTitle = "Product Manager, DigitalWave", Content = "Working with Mahbod was a game-changer. He consistently delivered pixel-perfect implementations ahead of schedule. His UI/UX intuition is remarkable.", Rating = 5, SortOrder = 2 },
+        new Testimonial { Id = 3, ClientName = "Dr. Reza Karimi", ClientTitle = "Founder, StartupHub", Content = "Mahbod brings a rare combination of technical excellence and creative vision. He doesn't just write code — he crafts experiences that users love.", Rating = 5, SortOrder = 3 }
+    };
+
     private void Refresh() => InvokeAsync(StateHasChanged);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Initialize animations once the real content is in the DOM (after data loads).
+        // portfolio.init() is idempotent (guards prevent duplicate listeners/observers),
+        // so calling it here right after content renders re-binds every scroll effect.
+        if (loaded)
+        {
+            await JS.InvokeVoidAsync("portfolio.init");
+        }
+    }
 
     private async Task HandleContact()
     {

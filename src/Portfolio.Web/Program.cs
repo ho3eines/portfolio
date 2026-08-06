@@ -9,7 +9,16 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-var apiBase = builder.HostEnvironment.BaseAddress;
+// Resolve API base address from configuration/environment; fall back to API launch URL.
+var apiBase = builder.Configuration["ApiBaseUrl"]
+             ?? builder.Configuration["Api:BaseUrl"]
+             ?? builder.HostEnvironment.BaseAddress;
+// Ensure the address is an absolute URI (BaseAddress requires it).
+if (!apiBase.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+    !apiBase.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+{
+    apiBase = apiBase.StartsWith('/') ? $"https://localhost:49325{apiBase}" : $"https://localhost:49325/{apiBase}";
+}
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBase) });
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();

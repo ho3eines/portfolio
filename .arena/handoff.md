@@ -11,11 +11,14 @@
 Stack:     Blazor WASM → HttpClient → ASP.NET Core API → Dapper → SQL Server
 Auth:      JWT (Bearer token in LocalStorage). Roles: Admin, Editor, Viewer
 DB:        Database-First, T-SQL in wwwroot/resources/, Dapper for all access
-UI:        Dark theme #0a0a0a, Gold accent #d4a04c, Bento Grid 5-box
+UI:        Premium dark #0b0d10 · champagne accent #c9a96a · minimal editorial Bento
+           (2026-08-05 redesign: hairline rules, serif display, Admin/Login pill in header+footer)
 Bilingual: TranslationService — T["key"] pattern, no reload, JSON in wwwroot/lang/
 Run:       cd src/Portfolio.Api && dotnet run   |   cd src/Portfolio.Web && dotnet run
 Login:     admin / Admin@123
 Preview:   http://localhost:5173 (npx serve wwwroot)
+          Admin accessible from the home page → /login.html (themable, posts to /api/auth/login)
+          → on success redirects to /admin.html (dashboard, populated from config.js).
 ```
 
 ---
