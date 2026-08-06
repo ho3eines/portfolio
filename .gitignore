@@ -34,3 +34,7 @@ npm-debug.log*
 # Temp
 *.tmp
 *.temp
+
+# Local dev only: SPA points at the local API on this machine.
+# Not committed so remote/deployed builds keep same-origin via reverse proxy.
+src/Portfolio.Web/wwwroot/appsettings.json

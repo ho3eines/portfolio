@@ -13,7 +13,7 @@ builder.Services.AddScoped<ErrorLogService>();
 // Dapper — SqlConnectionFactory instead of DbContext
 // NOTE: In production, override via env var ConnectionStrings__PortfolioDb.
 var connStr = builder.Configuration.GetConnectionString("PortfolioDb")
-    ?? "Server=localhost;Database=PortfolioDB;User Id=sa;Password=Portfolio@2026;TrustServerCertificate=True;MultipleActiveResultSets=true";
+    ?? "workstation id=support;password=123456;packet size=4096;user id=sa;data source=.;persist security info=false;initial catalog=PortfolioDB;Encrypt=False";
 builder.Services.AddSingleton(new SqlConnectionFactory(connStr));
 
 // Auto-Start Resource Runner
