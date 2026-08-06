@@ -57,13 +57,19 @@ else
     private bool sidebarOpen;
     private bool IsAdminRoute => Nav.Uri.Contains("/admin", StringComparison.OrdinalIgnoreCase);
 
+    protected override void OnInitialized()
+    {
+        // Subscribe before the first interaction so the root direction and
+        // font change together with the page content.
+        T.OnChange += Refresh;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             // Restore any persisted JWT so [Authorize] admin routes render.
             await AuthService.InitializeAsync();
-            T.OnChange += Refresh;
         }
     }
 

@@ -10,30 +10,23 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // ── Resolve API base address ──────────────────────────────────────────────
-// Priority: explicit config (appsettings.Development.json / env var) →
-//           PORTFOLIO_API_URL env var → sensible default.
-// In Development the API runs on a separate port (https://localhost:49325).
-// In production the API is served same-origin through the reverse proxy, so
-// the app's own BaseAddress is used — no hardcoded localhost shipped to users.
-var apiBase = builder.Configuration["ApiBaseUrl"]
-    ?? builder.Configuration["Api:BaseUrl"]
-    ?? Environment.GetEnvironmentVariable("PORTFOLIO_API_URL");
+// Browser code must never call a developer's localhost. By default all API
+// requests stay on the current origin and a reverse proxy forwards /api to the
+// ASP.NET API. This works in deployed sites and hosted previews alike.
+//
+// ApiBaseUrl / Api:BaseUrl is only an explicit opt-in for a separate API host
+// (for example a local development machine), and must be an absolute URL.
+var configuredApiBase = builder.Configuration["ApiBaseUrl"]
+    ?? builder.Configuration["Api:BaseUrl"];
 
-if (string.IsNullOrEmpty(apiBase))
-{
-    apiBase = builder.HostEnvironment.IsDevelopment()
-        ? "https://localhost:49325"
-        : builder.HostEnvironment.BaseAddress;
-}
+var apiBase = string.IsNullOrWhiteSpace(configuredApiBase)
+    ? builder.HostEnvironment.BaseAddress
+    : configuredApiBase;
 
-// Ensure absolute URI.
-if (!apiBase.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
-    !apiBase.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-{
-    apiBase = $"https://{apiBase.TrimStart('/')}";
-}
+if (!Uri.TryCreate(apiBase, UriKind.Absolute, out var apiUri))
+    throw new InvalidOperationException("ApiBaseUrl must be an absolute URL, e.g. https://api.example.com/.");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBase) });
+builder.Services.AddScoped(_ => new HttpClient { BaseAddress = apiUri });
 
 // ── Services ──────────────────────────────────────────────────────────────
 builder.Services.AddBlazoredLocalStorage();

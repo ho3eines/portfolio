@@ -229,7 +229,8 @@ if "Key" not in dev_cfg.get("Jwt", {}): err("Development Jwt:Key missing")
 web_cfg = json.load(open(os.path.join(ROOT, "src/Portfolio.Web/appsettings.json"), encoding="utf-8"))
 if "ApiBaseUrl" in web_cfg: err("ApiBaseUrl must not be in committed Web appsettings.json")
 web_dev = json.load(open(os.path.join(ROOT, "src/Portfolio.Web/appsettings.Development.json"), encoding="utf-8"))
-if web_dev.get("ApiBaseUrl") != "https://localhost:49325": warn("Web Development ApiBaseUrl differs from expected dev URL")
+if "ApiBaseUrl" in web_dev:
+    err("Web Development ApiBaseUrl must not point browser clients at localhost; use same-origin /api routing")
 
 # ── 9. All @code field references exist (rough) ──────────────────────────
 # skip — covered by manual review

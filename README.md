@@ -18,6 +18,11 @@ cd src/Portfolio.Api && dotnet run
 # 3. Blazor Client
 cd src/Portfolio.Web && dotnet run
 
+# Development note: configure the Web dev server / reverse proxy so its
+# /api path forwards to the API address printed above. Do not put
+# https://localhost:49325 in client configuration: in a remote browser,
+# localhost is the visitor's computer, not your server.
+
 # (Production) publish the Blazor client and serve the API + wwwroot
 # through a reverse proxy so both are same-origin:
 cd src/Portfolio.Web && dotnet publish -c Release
@@ -30,7 +35,8 @@ cd src/Portfolio.Web && dotnet publish -c Release
 | Setting | Where | Default (development) |
 |---|---|---|
 | SQL connection | `ConnectionStrings:PortfolioDb` in `src/Portfolio.Api/appsettings.json` | `Server=localhost;User Id=sa;Password=Portfolio@2026;TrustServerCertificate=True` |
-| API base URL | `ApiBaseUrl` in `src/Portfolio.Web/appsettings.Development.json` | `https://localhost:49325` (dev only — production uses same-origin) |
+| API base URL | Reverse-proxy `/api` to `Portfolio.Api` (recommended) | Same origin — no browser request to `localhost` |
+| Separate API (optional) | `ApiBaseUrl` / `Api__BaseUrl` in the Web app configuration | Must be an absolute, browser-reachable HTTPS URL |
 | JWT signing key | `Jwt:Key` in `src/Portfolio.Api/appsettings.Development.json` | Dev-only key; **must be set via env var `Jwt__Key` in production** |
 
 > ⚠️ The JWT signing key is intentionally **not** in `appsettings.json` — the API
