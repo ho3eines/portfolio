@@ -1,9 +1,23 @@
 # PROJECT HANDOFF — Complete Knowledge Base
 > **Read this FIRST before any code change. Update it AFTER every change.**
 > This is the SINGLE SOURCE OF TRUTH — replaces reading all 60+ source files.
-> Last updated: 2026-08-06 (responsive bilingual redesign, resilient language loading, and RTL admin layout repair)
+> Last updated: 2026-08-07 (harmonious Persian typography system & Blazor SRI check / static dictionary loading fix)
 
-## 🆕 LATEST UPDATE — Static dictionaries load from the app origin, not the API (2026-08-06)
+## 🆕 LATEST UPDATE — Harmonious Persian Typography & SRI / Static Dictionary Loading Fix (2026-08-07)
+
+- **Harmonized Persian Typography System (`styles.css`, `TranslationService.cs`, `gate.html`):**
+  - Replaced ad-hoc RTL body font settings with a unified Persian typography system in `styles.css`.
+  - Switched `--font-display`, `--font-body`, and `--font-mono` to `'Vazirmatn', 'Tahoma', system-ui, sans-serif` in RTL mode (`dir='rtl'`, `lang='fa'`), preventing headings from falling back to Georgia (a Latin newspaper serif) or Consolas.
+  - Reset `letter-spacing: 0 !important` on all RTL headings, uppercase labels, and buttons to prevent connected Persian cursive ligatures from overlapping or breaking apart.
+  - Standardized heading weights to `font-weight: 800 !important` for strong editorial presence, set comfortable line-height (`1.38` for headings, `1.9` for body) to avoid diacritic/dot collision, enabled OpenType ligatures (`ss01`, `kern`), and disabled unnatural italics (`font-style: normal !important`) in Persian.
+- **FIXED Blazor WebAssembly SRI Integrity Check Failures (`_framework/*.pdb`, `_framework/*.wasm`):**
+  - Updated `service-worker.js` so `fetch` explicitly bypasses `/_framework/`, `/_content/`, `/_vs/`, `.pdb`, and `.wasm` files. Previously, cached assemblies in `RUNTIME` cache from older builds caused SHA-256 computed integrity mismatches against freshly generated `blazor.boot.json` digests.
+  - Bumped PWA cache names to `'portfolio-v20260807-farsi-fonts-sri-fix'` and `'portfolio-runtime-v20260807'` so activation purges stale framework caches.
+  - Added `<BlazorCacheBootResources>false</BlazorCacheBootResources>` to `Portfolio.Web.csproj` to prevent cached boot resources from blocking local/dev builds.
+- **FIXED `/lang/en.json` and `/lang/fa.json` 404 on API Port (`:49325`):**
+  - Added static file serving fallback in `Portfolio.Api/Program.cs` (`UseDefaultFiles` + `UseStaticFiles` targeting `Portfolio.Web/wwwroot`) so direct or cross-configured requests for static dictionaries or frontend assets against the API server return HTTP 200 OK instead of 404.
+
+## PREVIOUS UPDATE — Static dictionaries load from the app origin, not the API (2026-08-06)
 
 - **FIXED `GET /lang/fa.json → 404`:** `TranslationService` previously fetched `wwwroot/lang/{code}.json` through the shared `HttpClient`, whose `BaseAddress` is the **API** base URL. When `ApiBaseUrl` is configured as a separate API host (e.g. `https://localhost:49325`), `lang/fa.json` was resolved against the API server — which has no `/lang/` files — returning 404 and blocking the language gate. `TranslationService` now gets its **own** `HttpClient` rooted at `builder.HostEnvironment.BaseAddress` (the Blazor app origin). `HelpPanel` had the identical latent bug for `lang/help/{lang}.json` and now resolves an absolute URL via `NavigationManager.BaseUri`.
 - **Language loading is transactional:** `TranslationService` now validates supported languages, loads and validates a dictionary before committing the UI change, caches both dictionaries, times out safely, and preserves the existing UI on a failed fetch. Invalid/stale storage is cleared and returns to the language gate instead of rendering raw translation keys.

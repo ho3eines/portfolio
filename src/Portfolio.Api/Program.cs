@@ -51,5 +51,15 @@ if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
 app.UseCors("All");
 app.UseMiddleware<Portfolio.Api.Middleware.ErrorHandlingMiddleware>();
 app.UseAuthentication(); app.UseAuthorization();
+
+// Support serving static frontend assets (/lang/*.json, css, js) if requested against the API host
+var webWwwRoot = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "Portfolio.Web", "wwwroot"));
+if (Directory.Exists(webWwwRoot))
+{
+    var fileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(webWwwRoot);
+    app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = fileProvider });
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = fileProvider });
+}
+
 app.MapControllers();
 app.Run();

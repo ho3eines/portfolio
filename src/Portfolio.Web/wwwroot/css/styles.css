@@ -74,7 +74,118 @@ body::after {
   background-size: 42px 42px;
   mask-image: linear-gradient(to bottom, black, transparent 90%);
 }
-html[dir='rtl'] body { font-family: 'Vazirmatn', Tahoma, sans-serif; line-height: 1.8; }
+/* ── Persian / RTL Harmonious Typography System ───────────────────────── */
+html[dir='rtl'],
+html[lang='fa'],
+[dir='rtl'],
+[lang='fa'],
+.is-rtl,
+.rtl {
+  --font-display: 'Vazirmatn', 'Tahoma', system-ui, sans-serif;
+  --font-body: 'Vazirmatn', 'Tahoma', system-ui, sans-serif;
+  --font-mono: 'Vazirmatn', 'Tahoma', system-ui, sans-serif;
+}
+
+html[dir='rtl'] body,
+html[dir='rtl'] button,
+html[dir='rtl'] input,
+html[dir='rtl'] textarea,
+html[dir='rtl'] select,
+html[dir='rtl'] table,
+html[dir='rtl'] .btn,
+html[dir='rtl'] .badge,
+html[dir='rtl'] .nav-link,
+html[dir='rtl'] .admin-nav-link,
+html[dir='rtl'] .form-control,
+html[dir='rtl'] .form-select {
+  font-family: var(--font-body) !important;
+  font-feature-settings: "ss01" on, "kern" on;
+  letter-spacing: 0 !important;
+  line-height: 1.85;
+}
+
+html[dir='rtl'] h1,
+html[dir='rtl'] h2,
+html[dir='rtl'] h3,
+html[dir='rtl'] h4,
+html[dir='rtl'] h5,
+html[dir='rtl'] h6,
+html[dir='rtl'] .hero-title,
+html[dir='rtl'] .box-title,
+html[dir='rtl'] .box-title-compact,
+html[dir='rtl'] .lang-gate-title,
+html[dir='rtl'] .admin-page-header h1,
+html[dir='rtl'] .admin-title,
+html[dir='rtl'] .admin-item-card h2,
+html[dir='rtl'] .about-stat .n,
+html[dir='rtl'] .stat-num,
+html[dir='rtl'] .logo,
+html[dir='rtl'] .auth-heading,
+html[dir='rtl'] .auth-brand .mark,
+html[dir='rtl'] .admin-brand strong,
+html[dir='rtl'] .ts-slide blockquote,
+html[dir='rtl'] .experience-copy h2,
+html[dir='rtl'] .skill-admin-card h2 {
+  font-family: var(--font-display) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.38 !important;
+}
+
+html[dir='rtl'] .hero-progress,
+html[dir='rtl'] .project-card .num,
+html[dir='rtl'] .skill-item .sp,
+html[dir='rtl'] .experience-date,
+html[dir='rtl'] .phase-meta,
+html[dir='rtl'] .table code,
+html[dir='rtl'] .error-card-title code,
+html[dir='rtl'] .stat-card .stat-num,
+html[dir='rtl'] .about-stat .n {
+  font-family: var(--font-mono) !important;
+  letter-spacing: 0 !important;
+  font-feature-settings: "ss01" on;
+}
+
+html[dir='rtl'] p,
+html[dir='rtl'] li,
+html[dir='rtl'] .box-desc,
+html[dir='rtl'] .hero-subtitle,
+html[dir='rtl'] .lang-gate-sub,
+html[dir='rtl'] .admin-page-header p,
+html[dir='rtl'] .admin-item-card p,
+html[dir='rtl'] .help-section p,
+html[dir='rtl'] .experience-copy p,
+html[dir='rtl'] .message-card > p {
+  font-family: var(--font-body) !important;
+  letter-spacing: 0 !important;
+  line-height: 1.9 !important;
+}
+
+html[dir='rtl'] .boot-text,
+html[dir='rtl'] .box-label,
+html[dir='rtl'] .scroll-text,
+html[dir='rtl'] .lang-gate-kicker,
+html[dir='rtl'] .admin-section-label,
+html[dir='rtl'] .admin-eyebrow,
+html[dir='rtl'] .help-eyebrow,
+html[dir='rtl'] .editor-header > div > span,
+html[dir='rtl'] .project-card .cat,
+html[dir='rtl'] .table th,
+html[dir='rtl'] .stat-label,
+html[dir='rtl'] .auth-brand .sub {
+  font-family: var(--font-body) !important;
+  letter-spacing: 0 !important;
+  font-weight: 700 !important;
+  text-transform: none;
+}
+
+html[dir='rtl'] i,
+html[dir='rtl'] em,
+html[dir='rtl'] .hero-title .accent,
+html[dir='rtl'] .ts-slide blockquote,
+html[dir='rtl'] .testimonial-admin-card blockquote {
+  font-style: normal !important;
+}
 
 img, svg { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }

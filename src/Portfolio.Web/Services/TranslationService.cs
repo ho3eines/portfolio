@@ -36,7 +36,7 @@ public sealed class TranslationService : IDisposable
     public bool IsRtl => string.Equals(_lang, "fa", StringComparison.OrdinalIgnoreCase);
     public string Direction => IsRtl ? "rtl" : "ltr";
     public string FontFamily => IsRtl
-        ? "'Vazirmatn','Tahoma',sans-serif"
+        ? "'Vazirmatn','Tahoma',system-ui,sans-serif"
         : "'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif";
 
     /// <summary>True after a valid preference has been loaded or chosen.</summary>
