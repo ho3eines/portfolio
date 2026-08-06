@@ -147,14 +147,13 @@ else
                 <h2 class="box-title">@T["contact.form_title"]</h2>
                 <p class="box-desc">@T["contact.form_subtitle"]</p>
                 <EditForm Model="@contactForm" OnValidSubmit="HandleContact" class="contact-form">
-                    <DataAnnotationsValidator />
                     <div class="form-row">
                         <div class="form-group"><InputText @bind-Value="contactForm.Name" placeholder="@T["contact.form_name_placeholder"]" /><label>@T["contact.form_name"]</label></div>
                         <div class="form-group"><InputText @bind-Value="contactForm.Email" placeholder="@T["contact.form_email_placeholder"]" /><label>@T["contact.form_email"]</label></div>
                     </div>
                     <div class="form-group"><InputText @bind-Value="contactForm.Subject" placeholder="@T["contact.form_subject_placeholder"]" /><label>@T["contact.form_subject"]</label></div>
                     <div class="form-group"><InputTextArea @bind-Value="contactForm.Message" rows="4" placeholder="@T["contact.form_message_placeholder"]" /><label>@T["contact.form_message"]</label></div>
-                    <ValidationSummary class="text-danger small mb-2" />
+                    @if (!string.IsNullOrEmpty(contactError)) { <div class="mt-2" style="color:#f44336;font-size:.85rem;">@contactError</div> }
                     <button type="submit" class="btn-solid" data-magnetic><span>@T["contact.form_send"]</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
                 </EditForm>
                 @if (contactSent) { <div class="mt-3" style="color:var(--accent)">@T["contact.form_sent"]</div> }
@@ -174,6 +173,9 @@ else
 </div>
 
 @if(profile!=null){<script type="application/ld+json">{ "@@context":"https://schema.org","@@type":"Person","name":"@profile.FullName","jobTitle":"@profile.Title","url":"@(profile.SiteUrl??"https://mahbodpour.com")","image":"@(profile.OgImageUrl??"")","sameAs":[@string.Join(",",new[]{profile.LinkedIn,profile.GitHub,profile.Twitter}.Where(x=>!string.IsNullOrEmpty(x)).Select(x=>$"\"{x}\""))],"knowsAbout":[@string.Join(",",skillBars.Select(s=>$"\"{s.Name}\""))]}</script>}
+
+<!-- Cursor glow (desktop only) -->
+<div class="cursor-glow" id="cursorGlow"></div>
 }
 
 @code {
@@ -284,10 +286,36 @@ else
         }
     }
 
+    private string? contactError;
+
     private async Task HandleContact()
     {
-        try { await Portfolio.SubmitContactAsync(contactForm); contactSent = true; contactForm = new(); await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.success('" + T["contact.form_sent"] + "')"); }
-        catch { await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.error('" + T["contact.form_error"] + "')"); }
+        contactError = null;
+
+        // Client-side validation
+        if (string.IsNullOrWhiteSpace(contactForm.Name) ||
+            string.IsNullOrWhiteSpace(contactForm.Email) ||
+            string.IsNullOrWhiteSpace(contactForm.Message))
+        {
+            contactError = "Please fill in all required fields.";
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            await Portfolio.SubmitContactAsync(contactForm);
+            contactSent = true;
+            contactForm = new();
+            contactError = null;
+            await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.success('" + T["contact.form_sent"] + "')");
+        }
+        catch
+        {
+            contactError = T["contact.form_error"];
+            await JS.InvokeVoidAsync("eval", "if(window.PortfolioToast) PortfolioToast.error('" + T["contact.form_error"] + "')");
+        }
+        StateHasChanged();
     }
 
     private async Task PlayShowreel() => await JS.InvokeVoidAsync("portfolio.showreel");

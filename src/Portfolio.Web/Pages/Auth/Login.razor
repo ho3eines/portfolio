@@ -1,14 +1,15 @@
 @page "/login"
+@layout AuthLayout
 @inject AuthService Auth
 @inject NavigationManager Nav
-@inject TranslationService T
 
-<PageTitle>Login — Mahbod Pour</PageTitle>
+<PageTitle>Login — Admin</PageTitle>
+
 <div class="login-wrap">
     <div class="login-card">
         <div class="login-head">
-            <div class="login-logo">@T["site.logo"]</div>
-            <div class="login-sub">Admin Login</div>
+            <div class="login-logo">Mahbod Pour</div>
+            <div class="login-sub">Admin Panel</div>
         </div>
 
         @if (!string.IsNullOrEmpty(error))
@@ -16,27 +17,34 @@
             <div class="login-error">@error</div>
         }
 
-        <div class="login-field">
-            <label>Username</label>
-            <input @bind="username" class="login-input" placeholder="admin" />
-        </div>
-        <div class="login-field">
-            <label>Password</label>
-            <input @bind="password" type="password" class="login-input" placeholder="••••••••" />
-        </div>
+        <form @onsubmit:preventDefault="true" @onsubmit="HandleLogin">
+            <div class="login-field">
+                <label for="username">Username</label>
+                <input @bind="username" id="username" class="login-input"
+                       placeholder="admin" autocomplete="username"
+                       required />
+            </div>
+            <div class="login-field">
+                <label for="password">Password</label>
+                <input @bind="password" @bind:event="oninput" id="password"
+                       type="password" class="login-input"
+                       placeholder="••••••••" autocomplete="current-password"
+                       required />
+            </div>
 
-        <button @onclick="HandleLogin" disabled="@loading" class="login-btn">
-            @(loading ? "Signing in…" : "Sign In")
-        </button>
+            <button type="submit" disabled="@loading" class="login-btn">
+                @(loading ? "Signing in…" : "Sign In")
+            </button>
+        </form>
 
         <div class="login-footer">
-            No account? <a href="/register">Register</a>
+            <a href="/" style="color:#8a8a8a;text-decoration:none;font-size:.82rem;">← Back to site</a>
         </div>
     </div>
 </div>
 
 <style>
-    body { background: #0b0d10; }
+    body { margin: 0; background: #0b0d10; min-height: 100vh; }
     .login-wrap {
         min-height: 100vh;
         display: flex;
@@ -59,55 +67,74 @@
     .login-field { margin-bottom: 1.25rem; }
     .login-field label { display: block; color: #d1d1d1; font-size: .85rem; margin-bottom: .45rem; }
     .login-input {
-        width: 100%; padding: .7rem 1rem; border-radius: 10px;
+        width: 100%; padding: .75rem 1rem; border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background: #0b0c10; color: #e0e0e0; outline: none;
         transition: border-color .2s;
+        font-size: 0.95rem;
+        box-sizing: border-box;
     }
-    .login-input:focus { border-color: #c9a96a; }
+    .login-input:focus { border-color: #c9a96a; box-shadow: 0 0 0 3px rgba(201,169,106,0.12); }
     .login-btn {
-        width: 100%; padding: .8rem; border-radius: 10px;
+        width: 100%; padding: .85rem; border-radius: 10px;
         border: none; background: #c9a96a; color: #0b0d10;
-        font-weight: 600; cursor: pointer; font-size: .95rem;
-        transition: background .2s;
+        font-weight: 700; cursor: pointer; font-size: .95rem;
+        transition: background .2s, transform .1s;
+        margin-top: 0.5rem;
     }
-    .login-btn:hover:not(:disabled) { background: #d4b473; }
-    .login-btn:disabled { opacity: .7; cursor: not-allowed; }
+    .login-btn:hover:not(:disabled) { background: #d4b473; transform: translateY(-1px); }
+    .login-btn:active:not(:disabled) { transform: translateY(0); }
+    .login-btn:disabled { opacity: .6; cursor: not-allowed; }
     .login-error {
         background: rgba(244, 67, 54, .12); color: #f44336;
-        padding: .6rem 1rem; border-radius: 10px; text-align: center;
+        padding: .7rem 1rem; border-radius: 10px; text-align: center;
         font-size: .85rem; margin-bottom: 1rem;
+        border: 1px solid rgba(244,67,54,0.2);
     }
-    .login-footer { text-align: center; margin-top: 1.2rem; color: #8a8a8a; font-size: .82rem; }
-    .login-footer a { color: #c9a96a; }
+    .login-footer { text-align: center; margin-top: 1.4rem; color: #8a8a8a; font-size: .82rem; }
+    .login-footer a { color: #c9a96a; transition: color .2s; }
+    .login-footer a:hover { color: #d4b473; }
 </style>
 
 @code {
-    private string username = "admin", password = "Admin@123", error = "";
+    private string username = "", password = "", error = "";
     private bool loading;
 
     private async Task HandleLogin()
     {
+        // Client-side validation
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            error = "Please enter both username and password.";
+            return;
+        }
+
         error = "";
         loading = true;
+        StateHasChanged();
+
         try
         {
             var r = await Auth.Login(username, password);
             if (r != null)
             {
-                Nav.NavigateTo("/admin");
+                Nav.NavigateTo("/admin", forceLoad: false);
                 return;
             }
-            error = "Invalid credentials.";
+            error = "Invalid credentials. Please check your username and password.";
         }
-        catch
+        catch (HttpRequestException)
         {
-            error = "Connection error — make sure the API is running.";
+            error = "Cannot reach the API server. Make sure Portfolio.Api is running on port 49325.";
+        }
+        catch (Exception ex)
+        {
+            error = $"Connection error: {ex.Message}";
         }
         finally
         {
             loading = false;
+            StateHasChanged();
         }
     }
 }
-
