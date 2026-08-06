@@ -3,8 +3,9 @@
 > This is the SINGLE SOURCE OF TRUTH — replaces reading all 60+ source files.
 > Last updated: 2026-08-06 (responsive bilingual redesign, resilient language loading, and RTL admin layout repair)
 
-## 🆕 LATEST UPDATE — Responsive bilingual redesign (2026-08-06)
+## 🆕 LATEST UPDATE — Static dictionaries load from the app origin, not the API (2026-08-06)
 
+- **FIXED `GET /lang/fa.json → 404`:** `TranslationService` previously fetched `wwwroot/lang/{code}.json` through the shared `HttpClient`, whose `BaseAddress` is the **API** base URL. When `ApiBaseUrl` is configured as a separate API host (e.g. `https://localhost:49325`), `lang/fa.json` was resolved against the API server — which has no `/lang/` files — returning 404 and blocking the language gate. `TranslationService` now gets its **own** `HttpClient` rooted at `builder.HostEnvironment.BaseAddress` (the Blazor app origin). `HelpPanel` had the identical latent bug for `lang/help/{lang}.json` and now resolves an absolute URL via `NavigationManager.BaseUri`.
 - **Language loading is transactional:** `TranslationService` now validates supported languages, loads and validates a dictionary before committing the UI change, caches both dictionaries, times out safely, and preserves the existing UI on a failed fetch. Invalid/stale storage is cleared and returns to the language gate instead of rendering raw translation keys.
 - **Document direction is synchronized:** `LanguageGate` calls `portfolio.applyDocumentLanguage()` after render, while `index.html` applies the persisted `lang`/`dir` before the first paint. This removes the LTR flash for returning Persian visitors. The PWA pre-caches both translation JSON files and uses a new cache version.
 - **RTL/LTR admin shell is logical-property based:** `.admin-side` uses `inset-inline-start`, `.admin-main` uses `margin-inline-start`, and the mobile drawer reverses its off-canvas transform in RTL. Forms, select arrows, tables, action rows, the help drawer, and mobile navigation now follow the active direction.
@@ -240,6 +241,7 @@ Skills, Experiences, Testimonials, ContactMessages, SiteSettings, ErrorLogs
 11. Every component using T must `@implements IDisposable` + unsubscribe OnChange
 12. `languageSelected` guard prevents gate flash for returning users
 13. `LangSwitcher` must be inside a component subscribed to `T.OnChange`
+14. Static `wwwroot/lang/*.json` must always be fetched from the **app origin** (`builder.HostEnvironment.BaseAddress` / `NavigationManager.BaseUri`), never through the API `HttpClient`. When `ApiBaseUrl` is a separate host, the API has no `/lang/` files → 404.
 
 ---
 

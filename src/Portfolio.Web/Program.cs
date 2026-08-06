@@ -37,7 +37,18 @@ builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredServ
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PortfolioService>();
 builder.Services.AddScoped<AdminService>();
-builder.Services.AddScoped<TranslationService>();
+
+// The TranslationService loads static language dictionaries from the app's own
+// origin (wwwroot/lang/*.json). It must NOT share the API HttpClient: when
+// ApiBaseUrl is configured as a separate API host, the shared client points at
+// the API server, which has no /lang/ files — so `lang/fa.json` would be
+// requested from the API and return 404, blocking the language gate. Give it
+// its own client rooted at the client host so translations always come from
+// the Blazor app itself, never from the API base URL.
+var appBaseUri = new Uri(builder.HostEnvironment.BaseAddress);
+builder.Services.AddScoped<TranslationService>(sp => new TranslationService(
+    new HttpClient { BaseAddress = appBaseUri },
+    sp.GetRequiredService<ILocalStorageService>()));
 
 var host = builder.Build();
 

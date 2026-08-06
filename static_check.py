@@ -77,7 +77,11 @@ for typ, name in sorted(injects):
     # built-in / framework types
     if simple in ("HttpClient", "IJSRuntime", "NavigationManager", "AuthenticationStateProvider"):
         continue
-    if f"AddScoped<{simple}>()" not in prog:
+    # Accept both the parameterless form (AddScoped<T>()) and the factory form
+    # (AddScoped<T>(sp => ...)); the latter is used when a service needs its own
+    # HttpClient / base address (e.g. TranslationService must fetch wwwroot/lang
+    # from the app origin rather than the API base URL).
+    if f"AddScoped<{simple}>()" not in prog and f"AddScoped<{simple}>(" not in prog:
         err(f"service not registered in Program.cs: {typ} (as {name})")
 
 # ── 3. API URL cross-check (client side vs controllers) ──────────────────

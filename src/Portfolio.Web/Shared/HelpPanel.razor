@@ -1,4 +1,5 @@
 @inject HttpClient Http
+@inject NavigationManager Nav
 @inject TranslationService T
 @implements IDisposable
 
@@ -128,7 +129,11 @@
         var key = section ?? "getting_started";
         try
         {
-            var json = await Http.GetStringAsync($"lang/help/{T.Lang}.json");
+            // Resolve the help dictionary against the app's own origin, not the
+            // API base URL. The injected client may be rooted at a separate API
+            // host; using an absolute URL here guarantees the static file is
+            // fetched from the Blazor app (wwwroot/lang/help/*.json).
+            var json = await Http.GetStringAsync($"{Nav.BaseUri}lang/help/{T.Lang}.json");
             using var document = JsonDocument.Parse(json);
             if (document.RootElement.TryGetProperty(key, out var sectionData))
                 data = JsonSerializer.Deserialize<Dictionary<string, object?>>(sectionData.GetRawText());
