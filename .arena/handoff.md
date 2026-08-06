@@ -1,7 +1,7 @@
 # PROJECT HANDOFF — Complete Knowledge Base
 > **Read this FIRST before any code change. Update it AFTER every change.**
 > This is the SINGLE SOURCE OF TRUTH — replaces reading all 60+ source files.
-> Last updated: 2026-08-04 (bilingual + LanguageGate + Contracts + Phases + Help System)
+> Last updated: 2026-08-06 (same-origin API routing and public language switch repair)
 
 ---
 
@@ -112,6 +112,15 @@ portfolio/
 7. NO reload — pure conditional rendering + StateHasChanged
 ```
 
+### API routing (browser-safe)
+```
+The WASM client defaults to builder.HostEnvironment.BaseAddress.
+Therefore requests are relative to the page origin: /api/portfolio/profile,
+not https://localhost:49325. The hosting reverse proxy must forward /api to
+Portfolio.Api. ApiBaseUrl / Api:BaseUrl is an opt-in only for a separately
+hosted, browser-reachable API URL.
+```
+
 ### Language Switch (Mid-Session)
 ```
 1. User clicks فا/EN button → LangSwitcher → T.ToggleAsync()
@@ -189,6 +198,7 @@ Skills, Experiences, Testimonials, ContactMessages, SiteSettings, ErrorLogs
 
 ### RTL + Fonts
 - `MainLayout.razor`: `style="direction:@T.Direction;font-family:@T.FontFamily"`
+- `Index.razor`: a visible `LangSwitcher` is present in the public hero header as well as admin.
 - Vazirmatn for Persian (CDN), Inter for English
 - `html.rtl` → 29 CSS RTL overrides in styles.css
 
