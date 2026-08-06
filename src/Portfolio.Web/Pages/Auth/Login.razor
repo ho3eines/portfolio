@@ -2,6 +2,7 @@
 @layout AuthLayout
 @inject AuthService Auth
 @inject NavigationManager Nav
+@inject PortfolioService Portfolio
 
 <PageTitle>Login — @(profile?.FullName ?? "Mahbod Pour")</PageTitle>
 
@@ -52,6 +53,19 @@
 @code {
     private string username = "", password = "", error = "";
     private bool loading;
+    private Profile? profile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await Portfolio.GetProfileAsync();
+        }
+        catch
+        {
+            // Keep the bundled fallback name when the API is unavailable.
+        }
+    }
 
     private async Task HandleLogin()
     {

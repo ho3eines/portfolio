@@ -42,14 +42,6 @@ public class ApiResponse<T>
     public static ApiResponse<T> Fail(string msg) => new() { Success = false, Message = msg };
 }
 
-public class PagedResult<T>
-{
-    public List<T> Items { get; set; } = new();
-    public int Total { get; set; }
-    public int Page { get; set; }
-    public int PageSize { get; set; }
-}
-
 // ================ DASHBOARD ================
 public class DashboardStats
 {

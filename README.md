@@ -8,9 +8,9 @@
 ## ⚡ Quick Start
 
 ```bash
-# 1. Database (SQL Server required)
-sqlcmd -S localhost -i wwwroot/resources/01-create-database.sql
-sqlcmd -S localhost -i wwwroot/resources/02-seed-data.sql
+# 1. Database (SQL Server required — Windows or Docker/Linux)
+sqlcmd -S localhost -U sa -P "Portfolio@2026" -i wwwroot/resources/01-create-database.sql
+sqlcmd -S localhost -U sa -P "Portfolio@2026" -i wwwroot/resources/02-seed-data.sql
 
 # 2. API Server (auto-executes SQL on startup)
 cd src/Portfolio.Api && dotnet run
@@ -18,11 +18,34 @@ cd src/Portfolio.Api && dotnet run
 # 3. Blazor Client
 cd src/Portfolio.Web && dotnet run
 
-# 4. Static Preview (no backend needed)
-npx serve wwwroot -p 5173
+# (Production) publish the Blazor client and serve the API + wwwroot
+# through a reverse proxy so both are same-origin:
+cd src/Portfolio.Web && dotnet publish -c Release
 
 # Default Admin: admin / Admin@123
 ```
+
+### 🔐 Configuration
+
+| Setting | Where | Default (development) |
+|---|---|---|
+| SQL connection | `ConnectionStrings:PortfolioDb` in `src/Portfolio.Api/appsettings.json` | `Server=localhost;User Id=sa;Password=Portfolio@2026;TrustServerCertificate=True` |
+| API base URL | `ApiBaseUrl` in `src/Portfolio.Web/appsettings.Development.json` | `https://localhost:49325` (dev only — production uses same-origin) |
+| JWT signing key | `Jwt:Key` in `src/Portfolio.Api/appsettings.Development.json` | Dev-only key; **must be set via env var `Jwt__Key` in production** |
+
+> ⚠️ The JWT signing key is intentionally **not** in `appsettings.json` — the API
+> refuses to start without `Jwt:Key` configured (dev key comes from
+> `appsettings.Development.json`, production from the `Jwt__Key` environment
+> variable or user-secrets).
+>
+> 🔑 Passwords are hashed with **PBKDF2** (SHA-256, 100 000 iterations, per-user
+> salt) — stored as `PBKDF2$iterations$saltHex$hashHex`. The seed admin uses the
+> password `Admin@123`.
+>
+> 👀 **Roles:** registration creates a **Viewer** (read-only dashboard access).
+> Admin/Editor can manage content; Admin alone can run SQL scripts and view
+> error logs. Signed-in users without permission see "Access Denied" instead of
+> a redirect loop.
 
 ---
 

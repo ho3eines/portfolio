@@ -77,19 +77,16 @@ public class AdminService
         var body = await r.Content.ReadAsStringAsync();
         return (r.IsSuccessStatusCode, body);
     }
-    public async Task<List<ResourceHistory>> GetResourceHistoryAsync() => await GetListAsync<ResourceHistory>("api/resources/history");
 
-    // --- Dashboard Stats ---
-    public async Task<DashboardStats?> GetDashboardStatsAsync() => await GetAsync<DashboardStats>("api/admin/dashboard");
+    // NOTE: GET api/resources/history returns a RAW list of Resource (not ApiResponse-wrapped).
+    public async Task<List<Resource>> GetResourceHistoryAsync()
+    {
+        try { return await _http.GetFromJsonAsync<List<Resource>>("api/resources/history") ?? new(); }
+        catch { return new(); }
+    }
+
+    // --- Contracts ---
+    public async Task<List<Contract>> GetContractsAsync() => await GetListAsync<Contract>("api/admin/contracts");
 
     private class FileListResponse { public string[]? files { get; set; } }
-
-    public class ResourceHistory
-    {
-        public int Id { get; set; }
-        public string FileName { get; set; } = "";
-        public DateTime ExecutedAt { get; set; }
-        public bool IsSuccess { get; set; }
-        public string? Error { get; set; }
-    }
 }

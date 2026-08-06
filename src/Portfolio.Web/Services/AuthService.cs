@@ -46,12 +46,6 @@ public class AuthService
         RemoveToken();
     }
 
-    public async Task<bool> IsLoggedIn()
-    {
-        var token = await _localStorage.GetItemAsync<string>("token");
-        return !string.IsNullOrEmpty(token);
-    }
-
     public async Task InitializeAsync()
     {
         var token = await _localStorage.GetItemAsync<string>("token");

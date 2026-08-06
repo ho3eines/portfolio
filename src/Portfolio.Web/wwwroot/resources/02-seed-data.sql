@@ -15,11 +15,15 @@ BEGIN
 END
 GO
 
--- Admin user (Password: Admin@123 — hash is SHA256)
+-- Admin user (Password: Admin@123)
+-- Hash format: PBKDF2$iterations$saltHex$hashHex (SHA-256, 100k iterations)
+--   salt = "PortfolioDevSalt" (fixed for the seed user)
+--   hash = PBKDF2("Admin@123", salt, 100000, SHA256)
+-- Matches AuthController.HashPassword / VerifyPassword.
 IF NOT EXISTS(SELECT 1 FROM Users WHERE Username='admin')
 BEGIN
     INSERT INTO Users(Username,Email,PasswordHash,FullName,RoleId,Bio)
-    VALUES('admin','admin@portfolio.com','8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918','Mahbod Pour',1,'Portfolio administrator');
+    VALUES('admin','admin@portfolio.com','PBKDF2$100000$506f7274666f6c696f44657653616c74$46404c2f3804e076a9e06110d9b225cef3743064d5835c9995dd7568cf958bb5','Mahbod Pour',1,'Portfolio administrator');
 END
 GO
 
