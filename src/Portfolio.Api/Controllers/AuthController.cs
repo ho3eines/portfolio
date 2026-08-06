@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,10 +19,11 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest req)
     {
-        var hash = HashPassword(req.Password);
         using var c = _db.Create();
-        var user = await c.QueryFirstOrDefaultAsync<User>(@"SELECT u.*, r.Name AS RoleName FROM Users u JOIN Roles r ON u.RoleId=r.Id WHERE u.Username=@U AND u.PasswordHash=@H AND u.IsActive=1", new { U = req.Username, H = hash });
-        if (user == null) return Unauthorized(ApiResponse<object>.Fail("Invalid credentials"));
+        // PBKDF2 hashes are salted, so fetch the user by username first and
+        // verify the password against the stored hash.
+        var user = await c.QueryFirstOrDefaultAsync<User>(@"SELECT u.*, r.Name AS RoleName FROM Users u JOIN Roles r ON u.RoleId=r.Id WHERE u.Username=@U AND u.IsActive=1", new { U = req.Username });
+        if (user == null || !VerifyPassword(req.Password, user.PasswordHash)) return Unauthorized(ApiResponse<object>.Fail("Invalid credentials"));
 
         var (t, exp) = _token.GenerateAccessToken(user.Id, user.Username, user.RoleName ?? "Admin");
         var refresh = _token.GenerateRefreshToken();
@@ -61,5 +61,34 @@ public class AuthController : ControllerBase
         return u == null ? NotFound() : Ok(new { u.Id, u.Username, u.Email, u.FullName, u.AvatarUrl, Role = u.RoleName });
     }
 
-    private static string HashPassword(string p) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(p + "PortfolioSalt2026!"))).ToLower();
+    // ── Password hashing: PBKDF2 (SHA-256, 100k iterations, per-user salt) ──
+    // Stored format: PBKDF2$iterations$saltHex$hashHex
+    private const int Pbkdf2Iterations = 100_000;
+    private const int SaltSize = 16;
+    private const int HashSize = 32;
+
+    private static string HashPassword(string password)
+    {
+        var salt = RandomNumberGenerator.GetBytes(SaltSize);
+        var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256, HashSize);
+        return $"PBKDF2${Pbkdf2Iterations}${Convert.ToHexString(salt)}${Convert.ToHexString(hash)}";
+    }
+
+    private static bool VerifyPassword(string password, string stored)
+    {
+        try
+        {
+            var parts = stored.Split('$');
+            if (parts.Length != 4 || parts[0] != "PBKDF2") return false;
+            var iterations = int.Parse(parts[1]);
+            var salt = Convert.FromHexString(parts[2]);
+            var expected = Convert.FromHexString(parts[3]);
+            var actual = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, expected.Length);
+            return CryptographicOperations.FixedTimeEquals(actual, expected);
+        }
+        catch
+        {
+            return false; // malformed/legacy hash → treat as invalid, never crash
+        }
+    }
 }

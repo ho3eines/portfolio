@@ -8,10 +8,9 @@ GO
 
 IF DB_ID('PortfolioDB') IS NULL
 BEGIN
-    CREATE DATABASE [PortfolioDB]
-    CONTAINMENT = NONE
-    ON PRIMARY (NAME=N'PortfolioDB',FILENAME=N'/var/opt/mssql/data/PortfolioDB.mdf',SIZE=200MB,MAXSIZE=UNLIMITED,FILEGROWTH=64MB)
-    LOG ON  (NAME=N'PortfolioDB_log',FILENAME=N'/var/opt/mssql/data/PortfolioDB_log.ldf',SIZE=100MB,MAXSIZE=2048GB,FILEGROWTH=64MB);
+    -- No FILENAME clauses → SQL Server uses its default data directory,
+    -- so this works on both Windows and Linux (Docker) installations.
+    CREATE DATABASE [PortfolioDB];
 END
 GO
 

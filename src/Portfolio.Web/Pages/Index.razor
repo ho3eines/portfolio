@@ -267,7 +267,6 @@ else
     private Profile? profile;
     private List<Project> featuredProjects = new();
     private List<Skill> skillBars = new(), skillTags = new();
-    private List<Experience> experiences = new();
     private List<Testimonial> testimonials = new();
     private ContactMessage contactForm = new();
     private bool loaded, contactSent;
@@ -283,7 +282,6 @@ else
             var projs = await Portfolio.GetProjectsAsync();
             featuredProjects = projs.Where(p => p.IsFeatured).OrderBy(p => p.SortOrder).Take(3).ToList();
             (skillBars, skillTags) = await Portfolio.GetSkillsAsync();
-            experiences = await Portfolio.GetExperiencesAsync();
             testimonials = await Portfolio.GetTestimonialsAsync();
         }
         catch { }

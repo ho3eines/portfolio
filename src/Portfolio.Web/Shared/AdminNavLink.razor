@@ -16,6 +16,10 @@
         Nav.Uri.Contains($"{Href}/", StringComparison.OrdinalIgnoreCase) ||
         (Href == "/admin" && Nav.Uri.TrimEnd('/').EndsWith("/admin", StringComparison.OrdinalIgnoreCase));
 
-    protected override void OnInitialized() => Nav.LocationChanged += (_, _) => StateHasChanged();
-    public void Dispose() { }
+    protected override void OnInitialized() => Nav.LocationChanged += OnLocationChanged;
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        => StateHasChanged();
+
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
 }

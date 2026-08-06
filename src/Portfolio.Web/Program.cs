@@ -10,33 +10,27 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // ── Resolve API base address ──────────────────────────────────────────────
-// Priority: explicit config → environment variable → same-origin (production)
-//           → localhost dev fallback
+// Priority: explicit config (appsettings.Development.json / env var) →
+//           PORTFOLIO_API_URL env var → sensible default.
+// In Development the API runs on a separate port (https://localhost:49325).
+// In production the API is served same-origin through the reverse proxy, so
+// the app's own BaseAddress is used — no hardcoded localhost shipped to users.
 var apiBase = builder.Configuration["ApiBaseUrl"]
     ?? builder.Configuration["Api:BaseUrl"]
-    ?? Environment.GetEnvironmentVariable("PORTFOLIO_API_URL")
-    ?? builder.HostEnvironment.BaseAddress;
+    ?? Environment.GetEnvironmentVariable("PORTFOLIO_API_URL");
 
-// If running on the same host as the API (production / reverse-proxy), use
-// the app's own BaseAddress.  In local dev the API runs on a different port,
-// so fall back to the well-known dev address.
-if (apiBase == builder.HostEnvironment.BaseAddress
-    && !builder.HostEnvironment.IsDevelopment())
+if (string.IsNullOrEmpty(apiBase))
 {
-    // Same-origin in production — BaseAddress is correct.
-}
-else if (builder.HostEnvironment.IsDevelopment()
-         && !apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
-{
-    // Dev mode: API is on port 49325 unless overridden.
-    apiBase = "https://localhost:49325";
+    apiBase = builder.HostEnvironment.IsDevelopment()
+        ? "https://localhost:49325"
+        : builder.HostEnvironment.BaseAddress;
 }
 
 // Ensure absolute URI.
 if (!apiBase.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
     !apiBase.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
 {
-    apiBase = $"https://localhost:49325/{apiBase.TrimStart('/')}";
+    apiBase = $"https://{apiBase.TrimStart('/')}";
 }
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBase) });
@@ -57,5 +51,10 @@ var host = builder.Build();
 // Pre-load translations before the first render so LanguageGate works immediately.
 var t = host.Services.GetRequiredService<TranslationService>();
 await t.InitAsync();
+
+// Restore a persisted JWT before the first render, so refreshing /admin
+// (or any authorized page) does not bounce an already signed-in user to
+// the login page while the auth state is still anonymous.
+await host.Services.GetRequiredService<AuthService>().InitializeAsync();
 
 await host.RunAsync();

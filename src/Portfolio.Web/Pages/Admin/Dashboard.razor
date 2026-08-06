@@ -1,15 +1,17 @@
 @page "/admin"
 @layout MainLayout
-@attribute [Authorize(Roles = "Admin,Editor")]
+@attribute [Authorize(Roles = "Admin,Editor,Viewer")]
 @inject AdminService Admin
+@inject PortfolioService Portfolio
 @inject HttpClient Http
+@inject AuthenticationStateProvider AuthState
 
 <PageTitle>Admin Dashboard — Mahbod Pour</PageTitle>
 
 <div class="admin-topbar">
     <div>
         <h1 class="admin-title">Admin Dashboard</h1>
-        <div class="admin-sub">Signed in as <span style="color:var(--accent)">Admin</span></div>
+        <div class="admin-sub">Signed in as <span style="color:var(--accent)">@displayName</span></div>
     </div>
 </div>
 
@@ -19,14 +21,14 @@
 }
 else
 {
-    @if (unresolvedErrors > 0)
+    @if (isStaff && unresolvedErrors > 0)
     {
         <div class="health-banner warn">
             <span>⚠ @unresolvedErrors unresolved error(s)</span>
             <a href="/admin/errors">View Errors →</a>
         </div>
     }
-    else
+    else if (isStaff)
     {
         <div class="health-banner ok">✅ All systems operational — no unresolved errors.</div>
     }
@@ -34,38 +36,73 @@ else
     <div class="admin-grid">
         <div class="stat-card"><div class="stat-num">@totalProjects</div><div class="stat-label">Projects</div></div>
         <div class="stat-card"><div class="stat-num">@totalSkills</div><div class="stat-label">Skills</div></div>
-        <div class="stat-card"><div class="stat-num @(unreadMessages > 0 ? "danger" : null)">@unreadMessages</div><div class="stat-label">Unread Messages</div></div>
+        @if (isStaff)
+        {
+            <div class="stat-card"><div class="stat-num @(unreadMessages > 0 ? "danger" : null)">@unreadMessages</div><div class="stat-label">Unread Messages</div></div>
+        }
+        else
+        {
+            <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Unread Messages</div></div>
+        }
         <div class="stat-card"><div class="stat-num">@totalTestimonials</div><div class="stat-label">Testimonials</div></div>
     </div>
 
-    <div class="admin-card">
-        <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:14px;color:#fff">Quick Actions</h3>
-        <div class="quick-actions">
-            <a href="/admin/profile">Edit Profile</a>
-            <a href="/admin/projects">Projects</a>
-            <a href="/admin/resources">Run SQL Scripts</a>
-            <a href="/admin/messages">Messages (@unreadMessages)</a>
-            <a href="/admin/errors">Error Logs</a>
+    @if (isStaff)
+    {
+        <div class="admin-card">
+            <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:14px;color:#fff">Quick Actions</h3>
+            <div class="quick-actions">
+                <a href="/admin/profile">Edit Profile</a>
+                <a href="/admin/projects">Projects</a>
+                <a href="/admin/resources">Run SQL Scripts</a>
+                <a href="/admin/messages">Messages (@unreadMessages)</a>
+                <a href="/admin/errors">Error Logs</a>
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <p style="color:#9a9a9a;margin:0;">You have read-only access. Contact an administrator to get edit permissions.</p>
+        </div>
+    }
 }
 
 @code {
     private int totalProjects, totalSkills, unreadMessages, totalTestimonials, unresolvedErrors;
     private bool loaded;
+    private bool isStaff;
+    private string displayName = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            totalProjects = (await Admin.GetProjectsAsync()).Count;
-            totalSkills = (await Admin.GetSkillsAsync()).Count;
-            var msgs = await Admin.GetMessagesAsync();
-            unreadMessages = msgs.Count(m => !m.IsRead);
-            totalTestimonials = (await Admin.GetTestimonialsAsync()).Count;
+            var auth = await AuthState.GetAuthenticationStateAsync();
+            isStaff = auth.User.IsInRole("Admin") || auth.User.IsInRole("Editor");
+            var name = auth.User.Identity?.Name;
+            var role = auth.User.FindFirst(claim => claim.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+            displayName = string.IsNullOrEmpty(name) ? "User" : $"{name}{(string.IsNullOrEmpty(role) ? "" : $" · {role}")}";
 
-            var errResp = await Http.GetFromJsonAsync<ErrorCountResp>("api/admin/errors/count");
-            unresolvedErrors = errResp?.unresolved ?? 0;
+            if (isStaff)
+            {
+                totalProjects = (await Admin.GetProjectsAsync()).Count;
+                totalSkills = (await Admin.GetSkillsAsync()).Count;
+                var msgs = await Admin.GetMessagesAsync();
+                unreadMessages = msgs.Count(m => !m.IsRead);
+                totalTestimonials = (await Admin.GetTestimonialsAsync()).Count;
+
+                var errResp = await Http.GetFromJsonAsync<ErrorCountResp>("api/admin/errors/count");
+                unresolvedErrors = errResp?.unresolved ?? 0;
+            }
+            else
+            {
+                // Viewer: read-only stats from the public endpoints (published content).
+                totalProjects = (await Portfolio.GetProjectsAsync()).Count;
+                var (bars, tags) = await Portfolio.GetSkillsAsync();
+                totalSkills = bars.Count + tags.Count;
+                totalTestimonials = (await Portfolio.GetTestimonialsAsync()).Count;
+            }
         }
         catch { }
         loaded = true;

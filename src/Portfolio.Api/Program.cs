@@ -11,14 +11,24 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ErrorLogService>();
 
 // Dapper — SqlConnectionFactory instead of DbContext
-var connStr = builder.Configuration.GetConnectionString("PortfolioDb") ?? "Server=localhost;Database=PortfolioDB;Trusted_Connection=true;TrustServerCertificate=true";
+// NOTE: In production, override via env var ConnectionStrings__PortfolioDb.
+var connStr = builder.Configuration.GetConnectionString("PortfolioDb")
+    ?? "Server=localhost;Database=PortfolioDB;User Id=sa;Password=Portfolio@2026;TrustServerCertificate=True;MultipleActiveResultSets=true";
 builder.Services.AddSingleton(new SqlConnectionFactory(connStr));
 
 // Auto-Start Resource Runner
 builder.Services.AddHostedService<ResourceAutoStartService>();
 
-// JWT
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "PortfolioSuperSecretKey2026!@#$%^&*()AtLeast32Chars";
+// JWT — the signing key must NOT be committed for production.
+// Development key comes from appsettings.Development.json; in production set
+// the Jwt__Key environment variable (or user-secrets). Startup fails fast
+// with a clear message if it is missing.
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey))
+    throw new InvalidOperationException(
+        "Jwt:Key is not configured. In Development it is provided by " +
+        "appsettings.Development.json; in production set the Jwt__Key environment variable.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o => {
     o.TokenValidationParameters = new TokenValidationParameters {
         ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true,

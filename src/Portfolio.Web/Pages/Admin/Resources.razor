@@ -45,7 +45,7 @@ else
                                 <td style="font-size:.82rem;font-weight:500;">@h.FileName</td>
                                 <td><span class="badge" style="background:@(h.IsSuccess?"rgba(76,175,80,0.2)":"rgba(244,67,54,0.2)");color:@(h.IsSuccess?"#4caf50":"#f44336")">@(h.IsSuccess ? "✓ OK" : "✗ ERROR")</span></td>
                                 <td style="font-size:.78rem;color:#9a9a9a;">@h.ExecutedAt.ToString("MM-dd HH:mm:ss")</td>
-                                <td style="font-size:.75rem;color:#f44336;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@h.Error">@(h.Error ?? "—")</td>
+                                <td style="font-size:.75rem;color:#f44336;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@h.ErrorMessage">@(h.ErrorMessage ?? "—")</td>
                             </tr>
                         }
                     </tbody>
@@ -58,7 +58,7 @@ else
 
 @code {
     private string[] files = Array.Empty<string>();
-    private List<AdminService.ResourceHistory> history = new();
+    private List<Portfolio.Data.Models.Resource> history = new();
     private bool loaded, executing, resultSuccess;
     private string? resultMsg;
 

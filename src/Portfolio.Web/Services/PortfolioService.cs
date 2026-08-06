@@ -23,14 +23,8 @@ public class PortfolioService
         return (resp?.bars ?? new(), resp?.tags ?? new());
     }
 
-    public async Task<List<Experience>> GetExperiencesAsync() =>
-        await _http.GetFromJsonAsync<List<Experience>>("api/portfolio/experiences") ?? new();
-
     public async Task<List<Testimonial>> GetTestimonialsAsync() =>
         await _http.GetFromJsonAsync<List<Testimonial>>("api/portfolio/testimonials") ?? new();
-
-    public async Task<Dictionary<string, object?>> GetSettingsAsync() =>
-        await _http.GetFromJsonAsync<Dictionary<string, object?>>("api/portfolio/settings") ?? new();
 
     public async Task<bool> SubmitContactAsync(ContactMessage msg)
     {

@@ -1,6 +1,7 @@
 @page "/admin/contracts"
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
+@inject AdminService Admin
 @inject HttpClient Http
 @inject TranslationService T
 @implements IDisposable
@@ -68,7 +69,7 @@ else
     private bool loaded;
 
     protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
-    private async void Load() { try { var r = await Http.GetFromJsonAsync<List<Portfolio.Data.Models.Contract>>("api/admin/contracts"); if (r != null) contracts = r; } catch { } loaded = true; StateHasChanged(); }
+    private async void Load() { try { contracts = await Admin.GetContractsAsync(); } catch { } loaded = true; StateHasChanged(); }
     private void Edit(Portfolio.Data.Models.Contract c) => editing = new Portfolio.Data.Models.Contract { Id = c.Id, Title = c.Title, ClientName = c.ClientName, ClientEmail = c.ClientEmail, Amount = c.Amount, Currency = c.Currency, StartDate = c.StartDate, EndDate = c.EndDate, Status = c.Status, Description = c.Description };
     private void Add() => editing = new Portfolio.Data.Models.Contract();
     private void Cancel() => editing = null;

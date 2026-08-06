@@ -2,7 +2,6 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
-@inject HttpClient Http
 @inject TranslationService T
 @implements IDisposable
 
@@ -87,7 +86,7 @@ else
     private bool loaded;
 
     protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
-    private async void Load() { try { projects = await Admin.GetProjectsAsync(); contracts = await Http.GetFromJsonAsync<List<Portfolio.Data.Models.Contract>>("api/admin/contracts") ?? new(); } catch { } loaded = true; StateHasChanged(); }
+    private async void Load() { try { projects = await Admin.GetProjectsAsync(); contracts = await Admin.GetContractsAsync(); } catch { } loaded = true; StateHasChanged(); }
     private void Edit(Data.Models.Project p) => editing = new Data.Models.Project { Id = p.Id, Title = p.Title, Slug = p.Slug, Category = p.Category, ClientName = p.ClientName, ContractId = p.ContractId, ShortDesc = p.ShortDesc, Description = p.Description, Technologies = p.Technologies, MockupClass = p.MockupClass, CardRotation = p.CardRotation, IsFeatured = p.IsFeatured, IsPublished = p.IsPublished };
     private async Task Save() { if (editing == null) return; if (editing.Id == 0) await Admin.CreateProjectAsync(editing); else await Admin.UpdateProjectAsync(editing.Id, editing); editing = null; Load(); }
     private async Task Delete(int id) { await Admin.DeleteProjectAsync(id); Load(); }
