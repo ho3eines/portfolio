@@ -1,2 +1,13 @@
 @inherits LayoutComponentBase
-@Body
+@inject TranslationService T
+@implements IDisposable
+
+<div class="auth-layout" dir="@T.Direction" lang="@T.Lang" style="font-family:@T.FontFamily" @key="T.Lang">
+    @Body
+</div>
+
+@code {
+    protected override void OnInitialized() => T.OnChange += Refresh;
+    private void Refresh() => InvokeAsync(StateHasChanged);
+    public void Dispose() => T.OnChange -= Refresh;
+}

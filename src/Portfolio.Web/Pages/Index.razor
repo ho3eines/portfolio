@@ -5,20 +5,20 @@
 @inject TranslationService T
 @implements IDisposable
 
-<PageTitle>@(profile?.FullName ?? T["site.logo"]) — @(profile?.Title ?? T["hero.subtitle"])</PageTitle>
+<PageTitle>@(profile?.FullName ?? T["site.logo"]) — @DisplayTitle()</PageTitle>
 
 <HeadContent>
-    <meta name="description" content="@(profile?.MetaDescription ?? profile?.Bio?.Truncate(160) ?? T["hero.subtitle"])" />
-    <meta name="theme-color" content="#0a0b0d" />
+    <meta name="description" content="@DisplayMetaDescription()" />
+    <meta name="theme-color" content="#080e19" />
 </HeadContent>
 
 @if (!loaded)
 {
-    <div class="text-center py-5" style="color:var(--accent)">Loading…</div>
+    <div class="public-loading" role="status"><span class="public-loading-mark"></span>@T["common.loading"]</div>
 }
 else
 {
-    <nav class="mobile-nav" id="mobileNav">
+    <nav class="mobile-nav" id="mobileNav" aria-label="@T["common.menu"]">
         <a href="#work">@T["nav.work"]</a>
         <a href="#about">@T["nav.about"]</a>
         <a href="#skills">@T["nav.skills"]</a>
@@ -31,7 +31,7 @@ else
         @* ── HERO ── *@
         <section class="bento-box box-hero" id="top">
             <div class="hero-portrait">
-                <img src="images/hero-portrait.png" alt="@(profile?.FullName ?? "Portrait")" loading="eager" />
+                <img src="images/hero-portrait.png" alt="@(profile?.FullName ?? T["site.logo"])" loading="eager" />
             </div>
 
             <header class="hero-header">
@@ -48,7 +48,7 @@ else
                 </nav>
                 <div class="header-actions">
                     <LangSwitcher />
-                    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="@T["common.menu"]">
                         <span></span><span></span><span></span>
                     </button>
                     <a href="#contact" class="btn-pill">@T["nav.letsTalk"]</a>
@@ -57,11 +57,11 @@ else
 
             <div class="hero-content">
                 <h1 class="hero-title">
-                    <span class="line">@(profile?.TaglineLine1 ?? T["hero.line1"])</span>
-                    <span class="line">@(profile?.TaglineLine2 ?? T["hero.line2"])</span>
-                    <span class="line accent">@(profile?.TaglineLine3 ?? T["hero.line3"])</span>
+                    <span class="line">@DisplayTagline(1)</span>
+                    <span class="line">@DisplayTagline(2)</span>
+                    <span class="line accent">@DisplayTagline(3)</span>
                 </h1>
-                <p class="hero-subtitle">@(profile?.Title ?? T["hero.subtitle"])</p>
+                <p class="hero-subtitle">@DisplayTitle()</p>
                 <div class="hero-actions">
                     <a href="#work" class="btn-solid">
                         <span>@T["hero.viewWork"]</span>
@@ -108,10 +108,10 @@ else
                     var cls = i == 0 ? "pc-1" : i == 1 ? "pc-2" : "pc-3";
                     var img = $"images/project-{i + 1}.png";
                     <div class="project-card @cls">
-                        <div class="shot"><img src="@img" alt="@p.Title" loading="lazy" /></div>
+                        <div class="shot"><img src="@img" alt="@DisplayProjectTitle(p, i)" loading="lazy" /></div>
                         <div class="cap">
                             <span class="num">@((i + 1).ToString("D2"))</span>
-                            <span class="ttl">@p.Title</span>
+                            <span class="ttl">@DisplayProjectTitle(p, i)</span>
                             <span class="cat">@p.Category</span>
                         </div>
                     </div>
@@ -123,35 +123,31 @@ else
         <section class="bento-box box-about" id="about">
             <div class="about-text">
                 <div class="box-label">@T["about.label"]</div>
-                <h2 class="box-title">
-                    Designing Solutions.<br />
-                    Building Relationships.<br />
-                    Creating Value.
-                </h2>
+                <h2 class="box-title">@T["about.title"]</h2>
                 @if (!string.IsNullOrEmpty(profile?.Bio))
                 {
-                    <p class="box-desc">@profile.Bio</p>
+                    <p class="box-desc">@DisplayBio()</p>
                 }
                 <div class="about-stats">
                     <div class="about-stat">
                         <div class="n"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 8v4l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>4+</div>
-                        <div class="l">Years Experience</div>
+                        <div class="l">@T["about.experience"]</div>
                     </div>
                     <div class="about-stat">
                         <div class="n"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" /></svg>20+</div>
-                        <div class="l">Projects Completed</div>
+                        <div class="l">@T["about.projects"]</div>
                     </div>
                     <div class="about-stat">
                         <div class="n"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm12 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>10+</div>
-                        <div class="l">Happy Clients</div>
+                        <div class="l">@T["about.clients"]</div>
                     </div>
                 </div>
                 <div class="about-cta">
-                    <a href="#contact" class="btn-outline">@T["about.more"] <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="margin-left:4px"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
+                    <a href="#contact" class="btn-outline">@T["about.more"] <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></a>
                 </div>
             </div>
             <div class="about-photo">
-                <img src="images/about-photo.png" alt="About" loading="lazy" />
+                <img src="images/about-photo.png" alt="@T["about.label"]" loading="lazy" />
             </div>
         </section>
 
@@ -189,31 +185,33 @@ else
         <section class="bento-box box-contact" id="contact">
             <div class="testimonial-section">
                 <div class="box-label">@T["contact.testimonials_label"]</div>
-                <h2 class="box-title" style="font-size:clamp(1.4rem,2vw,1.9rem)">What People Say</h2>
+                <h2 class="box-title box-title-compact">@T["contact.testimonials_title"]</h2>
                 <div class="ts-carousel">
                     <div class="ts-track" id="tsTrack" style="transform:translateX(0)">
-                        @foreach (var t in testimonials)
+                        @for (var i = 0; i < testimonials.Count; i++)
                         {
+                            var testimonial = testimonials[i];
+                            var clientName = DisplayTestimonialName(testimonial, i);
                             <div class="ts-slide">
-                                <div class="ts-stars">@(new string('★', t.Rating))</div>
-                                <blockquote>"@t.Content"</blockquote>
+                                <div class="ts-stars">@(new string('★', testimonial.Rating))</div>
+                                <blockquote>"@DisplayTestimonialContent(testimonial, i)"</blockquote>
                                 <cite>
-                                    <span class="ts-avatar">@(t.ClientName?.Length > 0 ? t.ClientName[0].ToString().ToUpper() : "?")</span>
-                                    <span><span class="ts-name">@t.ClientName</span><span class="ts-role">@t.ClientTitle</span></span>
+                                    <span class="ts-avatar">@(clientName.Length > 0 ? clientName[0].ToString().ToUpper() : "?")</span>
+                                    <span><span class="ts-name">@clientName</span><span class="ts-role">@DisplayTestimonialRole(testimonial, i)</span></span>
                                 </cite>
                             </div>
                         }
                     </div>
                 </div>
                 <div class="ts-nav">
-                    <button id="tsPrev" aria-label="Previous"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
-                    <button id="tsNext" aria-label="Next"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                    <button id="tsPrev" aria-label="@T["contact.previous_testimonial"]"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+                    <button id="tsNext" aria-label="@T["contact.next_testimonial"]"><svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
                 </div>
             </div>
 
             <div class="contact-form-section">
                 <div class="box-label">@T["contact.form_label"]</div>
-                <h2 class="box-title" style="font-size:clamp(1.4rem,2vw,1.9rem)">Have a Project<br />in Mind?</h2>
+                <h2 class="box-title box-title-compact">@T["contact.form_title"]</h2>
                 <p class="box-desc">@T["contact.form_subtitle"]</p>
                 <EditForm Model="@contactForm" OnValidSubmit="HandleContact" class="contact-form">
                     <div class="form-row">
@@ -274,6 +272,7 @@ else
     private ContactMessage contactForm = new();
     private bool loaded, contactSent;
     private string? contactError;
+    private string? initializedLanguage;
 
     protected override void OnInitialized() => T.OnChange += Refresh;
 
@@ -346,15 +345,104 @@ else
         new() { ClientName = "David Kim", ClientTitle = "Founder, StartupHub", Content = "A rare blend of technical excellence and creative vision. He crafts experiences users truly love.", Rating = 5 }
     };
 
+    private string DisplayTagline(int line)
+    {
+        var fallback = line switch
+        {
+            1 => T["hero.line1"],
+            2 => T["hero.line2"],
+            _ => T["hero.line3"]
+        };
+
+        if (T.IsRtl || profile is null || ReferenceEquals(profile, DefaultProfile))
+            return fallback;
+
+        return line switch
+        {
+            1 => profile.TaglineLine1 ?? fallback,
+            2 => profile.TaglineLine2 ?? fallback,
+            _ => profile.TaglineLine3 ?? fallback
+        };
+    }
+
+    private string DisplayTitle() =>
+        T.IsRtl || profile is null || ReferenceEquals(profile, DefaultProfile)
+            ? T["hero.subtitle"]
+            : profile.Title ?? T["hero.subtitle"];
+
+    private string DisplayBio() =>
+        T.IsRtl || profile is null || ReferenceEquals(profile, DefaultProfile)
+            ? T["about.bio"]
+            : profile.Bio ?? T["about.bio"];
+
+    private string DisplayMetaDescription() => T.IsRtl
+        ? T["hero.subtitle"]
+        : profile?.MetaDescription ?? DisplayBio().Truncate(160);
+
+    private string DisplayProjectTitle(Project project, int index) =>
+        T.IsRtl
+            ? index switch
+            {
+                0 => T["work.project_card_01"],
+                1 => T["work.project_card_02"],
+                2 => T["work.project_card_03"],
+                _ => project.Title
+            }
+            : project.Title;
+
+
+    private bool UsePersianSample(Testimonial testimonial, int index) =>
+        T.IsRtl && (index switch
+        {
+            0 => (testimonial.ClientName ?? string.Empty).StartsWith("Alex", StringComparison.OrdinalIgnoreCase),
+            1 => (testimonial.ClientName ?? string.Empty).StartsWith("Sarah", StringComparison.OrdinalIgnoreCase),
+            2 => (testimonial.ClientName ?? string.Empty).Contains("Reza", StringComparison.OrdinalIgnoreCase) || (testimonial.ClientName ?? string.Empty).StartsWith("David", StringComparison.OrdinalIgnoreCase),
+            _ => false
+        });
+
+    private string DisplayTestimonialName(Testimonial testimonial, int index) =>
+        UsePersianSample(testimonial, index)
+            ? index switch
+            {
+                0 => T["contact.testimonial_1_name"],
+                1 => T["contact.testimonial_2_name"],
+                _ => T["contact.testimonial_3_name"]
+            }
+            : testimonial.ClientName ?? string.Empty;
+
+    private string DisplayTestimonialRole(Testimonial testimonial, int index) =>
+        UsePersianSample(testimonial, index)
+            ? index switch
+            {
+                0 => T["contact.testimonial_1_role"],
+                1 => T["contact.testimonial_2_role"],
+                _ => T["contact.testimonial_3_role"]
+            }
+            : testimonial.ClientTitle ?? string.Empty;
+
+    private string DisplayTestimonialContent(Testimonial testimonial, int index) =>
+        UsePersianSample(testimonial, index)
+            ? index switch
+            {
+                0 => T["contact.testimonial_1_text"],
+                1 => T["contact.testimonial_2_text"],
+                _ => T["contact.testimonial_3_text"]
+            }
+            : testimonial.Content;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (loaded)
-            await JS.InvokeVoidAsync("portfolio.init");
+        if (!loaded || initializedLanguage == T.Lang)
+            return;
+
+        initializedLanguage = T.Lang;
+        await JS.InvokeVoidAsync("portfolio.init");
     }
 
     private async Task HandleContact()
     {
         contactError = null;
+        contactSent = false;
         if (string.IsNullOrWhiteSpace(contactForm.Name) ||
             string.IsNullOrWhiteSpace(contactForm.Email) ||
             string.IsNullOrWhiteSpace(contactForm.Message))
@@ -364,9 +452,15 @@ else
         }
         try
         {
-            await Portfolio.SubmitContactAsync(contactForm);
-            contactSent = true;
-            contactForm = new();
+            if (await Portfolio.SubmitContactAsync(contactForm))
+            {
+                contactSent = true;
+                contactForm = new();
+            }
+            else
+            {
+                contactError = T["contact.form_error"];
+            }
         }
         catch
         {

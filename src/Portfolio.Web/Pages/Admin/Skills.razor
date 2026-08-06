@@ -2,43 +2,56 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
+@inject TranslationService T
 
-<PageTitle>Skills — Admin</PageTitle>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 style="font-weight:700;margin:0;">Skills</h1>
-    <button @onclick="Add" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ Add Skill</button>
-</div>
+<PageTitle>@T["admin.skills"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+<header class="admin-page-header admin-page-header-actions">
+    <div>
+        <p class="admin-eyebrow">@T["admin.manage"] / 04</p>
+        <h1>@T["admin.skills"]</h1>
+        <p>@T["skills.title"]</p>
+    </div>
+    <button type="button" @onclick="Add" class="btn btn-primary">+ @T["admin.add_skill"]</button>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
 else
 {
-    <table class="table table-dark table-borderless align-middle">
-        <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.06);"><th>Name</th><th>Category</th><th>Proficiency</th><th>Type</th><th style="width:160px;"></th></tr></thead>
-        <tbody>
-            @foreach (var s in skills)
-            {
-                @if (editing?.Id == s.Id)
-                {
-                    <tr>
-                        <td><input @bind="editing.Name" class="form-control form-control-sm bg-dark text-light border-secondary" /></td>
-                        <td><input @bind="editing.Category" class="form-control form-control-sm bg-dark text-light border-secondary" /></td>
-                        <td><input @bind="editing.Proficiency" type="number" class="form-control form-control-sm bg-dark text-light border-secondary" style="width:80px;" /></td>
-                        <td><select @bind="editing.IsTag" class="form-select form-select-sm bg-dark text-light border-secondary"><option value="false">Skill Bar</option><option value="true">Tag</option></select></td>
-                        <td><button @onclick="Save" class="btn btn-sm" style="background:#d4a04c;color:#000;">✓</button><button @onclick="CancelEdit" class="btn btn-sm btn-outline-light ms-1">✗</button></td>
-                    </tr>
-                }
-                else
-                {
-                    <tr>
-                        <td class="text-light fw-medium">@s.Name</td><td style="color:#9a9a9a;">@s.Category</td>
-                        <td><span style="color:#d4a04c;font-weight:600;">@s.Proficiency%</span></td>
-                        <td><span class="badge" style="background:rgba(255,255,255,0.08);color:#9a9a9a;">@(s.IsTag ? "Tag" : "Bar")</span></td>
-                        <td><button @onclick="()=>Edit(s)" class="btn btn-sm btn-outline-light">Edit</button><button @onclick="()=>Delete(s.Id)" class="btn btn-sm btn-outline-danger ms-1">Del</button></td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
+    <section class="skill-admin-grid">
+        @foreach (var skill in skills)
+        {
+            <article class="skill-admin-card">
+                <div class="skill-card-top"><span class="skill-icon">✦</span><span class="status-badge is-neutral">@(skill.IsTag ? T["admin.tag"] : T["admin.skill_bar"])</span></div>
+                <h2>@skill.Name</h2>
+                <p>@skill.Category</p>
+                <div class="skill-card-meter"><div><span>@T["admin.proficiency"]</span><b>@skill.Proficiency%</b></div><i><em style="width:@skill.Proficiency%"></em></i></div>
+                <footer class="admin-item-actions"><button type="button" @onclick="() => Edit(skill)" class="btn btn-outline-light">@T["common.edit"]</button><button type="button" @onclick="() => Delete(skill.Id)" class="btn btn-outline-danger">@T["common.delete"]</button></footer>
+            </article>
+        }
+    </section>
+
+    @if (skills.Count == 0 && editing is null)
+    {
+        <div class="admin-empty-state"><span>✦</span><p>@T["common.no_data"]</p><button type="button" class="btn btn-primary" @onclick="Add">@T["admin.add_skill"]</button></div>
+    }
+
+    @if (editing is not null)
+    {
+        <section class="admin-editor" aria-labelledby="skill-editor-title">
+            <header class="editor-header"><div><span>@T["common.edit"]</span><h2 id="skill-editor-title">@(editing.Id == 0 ? T["admin.add_skill"] : T["common.edit"])</h2></div><button type="button" class="editor-close" @onclick="CancelEdit" aria-label="@T["common.close"]">×</button></header>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">@T["admin.skill_name"]</label><input @bind="editing.Name" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.category"]</label><input @bind="editing.Category" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.proficiency"]</label><input @bind="editing.Proficiency" type="number" min="0" max="100" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.type"]</label><select @bind="editing.IsTag" class="form-select"><option value="false">@T["admin.skill_bar"]</option><option value="true">@T["admin.tag"]</option></select></div>
+            </div>
+            <footer class="editor-actions"><button type="button" @onclick="Save" class="btn btn-primary">@T["common.save"]</button><button type="button" @onclick="CancelEdit" class="btn btn-outline-light">@T["common.cancel"]</button></footer>
+        </section>
+    }
 }
 
 @code {
@@ -46,10 +59,40 @@ else
     private Data.Models.Skill? editing;
     private bool loaded;
 
-    protected override async Task OnInitializedAsync() { skills = await Admin.GetSkillsAsync(); loaded = true; }
-    private void Edit(Data.Models.Skill s) => editing = new() { Id=s.Id, Name=s.Name, Category=s.Category, Proficiency=s.Proficiency, IsTag=s.IsTag };
+    protected override async Task OnInitializedAsync()
+    {
+        try { skills = await Admin.GetSkillsAsync(); }
+        catch { skills = new(); }
+        loaded = true;
+    }
+
+    private void Edit(Data.Models.Skill skill) => editing = new()
+    {
+        Id = skill.Id,
+        Name = skill.Name,
+        Category = skill.Category,
+        Proficiency = skill.Proficiency,
+        IsTag = skill.IsTag
+    };
+
     private void CancelEdit() => editing = null;
     private void Add() => editing = new Data.Models.Skill();
-    private async Task Save() { if (editing==null)return; if (editing.Id==0) await Admin.CreateSkillAsync(editing); else await Admin.UpdateSkillAsync(editing.Id, editing); editing=null;skills=await Admin.GetSkillsAsync(); }
-    private async Task Delete(int id) { await Admin.DeleteSkillAsync(id); skills=await Admin.GetSkillsAsync(); }
+
+    private async Task Save()
+    {
+        if (editing is null)
+            return;
+        if (editing.Id == 0)
+            await Admin.CreateSkillAsync(editing);
+        else
+            await Admin.UpdateSkillAsync(editing.Id, editing);
+        editing = null;
+        skills = await Admin.GetSkillsAsync();
+    }
+
+    private async Task Delete(int id)
+    {
+        await Admin.DeleteSkillAsync(id);
+        skills = await Admin.GetSkillsAsync();
+    }
 }

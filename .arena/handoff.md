@@ -1,7 +1,16 @@
 # PROJECT HANDOFF — Complete Knowledge Base
 > **Read this FIRST before any code change. Update it AFTER every change.**
 > This is the SINGLE SOURCE OF TRUTH — replaces reading all 60+ source files.
-> Last updated: 2026-08-06 (same-origin API routing and public language switch repair)
+> Last updated: 2026-08-06 (responsive bilingual redesign, resilient language loading, and RTL admin layout repair)
+
+## 🆕 LATEST UPDATE — Responsive bilingual redesign (2026-08-06)
+
+- **Language loading is transactional:** `TranslationService` now validates supported languages, loads and validates a dictionary before committing the UI change, caches both dictionaries, times out safely, and preserves the existing UI on a failed fetch. Invalid/stale storage is cleared and returns to the language gate instead of rendering raw translation keys.
+- **Document direction is synchronized:** `LanguageGate` calls `portfolio.applyDocumentLanguage()` after render, while `index.html` applies the persisted `lang`/`dir` before the first paint. This removes the LTR flash for returning Persian visitors. The PWA pre-caches both translation JSON files and uses a new cache version.
+- **RTL/LTR admin shell is logical-property based:** `.admin-side` uses `inset-inline-start`, `.admin-main` uses `margin-inline-start`, and the mobile drawer reverses its off-canvas transform in RTL. Forms, select arrows, tables, action rows, the help drawer, and mobile navigation now follow the active direction.
+- **All current Blazor interface chrome is localized:** EN/FA dictionaries now cover the public landing page, auth pages, dashboard, all CRUD/admin surfaces, errors, resource runner, help panel, empty/loading states, and access-denied view. The public Persian mode also localizes bundled hero, project-card, and sample-testimonial copy.
+- **Visual system:** `wwwroot/css/styles.css` was rebuilt as a midnight studio design (Manrope + DM Serif Display / Vazirmatn), with responsive public bento cards, mobile menu, polished auth pages, and usable admin cards/forms/tables down to narrow phones. New admin item editors also fix the previous inability to add a brand-new skill.
+
 
 ---
 

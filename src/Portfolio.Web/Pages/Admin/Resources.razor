@@ -2,57 +2,64 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin")]
 @inject AdminService Admin
+@inject TranslationService T
 
-<PageTitle>Resource Runner — Admin</PageTitle>
-<h1 style="font-weight:700;margin-bottom:8px;">SQL Resource Runner</h1>
-<p style="color:#9a9a9a;font-size:.88rem;">Execute .sql files from <code style="color:#d4a04c;">wwwroot/resources</code>. Results logged to <b>Resources</b> table with <b>ErrorMessage</b> on failure.</p>
+<PageTitle>@T["admin.resources"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+<header class="admin-page-header">
+    <div>
+        <p class="admin-eyebrow">@T["admin.system"] / 01</p>
+        <h1>@T["admin.resource_runner"]</h1>
+        <p>@T["admin.resource_intro"]</p>
+    </div>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
 else
 {
-    <div class="row">
-        <div class="col-lg-5">
-            <h6 class="text-light mb-3">Available SQL Files</h6>
-            <div class="list-group mb-3">
-                @foreach (var f in files)
+    <div class="resource-layout">
+        <section class="admin-card resource-files">
+            <div class="admin-card-heading"><span class="admin-card-icon">⌘</span><h2>@T["admin.available_sql_files"]</h2></div>
+            <div class="resource-file-list">
+                @foreach (var file in files)
                 {
-                    <button @onclick="()=>Execute(f)" disabled="@executing" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-light border-secondary">
-                        📄 @f
-                        <span style="color:#d4a04c;font-size:.75rem;">Run →</span>
+                    <button type="button" @onclick="() => Execute(file)" disabled="@executing" class="resource-file">
+                        <span><b>SQL</b>@file</span><i>@T["admin.run"] <em>→</em></i>
                     </button>
                 }
             </div>
-            @if (files.Length == 0) { <p style="color:#9a9a9a;">No .sql files found in wwwroot/resources.</p> }
-            <button @onclick="ExecuteAll" disabled="@executing" class="btn btn-sm mb-3" style="background:#d4a04c;color:#000;font-weight:600;">▶ Run All Files</button>
+            @if (files.Length == 0) { <p class="resource-empty">@T["admin.no_sql_files"]</p> }
+            <button type="button" @onclick="ExecuteAll" disabled="@executing" class="btn btn-primary resource-run-all">@T["admin.run_all"] <span aria-hidden="true">→</span></button>
 
             @if (!string.IsNullOrEmpty(resultMsg))
             {
-                <div class="alert @(resultSuccess ? "alert-success" : "alert-danger") mt-2" style="background:@(resultSuccess?"rgba(76,175,80,0.15)":"rgba(244,67,54,0.15)");border-color:@(resultSuccess?"#4caf50":"#f44336");color:#fff;">
-                    <pre style="margin:0;font-size:.8rem;white-space:pre-wrap;">@resultMsg</pre>
-                </div>
+                <div class="resource-result @(resultSuccess ? "is-success" : "is-error")"><span>@(resultSuccess ? "✓" : "!")</span><pre>@resultMsg</pre></div>
             }
-        </div>
+        </section>
 
-        <div class="col-lg-7">
-            <h6 class="text-light mb-3">Execution History (Resources Table)</h6>
-            <div style="max-height:60vh;overflow-y:auto;">
-                <table class="table table-dark table-sm table-borderless">
-                    <thead><tr style="border-bottom:1px solid rgba(255,255,255,0.06);"><th>File</th><th>Status</th><th>Executed</th><th>Error</th></tr></thead>
+        <section class="admin-card resource-history">
+            <div class="admin-card-heading"><span class="admin-card-icon">◴</span><h2>@T["admin.execution_history"]</h2></div>
+            <div class="table-responsive">
+                <table class="table resource-table">
+                    <thead><tr><th>@T["admin.file"]</th><th>@T["admin.status"]</th><th>@T["admin.executed"]</th><th>@T["admin.error"]</th></tr></thead>
                     <tbody>
-                        @foreach (var h in history)
+                        @foreach (var item in history)
                         {
                             <tr>
-                                <td style="font-size:.82rem;font-weight:500;">@h.FileName</td>
-                                <td><span class="badge" style="background:@(h.IsSuccess?"rgba(76,175,80,0.2)":"rgba(244,67,54,0.2)");color:@(h.IsSuccess?"#4caf50":"#f44336")">@(h.IsSuccess ? "✓ OK" : "✗ ERROR")</span></td>
-                                <td style="font-size:.78rem;color:#9a9a9a;">@h.ExecutedAt.ToString("MM-dd HH:mm:ss")</td>
-                                <td style="font-size:.75rem;color:#f44336;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@h.ErrorMessage">@(h.ErrorMessage ?? "—")</td>
+                                <td><code>@item.FileName</code></td>
+                                <td><span class="status-badge @(item.IsSuccess ? "is-completed" : "is-cancelled")">@(item.IsSuccess ? T["admin.status_ok"] : T["admin.status_error"])</span></td>
+                                <td><time dir="ltr">@item.ExecutedAt.ToString("yyyy-MM-dd HH:mm:ss")</time></td>
+                                <td class="resource-error" title="@item.ErrorMessage">@(item.ErrorMessage ?? "—")</td>
                             </tr>
                         }
                     </tbody>
                 </table>
-                @if (history.Count == 0) { <p style="color:#9a9a9a;">No executions recorded yet.</p> }
             </div>
-        </div>
+            @if (history.Count == 0) { <p class="resource-empty">@T["admin.no_executions"]</p> }
+        </section>
     </div>
 }
 
@@ -62,23 +69,50 @@ else
     private bool loaded, executing, resultSuccess;
     private string? resultMsg;
 
-    protected override async Task OnInitializedAsync() { await Refresh(); loaded = true; }
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+        loaded = true;
+    }
 
-    private async Task Refresh() { files = await Admin.ListResourceFilesAsync(); history = await Admin.GetResourceHistoryAsync(); }
+    private async Task Refresh()
+    {
+        try
+        {
+            files = await Admin.ListResourceFilesAsync();
+            history = await Admin.GetResourceHistoryAsync();
+        }
+        catch
+        {
+            files = Array.Empty<string>();
+            history = new();
+        }
+    }
 
     private async Task Execute(string fileName)
     {
-        executing = true; resultMsg = $"Running {fileName}…";
-        var (ok, msg) = await Admin.ExecuteResourceAsync(fileName);
-        resultSuccess = ok; resultMsg = msg;
-        executing = false; await Refresh();
+        executing = true;
+        resultMsg = string.Format(T["admin.running_file"], fileName);
+        var (ok, message) = await Admin.ExecuteResourceAsync(fileName);
+        resultSuccess = ok;
+        resultMsg = message;
+        executing = false;
+        await Refresh();
     }
 
     private async Task ExecuteAll()
     {
-        executing = true; resultMsg = "Running all files…";
-        foreach (var f in files) { await Admin.ExecuteResourceAsync(f); }
-        resultSuccess = true; resultMsg = $"All {files.Length} files processed.";
-        executing = false; await Refresh();
+        executing = true;
+        resultMsg = T["admin.running_all"];
+        var allSucceeded = true;
+        foreach (var file in files)
+        {
+            var (ok, _) = await Admin.ExecuteResourceAsync(file);
+            allSucceeded &= ok;
+        }
+        resultSuccess = allSucceeded;
+        resultMsg = string.Format(T["admin.all_processed"], files.Length);
+        executing = false;
+        await Refresh();
     }
 }

@@ -2,46 +2,52 @@
 @layout AuthLayout
 @inject AuthService Auth
 @inject NavigationManager Nav
+@inject TranslationService T
 
-<PageTitle>Register — Mahbod Pour</PageTitle>
+<PageTitle>@T["auth.register"] — @T["site.logo"]</PageTitle>
 
 <div class="auth-shell">
-    <div class="auth-card">
+    <div class="auth-orb auth-orb-one"></div>
+    <div class="auth-orb auth-orb-two"></div>
+    <section class="auth-card" aria-labelledby="register-heading">
+        <div class="auth-card-top"><LangSwitcher /></div>
         <div class="auth-brand">
-            <div class="mark">Mahbod Pour</div>
-            <div class="sub">Create Account</div>
+            <div class="auth-brand-mark">M</div>
+            <div class="mark">@T["site.logo"]</div>
+            <div class="sub">@T["auth.create_account"]</div>
         </div>
 
-        @if (!string.IsNullOrEmpty(error)) { <div class="auth-error">@error</div> }
-        @if (!string.IsNullOrEmpty(success)) { <div class="form-msg ok" style="text-align:center;margin-bottom:14px">@success</div> }
+        @if (!string.IsNullOrEmpty(error)) { <div class="auth-error" role="alert">@error</div> }
+        @if (!string.IsNullOrEmpty(success)) { <div class="auth-success" role="status">@success</div> }
 
         <form @onsubmit:preventDefault="true" @onsubmit="HandleRegister">
+            <h1 id="register-heading" class="auth-heading">@T["auth.create_account"]</h1>
             <div class="auth-field">
-                <label for="fullName">Full Name</label>
-                <input @bind="fullName" id="fullName" class="auth-input" placeholder="Your full name" />
+                <label for="fullName">@T["auth.full_name"] <span>@T["common.optional"]</span></label>
+                <input @bind="fullName" id="fullName" class="auth-input" placeholder="@T["auth.name_placeholder"]" autocomplete="name" />
             </div>
             <div class="auth-field">
-                <label for="regUsername">Username</label>
-                <input @bind="username" id="regUsername" class="auth-input" placeholder="Choose a username" required />
+                <label for="regUsername">@T["auth.username"]</label>
+                <input @bind="username" id="regUsername" class="auth-input" dir="ltr" placeholder="@T["auth.username_placeholder"]" autocomplete="username" required />
             </div>
             <div class="auth-field">
-                <label for="regEmail">Email</label>
-                <input @bind="email" id="regEmail" type="email" class="auth-input" placeholder="your@email.com" required />
+                <label for="regEmail">@T["auth.email"]</label>
+                <input @bind="email" id="regEmail" type="email" class="auth-input" dir="ltr" placeholder="you@example.com" autocomplete="email" required />
             </div>
             <div class="auth-field">
-                <label for="regPassword">Password</label>
-                <input @bind="password" id="regPassword" type="password" class="auth-input" placeholder="Minimum 6 characters" required />
+                <label for="regPassword">@T["auth.password"]</label>
+                <input @bind="password" id="regPassword" type="password" dir="ltr" class="auth-input" placeholder="@T["auth.password_placeholder"]" autocomplete="new-password" required />
             </div>
 
             <button type="submit" disabled="@loading" class="auth-btn">
-                @(loading ? "Creating account…" : "Register")
+                @(loading ? T["auth.creating_account"] : T["auth.register"])
             </button>
         </form>
 
         <div class="auth-foot">
-            Already have an account? <a href="/login">Sign In</a>
+            @T["auth.have_account"] <a href="/login">@T["auth.sign_in"]</a>
         </div>
-    </div>
+    </section>
 </div>
 
 @code {
@@ -50,25 +56,44 @@
 
     private async Task HandleRegister()
     {
-        error = ""; success = "";
+        error = "";
+        success = "";
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-        { error = "Please fill in all required fields."; return; }
+        {
+            error = T["auth.required_fields"];
+            return;
+        }
         if (password.Length < 6)
-        { error = "Password must be at least 6 characters."; return; }
+        {
+            error = T["auth.password_minimum"];
+            return;
+        }
 
         loading = true;
         try
         {
             if (await Auth.Register(username, email, password, fullName))
             {
-                success = "Account created! Redirecting to login…";
+                success = T["auth.registration_success"];
                 await Task.Delay(1500);
                 Nav.NavigateTo("/login");
             }
-            else error = "Registration failed. Username may already be taken.";
+            else
+            {
+                error = T["auth.registration_failed"];
+            }
         }
-        catch (HttpRequestException) { error = "Cannot reach the API server. Make sure Portfolio.Api is running."; }
-        catch { error = "Connection error."; }
-        finally { loading = false; }
+        catch (HttpRequestException)
+        {
+            error = T["auth.api_unavailable"];
+        }
+        catch
+        {
+            error = T["auth.connection_error"];
+        }
+        finally
+        {
+            loading = false;
+        }
     }
 }

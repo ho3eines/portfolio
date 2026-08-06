@@ -1,52 +1,70 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Nav
-@inject IJSRuntime JS
 @inject AuthService AuthService
 @inject TranslationService T
 @implements IDisposable
 
 @if (IsAdminRoute)
 {
-    <div class="admin-shell" style="direction:@T.Direction;font-family:@T.FontFamily">
-        <div class="admin-backdrop @(sidebarOpen ? "show" : "")" @onclick="ToggleSidebar"></div>
-        <nav class="admin-side @(sidebarOpen ? "open" : "")">
-            <a href="/" class="admin-brand"><span class="dot"></span> @(T["site.logo"])</a>
+    <div class="admin-shell @(T.IsRtl ? "is-rtl" : "is-ltr")" dir="@T.Direction" lang="@T.Lang" style="font-family:@T.FontFamily">
+        <button type="button" class="admin-backdrop @(sidebarOpen ? "show" : "")" aria-label="@T["admin.close_navigation"]" @onclick="CloseSidebar"></button>
 
-            <div class="admin-section-label">Manage</div>
-            <AdminNavLink Href="/admin" Icon="📊" Label="@T["admin.dashboard"]" />
-            <AdminNavLink Href="/admin/profile" Icon="👤" Label="@T["admin.edit_profile"]" />
-            <AdminNavLink Href="/admin/projects" Icon="📁" Label="@T["admin.total_projects"]" />
-            <AdminNavLink Href="/admin/contracts" Icon="📋" Label="Contracts" />
-            <AdminNavLink Href="/admin/skills" Icon="⚡" Label="@T["admin.total_skills"]" />
-            <AdminNavLink Href="/admin/experiences" Icon="💼" Label="Experiences" />
-            <AdminNavLink Href="/admin/testimonials" Icon="💬" Label="Testimonials" />
-            <AdminNavLink Href="/admin/messages" Icon="✉️" Label="@T["admin.view_messages"]" />
+        <aside class="admin-side @(sidebarOpen ? "open" : "")" aria-label="@T["common.menu"]">
+            <div class="admin-side-header">
+                <a href="/" class="admin-brand" aria-label="@T["admin.back_to_site"]">
+                    <span class="admin-brand-mark">M</span>
+                    <span><strong>@T["site.logo"]</strong><small>@T["site.studio"]</small></span>
+                </a>
+                <button type="button" class="admin-sidebar-close" aria-label="@T["admin.close_navigation"]" @onclick="CloseSidebar">×</button>
+            </div>
 
-            <div class="admin-section-label">System</div>
-            <AdminNavLink Href="/admin/resources" Icon="🗄️" Label="@T["admin.run_sql"]" />
-            <AdminNavLink Href="/admin/errors" Icon="🔍" Label="@T["admin.error_logs"]" />
+            <div class="admin-section-label">@T["admin.manage"]</div>
+            <nav class="admin-nav-list">
+                <AdminNavLink Href="/admin" Icon="⌂" Label="@T["admin.dashboard"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/profile" Icon="◌" Label="@T["admin.profile"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/projects" Icon="▣" Label="@T["admin.projects"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/contracts" Icon="□" Label="@T["admin.contracts"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/skills" Icon="✦" Label="@T["admin.skills"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/experiences" Icon="↗" Label="@T["admin.experiences"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/testimonials" Icon="❝" Label="@T["admin.testimonials"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/messages" Icon="✉" Label="@T["admin.messages"]" OnNavigate="CloseSidebar" />
+            </nav>
+
+            <div class="admin-section-label admin-system-label">@T["admin.system"]</div>
+            <nav class="admin-nav-list">
+                <AdminNavLink Href="/admin/resources" Icon="⌘" Label="@T["admin.resources"]" OnNavigate="CloseSidebar" />
+                <AdminNavLink Href="/admin/errors" Icon="!" Label="@T["admin.error_logs"]" OnNavigate="CloseSidebar" />
+            </nav>
 
             <div class="spacer"></div>
             <div class="foot">
                 <LangSwitcher />
-                <button class="btn-accent-ghost" @onclick="OpenHelp">📖 Help &amp; Guide</button>
-                <a href="/" class="btn-ghost">← Back to Site</a>
-                <button class="btn-ghost" @onclick="Logout">Logout</button>
+                <button type="button" class="btn-accent-ghost" @onclick="OpenHelp">? <span>@T["admin.help"]</span></button>
+                <a href="/" class="btn-ghost">← <span>@T["admin.back_to_site"]</span></a>
+                <button type="button" class="btn-ghost" @onclick="Logout">@T["admin.logout"] <span aria-hidden="true">↗</span></button>
             </div>
-        </nav>
+        </aside>
 
         <main class="admin-main">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
-                <button class="mobile-admin-toggle" @onclick="ToggleSidebar">☰ Menu</button>
+            <header class="admin-mobilebar">
+                <button type="button" class="mobile-admin-toggle" aria-label="@T["admin.open_navigation"]" @onclick="ToggleSidebar">
+                    <span class="menu-lines" aria-hidden="true"><i></i><i></i></span>
+                    <span>@T["common.menu"]</span>
+                </button>
+                <a href="/" class="mobile-admin-brand">@T["site.logo"]</a>
+                <LangSwitcher />
+            </header>
+            <div class="admin-content" @key="T.Lang">
+                @Body
             </div>
-            @Body
         </main>
+
+        <HelpPanel @ref="helpPanel" section="@currentHelpSection" Direction="@T.Direction" />
     </div>
-    <HelpPanel @ref="helpPanel" section="@currentHelpSection" />
 }
 else
 {
-    <div class="app-wrapper" style="direction:@T.Direction;font-family:@T.FontFamily">
+    <div class="app-wrapper" dir="@T.Direction" lang="@T.Lang" style="font-family:@T.FontFamily" @key="T.Lang">
         @Body
     </div>
 }
@@ -55,28 +73,17 @@ else
     private HelpPanel? helpPanel;
     private string? currentHelpSection;
     private bool sidebarOpen;
+
     private bool IsAdminRoute => Nav.Uri.Contains("/admin", StringComparison.OrdinalIgnoreCase);
 
-    protected override void OnInitialized()
-    {
-        // Subscribe before the first interaction so the root direction and
-        // font change together with the page content.
-        T.OnChange += Refresh;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Restore any persisted JWT so [Authorize] admin routes render.
-            await AuthService.InitializeAsync();
-        }
-    }
+    protected override void OnInitialized() => T.OnChange += Refresh;
 
     private void ToggleSidebar() => sidebarOpen = !sidebarOpen;
+    private void CloseSidebar() => sidebarOpen = false;
 
-    private async void OpenHelp()
+    private async Task OpenHelp()
     {
+        CloseSidebar();
         currentHelpSection = Nav.Uri switch
         {
             var u when u.Contains("/admin/profile") => "profile",
@@ -92,9 +99,11 @@ else
             var u when u.Contains("/admin") => "dashboard",
             _ => "getting_started"
         };
-        StateHasChanged();
-        await Task.Delay(50);
-        if (helpPanel != null) await helpPanel.Open(currentHelpSection);
+
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        if (helpPanel is not null)
+            await helpPanel.Open(currentHelpSection);
     }
 
     private void Refresh() => InvokeAsync(StateHasChanged);

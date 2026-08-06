@@ -3,8 +3,8 @@
  * Caches static assets for offline access & fast load
  * Version: 2026.08.04
  */
-const CACHE_NAME = 'portfolio-v20260806-redesign';
-const RUNTIME = 'portfolio-runtime';
+const CACHE_NAME = 'portfolio-v20260806-i18n-responsive';
+const RUNTIME = 'portfolio-runtime-i18n-responsive';
 
 // Assets to pre-cache on install
 const PRECACHE_URLS = [
@@ -13,10 +13,12 @@ const PRECACHE_URLS = [
   '/css/styles.css',
   '/js/config.js',
   '/js/animations.js',
+  '/lang/en.json',
+  '/lang/fa.json',
   '/manifest.json',
   '/images/icon-192.png',
   '/images/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap'
+  'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap'
 ];
 
 // ===== INSTALL =====
@@ -101,7 +103,7 @@ self.addEventListener('fetch', (event) => {
         // Offline fallback for images
         if (event.request.destination === 'image') {
           return new Response(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#1a1a1a" width="200" height="200"/><text fill="#d4a04c" x="100" y="105" text-anchor="middle" font-size="48">M</text></svg>',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#111c2e" width="200" height="200"/><text fill="#f0b45e" x="100" y="105" text-anchor="middle" font-size="48">M</text></svg>',
             { headers: { 'Content-Type': 'image/svg+xml' } }
           );
         }

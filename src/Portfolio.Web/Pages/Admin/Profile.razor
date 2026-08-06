@@ -2,128 +2,87 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
+@inject TranslationService T
 
-<PageTitle>Edit Profile — Admin</PageTitle>
-<h1 style="font-weight:700;margin-bottom:8px;">Edit Profile</h1>
-<p style="color:#9a9a9a;font-size:.85rem;margin-bottom:24px;">All changes are reflected immediately on the live site — including SEO meta tags.</p>
+<PageTitle>@T["admin.profile"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (model == null) { <p style="color:#9a9a9a;">Loading…</p> return; }
-
-<div class="card-dark p-4 mb-4" style="max-width:800px;">
-    @* == BASIC INFO == *@
-    <h5 class="text-light mb-3">👤 Basic Information</h5>
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Full Name</label>
-            <input @bind="model.FullName" class="form-control bg-dark text-light border-secondary" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Title / Role</label>
-            <input @bind="model.Title" class="form-control bg-dark text-light border-secondary" />
-        </div>
+<header class="admin-page-header">
+    <div>
+        <p class="admin-eyebrow">@T["admin.manage"] / 01</p>
+        <h1>@T["admin.profile"]</h1>
+        <p>@T["admin.profile_intro"]</p>
     </div>
+</header>
 
-    @* == TAGLINE == *@
-    <h5 class="text-light mb-3">📝 Hero Tagline</h5>
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">Line 1</label>
-            <input @bind="model.TaglineLine1" class="form-control bg-dark text-light border-secondary" placeholder="Crafting Digital" />
+@if (model is null)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
+else
+{
+    <section class="profile-editor">
+        <div class="admin-form-section">
+            <header><span>01</span><div><h2>@T["admin.basic_information"]</h2><p>@T["admin.profile"]</p></div></header>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">@T["admin.full_name"]</label><input @bind="model.FullName" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.role_title"]</label><input @bind="model.Title" class="form-control" /></div>
+            </div>
         </div>
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">Line 2</label>
-            <input @bind="model.TaglineLine2" class="form-control bg-dark text-light border-secondary" placeholder="Experiences" />
-        </div>
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">Line 3 (Gold)</label>
-            <input @bind="model.TaglineLine3" class="form-control bg-dark text-light border-secondary" placeholder="That Inspire" />
-        </div>
-    </div>
 
-    @* == BIO == *@
-    <div class="mb-4">
-        <label class="form-label text-light fw-semibold small">Bio</label>
-        <textarea @bind="model.Bio" rows="4" class="form-control bg-dark text-light border-secondary"></textarea>
-    </div>
+        <div class="admin-form-section">
+            <header><span>02</span><div><h2>@T["admin.hero_tagline"]</h2><p>@T["hero.subtitle"]</p></div></header>
+            <div class="row g-3">
+                <div class="col-md-4"><label class="form-label">@T["admin.line_1"]</label><input @bind="model.TaglineLine1" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.line_2"]</label><input @bind="model.TaglineLine2" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.line_3_accent"]</label><input @bind="model.TaglineLine3" class="form-control" /></div>
+                <div class="col-12"><label class="form-label">@T["admin.bio"]</label><textarea @bind="model.Bio" rows="4" class="form-control"></textarea></div>
+            </div>
+        </div>
 
-    @* == LINKS == *@
-    <h5 class="text-light mb-3">🔗 Links & Location</h5>
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Email</label>
-            <input @bind="model.Email" class="form-control bg-dark text-light border-secondary" />
+        <div class="admin-form-section">
+            <header><span>03</span><div><h2>@T["admin.links_location"]</h2><p>@T["contact.footer_connect"]</p></div></header>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">@T["admin.email"]</label><input @bind="model.Email" dir="ltr" type="email" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.location"]</label><input @bind="model.Location" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.linkedin_url"]</label><input @bind="model.LinkedIn" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.github_url"]</label><input @bind="model.GitHub" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.twitter_url"]</label><input @bind="model.Twitter" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.showreel_url"]</label><input @bind="model.ShowreelUrl" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.profile_image_url"]</label><input @bind="model.ProfileImageUrl" dir="ltr" type="url" class="form-control" /></div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Location</label>
-            <input @bind="model.Location" class="form-control bg-dark text-light border-secondary" />
-        </div>
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">LinkedIn URL</label>
-            <input @bind="model.LinkedIn" class="form-control bg-dark text-light border-secondary" />
-        </div>
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">GitHub URL</label>
-            <input @bind="model.GitHub" class="form-control bg-dark text-light border-secondary" />
-        </div>
-        <div class="col-md-4">
-            <label class="form-label text-light fw-semibold small">Twitter URL</label>
-            <input @bind="model.Twitter" class="form-control bg-dark text-light border-secondary" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Showreel URL</label>
-            <input @bind="model.ShowreelUrl" class="form-control bg-dark text-light border-secondary" placeholder="https://youtube.com/..." />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Profile Image URL</label>
-            <input @bind="model.ProfileImageUrl" class="form-control bg-dark text-light border-secondary" />
-        </div>
-    </div>
 
-    @* == SEO == *@
-    <h5 class="text-light mb-3" style="color:#d4a04c !important;">🔍 SEO Settings</h5>
-    <p class="text-muted small mb-3">These fields control how search engines and social media display your site.</p>
-    <div class="row g-3 mb-3">
-        <div class="col-12">
-            <label class="form-label text-light fw-semibold small">
-                Meta Description
-                <span style="color:#9a9a9a;font-weight:400;">— used for Google snippets &amp; social previews (50-160 chars)</span>
-            </label>
-            <textarea @bind="model.MetaDescription" rows="2" class="form-control bg-dark text-light border-secondary" placeholder="Frontend Developer &amp; UI/UX Enthusiast based in Frankfurt. Crafting digital experiences with Blazor, .NET, and modern web technologies."></textarea>
-            <small style="color:#9a9a9a;">@(model.MetaDescription?.Length ?? 0) / 160 characters</small>
+        <div class="admin-form-section admin-form-section-seo">
+            <header><span>04</span><div><h2>@T["admin.seo_settings"]</h2><p>@T["admin.seo_intro"]</p></div></header>
+            <div class="row g-3">
+                <div class="col-12"><label class="form-label">@T["admin.meta_description"] <span class="form-label-note">@T["admin.meta_description_hint"]</span></label><textarea @bind="model.MetaDescription" rows="3" class="form-control"></textarea><small class="field-counter">@(model.MetaDescription?.Length ?? 0) / 160</small></div>
+                <div class="col-12"><label class="form-label">@T["admin.meta_keywords"] <span class="form-label-note">@T["admin.meta_keywords_hint"]</span></label><input @bind="model.MetaKeywords" dir="ltr" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.og_image_url"]</label><input @bind="model.OgImageUrl" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.canonical_url"]</label><input @bind="model.SiteUrl" dir="ltr" type="url" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.analytics_id"]</label><input @bind="model.GoogleAnalyticsId" dir="ltr" class="form-control" /></div>
+            </div>
         </div>
-        <div class="col-12">
-            <label class="form-label text-light fw-semibold small">
-                Meta Keywords
-                <span style="color:#9a9a9a;font-weight:400;">— comma-separated (less important for Google, still used by some engines)</span>
-            </label>
-            <input @bind="model.MetaKeywords" class="form-control bg-dark text-light border-secondary" placeholder="Mahbod Pour, frontend developer, Blazor, .NET, web developer Frankfurt" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Open Graph Image URL</label>
-            <input @bind="model.OgImageUrl" class="form-control bg-dark text-light border-secondary" placeholder="/images/og-default.jpg" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Canonical Site URL</label>
-            <input @bind="model.SiteUrl" class="form-control bg-dark text-light border-secondary" placeholder="https://mahbodpour.com" />
-        </div>
-        <div class="col-md-6">
-            <label class="form-label text-light fw-semibold small">Google Analytics ID</label>
-            <input @bind="model.GoogleAnalyticsId" class="form-control bg-dark text-light border-secondary" placeholder="G-XXXXXXXXXX" />
-        </div>
-    </div>
 
-    <button @onclick="Save" class="btn px-4 mt-2" style="background:#d4a04c;color:#000;font-weight:600;">
-        💾 Save All Changes
-    </button>
-    @if (saved) { <span class="ms-3" style="color:#4caf50;">✓ Profile updated — live site refreshed!</span> }
-</div>
-
-<style>.card-dark { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px; }</style>
+        <footer class="profile-savebar">
+            <div>@if (saved) { <span class="save-confirmation">✓ @T["admin.profile_updated"]</span> }</div>
+            <button type="button" @onclick="Save" class="btn btn-primary">@T["admin.save_profile"] <span aria-hidden="true">→</span></button>
+        </footer>
+    </section>
+}
 
 @code {
     private Data.Models.Profile? model;
     private bool saved;
 
-    protected override async Task OnInitializedAsync() { model = await Admin.GetProfileAsync() ?? new(); }
-    private async Task Save() { if (model != null) { await Admin.UpdateProfileAsync(model); saved = true; } }
+    protected override async Task OnInitializedAsync()
+    {
+        model = await Admin.GetProfileAsync() ?? new();
+    }
+
+    private async Task Save()
+    {
+        if (model is null)
+            return;
+        saved = await Admin.UpdateProfileAsync(model);
+    }
 }
