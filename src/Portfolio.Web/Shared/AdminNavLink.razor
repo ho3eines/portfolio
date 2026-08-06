@@ -1,8 +1,9 @@
 @inject NavigationManager Nav
+@implements IDisposable
 
-<a href="@Href" class="text-decoration-none d-block py-2 px-3 rounded-2 mb-1"
-   style="@GetStyle()">
-    <span style="margin-right:8px;">@Icon</span>@Label
+<a href="@Href" class="admin-nav-link @(IsActive ? "active" : "")">
+    <span class="ico">@Icon</span>
+    <span>@Label</span>
 </a>
 
 @code {
@@ -10,13 +11,11 @@
     [Parameter] public string Icon { get; set; } = "";
     [Parameter] public string Label { get; set; } = "";
 
-    private string GetStyle()
-    {
-        var isActive = Nav.Uri.EndsWith(Href, StringComparison.OrdinalIgnoreCase) ||
-                       Nav.Uri.Contains($"{Href}/", StringComparison.OrdinalIgnoreCase);
-        var bg = isActive ? "rgba(212,160,76,0.12)" : "transparent";
-        var color = isActive ? "#d4a04c" : "#9a9a9a";
-        var fw = isActive ? "600" : "400";
-        return $"color:{color};font-weight:{fw};background:{bg};font-size:.88rem;transition:all .2s;";
-    }
+    private bool IsActive =>
+        Nav.Uri.Equals(Nav.BaseUri.TrimEnd('/') + Href, StringComparison.OrdinalIgnoreCase) ||
+        Nav.Uri.Contains($"{Href}/", StringComparison.OrdinalIgnoreCase) ||
+        (Href == "/admin" && Nav.Uri.TrimEnd('/').EndsWith("/admin", StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized() => Nav.LocationChanged += (_, _) => StateHasChanged();
+    public void Dispose() { }
 }

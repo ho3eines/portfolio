@@ -1,4 +1,4 @@
-﻿@page "/admin"
+@page "/admin"
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
@@ -6,77 +6,52 @@
 
 <PageTitle>Admin Dashboard — Mahbod Pour</PageTitle>
 
-<div class="dashboard-wrap" data-section="dashboard">
-    <div class="dashboard-container">
-        <div class="dashboard-header" data-reveal>
-            <h1 class="dashboard-title">Admin Dashboard</h1>
-            <div class="dashboard-meta">Signed in as <span class="meta-accent">Admin</span></div>
-        </div>
-
-        @if (!loaded) { <p class="dashboard-loading">Loading…</p> }
-        else
-        {
-            <!-- Health Banner -->
-            @if (unresolvedErrors > 0)
-            {
-                <div class="health-banner warning">
-                    <span>⚠ @unresolvedErrors unresolved error(s)</span>
-                    <a href="/admin/errors">View Errors →</a>
-                </div>
-            }
-            else
-            {
-                <div class="health-banner ok">✅ All systems operational — no unresolved errors.</div>
-            }
-
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card"><div class="stat-num">@totalProjects</div><div class="stat-label">Projects</div></div>
-                <div class="stat-card"><div class="stat-num">@totalSkills</div><div class="stat-label">Skills</div></div>
-                                <div class="stat-card"><div class="stat-num @(unreadMessages>0 ? "unread" : null)" >@unreadMessages</div><div class="stat-label">Unread Messages</div></div>
-                <div class="stat-card"><div class="stat-num">@totalTestimonials</div><div class="stat-label">Testimonials</div></div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <a href="/admin/profile" class="action-btn">Edit Profile</a>
-                <a href="/admin/projects" class="action-btn">Projects</a>
-                <a href="/admin/resources" class="action-btn">Run SQL Scripts</a>
-                <a href="/admin/messages" class="action-btn">Messages (@unreadMessages)</a>
-                <a href="/admin/errors" class="action-btn">Error Logs</a>
-            </div>
-        }
+<div class="admin-topbar">
+    <div>
+        <h1 class="admin-title">Admin Dashboard</h1>
+        <div class="admin-sub">Signed in as <span style="color:var(--accent)">Admin</span></div>
     </div>
 </div>
 
-<style>
-    .dashboard-wrap { min-height: 100vh; background: #0b0d10; color: #e0e0e0; padding: 2rem 1rem; }
-    .dashboard-container { max-width: 1100px; margin: 0 auto; }
-    .dashboard-header { margin-bottom: 1.75rem; }
-    .dashboard-title { font-family: "Playfair Display", serif; font-size: 1.6rem; font-weight: 700; color: #c9a96a; margin: 0; }
-    .dashboard-meta { color: #8a8a8a; font-size: .82rem; margin-top: .3rem; }
-    .meta-accent { color: #c9a96a; }
-    .dashboard-loading { color: #8a8a8a; }
+@if (!loaded)
+{
+    <p class="admin-sub">Loading…</p>
+}
+else
+{
+    @if (unresolvedErrors > 0)
+    {
+        <div class="health-banner warn">
+            <span>⚠ @unresolvedErrors unresolved error(s)</span>
+            <a href="/admin/errors">View Errors →</a>
+        </div>
+    }
+    else
+    {
+        <div class="health-banner ok">✅ All systems operational — no unresolved errors.</div>
+    }
 
-    .health-banner { padding: .9rem 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: .88rem; display: flex; justify-content: space-between; align-items: center; }
-    .health-banner.ok { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: #34d399; }
-    .health-banner.warning { background: rgba(244,67,54,.08); border: 1px solid rgba(244,67,54,.25); color: #f44336; }
-    .health-banner a { color: inherit; text-decoration: underline; }
+    <div class="admin-grid">
+        <div class="stat-card"><div class="stat-num">@totalProjects</div><div class="stat-label">Projects</div></div>
+        <div class="stat-card"><div class="stat-num">@totalSkills</div><div class="stat-label">Skills</div></div>
+        <div class="stat-card"><div class="stat-num @(unreadMessages > 0 ? "danger" : null)">@unreadMessages</div><div class="stat-label">Unread Messages</div></div>
+        <div class="stat-card"><div class="stat-num">@totalTestimonials</div><div class="stat-label">Testimonials</div></div>
+    </div>
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.75rem; }
-    .stat-card { background: #111316; border: 1px solid rgba(255,255,255,.06); border-radius: 14px; padding: 1.75rem 1rem; text-align: center; transition: transform .2s, border-color .2s; }
-    .stat-card:hover { transform: translateY(-3px); border-color: #c9a96a; }
-        .stat-num { font-size: 2.2rem; font-weight: 800; color: #c9a96a; line-height: 1.2; }
-    .stat-num.unread { color: #ef4444; }
-    .stat-label { color: #8a8a8a; font-size: .78rem; margin-top: .3rem; text-transform: uppercase; letter-spacing: .06em; }
-
-    .quick-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
-    .action-btn { background: #111316; border: 1px solid rgba(255,255,255,.06); color: #e0e0e0; padding: .65rem 1.3rem; border-radius: 10px; font-size: .85rem; text-decoration: none; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; }
-    .action-btn:hover { background: rgba(255,255,255,.03); border-color: #c9a96a; color: #c9a96a; }
-</style>
+    <div class="admin-card">
+        <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:14px;color:#fff">Quick Actions</h3>
+        <div class="quick-actions">
+            <a href="/admin/profile">Edit Profile</a>
+            <a href="/admin/projects">Projects</a>
+            <a href="/admin/resources">Run SQL Scripts</a>
+            <a href="/admin/messages">Messages (@unreadMessages)</a>
+            <a href="/admin/errors">Error Logs</a>
+        </div>
+    </div>
+}
 
 @code {
-    private int totalProjects, totalSkills, totalMessages, unreadMessages, totalTestimonials, unresolvedErrors;
+    private int totalProjects, totalSkills, unreadMessages, totalTestimonials, unresolvedErrors;
     private bool loaded;
 
     protected override async Task OnInitializedAsync()
@@ -86,7 +61,7 @@
             totalProjects = (await Admin.GetProjectsAsync()).Count;
             totalSkills = (await Admin.GetSkillsAsync()).Count;
             var msgs = await Admin.GetMessagesAsync();
-            totalMessages = msgs.Count; unreadMessages = msgs.Count(m => !m.IsRead);
+            unreadMessages = msgs.Count(m => !m.IsRead);
             totalTestimonials = (await Admin.GetTestimonialsAsync()).Count;
 
             var errResp = await Http.GetFromJsonAsync<ErrorCountResp>("api/admin/errors/count");
