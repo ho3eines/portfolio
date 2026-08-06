@@ -7,10 +7,12 @@
 
 @if (IsAdminRoute)
 {
-    <div class="d-flex min-vh-100" style="background:#0a0a0a;color:#fff;direction:@T.Direction;font-family:@T.FontFamily">
-        <nav class="d-flex flex-column p-3" style="width:260px;background:#111;border-right:1px solid rgba(255,255,255,0.08);min-height:100vh;position:fixed;top:0;left:0;z-index:100;">
-            <a href="/" class="text-decoration-none mb-4" style="color:var(--accent,#d4a04c);font-weight:700;font-size:1.2rem;">@T["site.logo"]</a>
-            <div class="mb-3" style="color:#9a9a9a;font-size:.7rem;letter-spacing:.2em;">@T["admin.dashboard"]</div>
+    <div class="admin-shell" style="direction:@T.Direction;font-family:@T.FontFamily">
+        <div class="admin-backdrop @(sidebarOpen ? "show" : "")" @onclick="ToggleSidebar"></div>
+        <nav class="admin-side @(sidebarOpen ? "open" : "")">
+            <a href="/" class="admin-brand"><span class="dot"></span> @(T["site.logo"])</a>
+
+            <div class="admin-section-label">Manage</div>
             <AdminNavLink Href="/admin" Icon="📊" Label="@T["admin.dashboard"]" />
             <AdminNavLink Href="/admin/profile" Icon="👤" Label="@T["admin.edit_profile"]" />
             <AdminNavLink Href="/admin/projects" Icon="📁" Label="@T["admin.total_projects"]" />
@@ -19,18 +21,24 @@
             <AdminNavLink Href="/admin/experiences" Icon="💼" Label="Experiences" />
             <AdminNavLink Href="/admin/testimonials" Icon="💬" Label="Testimonials" />
             <AdminNavLink Href="/admin/messages" Icon="✉️" Label="@T["admin.view_messages"]" />
+
+            <div class="admin-section-label">System</div>
             <AdminNavLink Href="/admin/resources" Icon="🗄️" Label="@T["admin.run_sql"]" />
             <AdminNavLink Href="/admin/errors" Icon="🔍" Label="@T["admin.error_logs"]" />
-            <div class="mt-auto pt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
-                <div class="mb-2"><LangSwitcher /></div>
-                <button @onclick="OpenHelp" class="btn btn-sm w-100 mb-2" style="background:rgba(212,160,76,0.12);border:1px solid rgba(212,160,76,0.2);color:#d4a04c;font-weight:600;">
-                    📖 Help &amp; Guide
-                </button>
-                <a href="/" class="text-decoration-none d-block py-2" style="color:#9a9a9a;font-size:.85rem;">← Back to Site</a>
-                <button @onclick="Logout" class="btn btn-sm w-100 mt-2" style="border:1px solid rgba(255,255,255,0.2);color:#fff;">Logout</button>
+
+            <div class="spacer"></div>
+            <div class="foot">
+                <LangSwitcher />
+                <button class="btn-accent-ghost" @onclick="OpenHelp">📖 Help &amp; Guide</button>
+                <a href="/" class="btn-ghost">← Back to Site</a>
+                <button class="btn-ghost" @onclick="Logout">Logout</button>
             </div>
         </nav>
-        <main style="margin-left:260px;flex:1;padding:24px 32px;min-height:100vh;">
+
+        <main class="admin-main">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+                <button class="mobile-admin-toggle" @onclick="ToggleSidebar">☰ Menu</button>
+            </div>
             @Body
         </main>
     </div>
@@ -46,17 +54,20 @@ else
 @code {
     private HelpPanel? helpPanel;
     private string? currentHelpSection;
+    private bool sidebarOpen;
     private bool IsAdminRoute => Nav.Uri.Contains("/admin", StringComparison.OrdinalIgnoreCase);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            // Restore any persisted JWT so [Authorize] admin routes render.
             await AuthService.InitializeAsync();
-            if (!IsAdminRoute) await JS.InvokeVoidAsync("portfolio.init");
             T.OnChange += Refresh;
         }
     }
+
+    private void ToggleSidebar() => sidebarOpen = !sidebarOpen;
 
     private async void OpenHelp()
     {
@@ -82,7 +93,11 @@ else
 
     private void Refresh() => InvokeAsync(StateHasChanged);
 
-    private async Task Logout() { await AuthService.Logout(); Nav.NavigateTo("/"); }
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        Nav.NavigateTo("/");
+    }
 
     public void Dispose() => T.OnChange -= Refresh;
 }

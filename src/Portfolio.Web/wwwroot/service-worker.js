@@ -3,7 +3,7 @@
  * Caches static assets for offline access & fast load
  * Version: 2026.08.04
  */
-const CACHE_NAME = 'portfolio-v20260804';
+const CACHE_NAME = 'portfolio-v20260806-redesign';
 const RUNTIME = 'portfolio-runtime';
 
 // Assets to pre-cache on install

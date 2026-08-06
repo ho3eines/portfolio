@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login — Mahbod Pour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="mark">Mahbod Pour</div>
+      <div class="sub">Admin Panel</div>
+    </div>
+    <form onsubmit="event.preventDefault();alert('Run the Blazor app (Portfolio.Web) for the live admin login.');">
+      <div class="auth-field">
+        <label>Username</label>
+        <input class="auth-input" placeholder="admin" />
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" class="auth-input" placeholder="••••••••" />
+      </div>
+      <button class="auth-btn">Sign In
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </form>
+    <div class="auth-foot"><a href="/">← Back to site</a></div>
+  </div>
+</div>
+</body>
+</html>

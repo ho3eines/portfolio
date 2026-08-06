@@ -1,20 +1,21 @@
 /**
- * Portfolio PWA — Service Worker (Blazor WASM edition)
- * Caches Blazor WASM framework files + static assets for offline access.
- * Version: 2026.08.06
+ * Portfolio PWA — Service Worker
+ * Caches static assets for offline access & fast load
+ * Version: 2026.08.04
  */
-const CACHE_NAME = 'portfolio-bwasm-v20260806';
+const CACHE_NAME = 'portfolio-v20260806-redesign';
 const RUNTIME = 'portfolio-runtime';
 
-// Core static assets to pre-cache
+// Assets to pre-cache on install
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/css/styles.css',
+  '/js/config.js',
+  '/js/animations.js',
   '/manifest.json',
   '/images/icon-192.png',
   '/images/icon-512.png',
-  '/js/animations.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap'
 ];
 
@@ -23,7 +24,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('⚡ PWA: Pre-caching shell assets...');
+        console.log('⚡ PWA: Pre-caching assets...');
         return cache.addAll(PRECACHE_URLS);
       })
       .then(() => self.skipWaiting())
@@ -47,50 +48,20 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// ===== FETCH =====
+// ===== FETCH — Cache-first with network fallback =====
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // Skip cross-origin requests (except allowed CDNs)
-  if (url.origin !== self.location.origin &&
-      !url.hostname.includes('fonts.googleapis.com') &&
-      !url.hostname.includes('fonts.gstatic.com') &&
-      !url.hostname.includes('cdn.jsdelivr.net')) {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin) &&
+      !event.request.url.includes('fonts.googleapis.com') &&
+      !event.request.url.includes('fonts.gstatic.com') &&
+      !event.request.url.includes('cdn.jsdelivr.net')) {
     return;
   }
 
-  // NEVER cache API calls — always go to network
-  if (url.pathname.startsWith('/api/')) return;
+  // Skip API calls
+  if (event.request.url.includes('/api/')) return;
 
-  // Blazor WASM framework files — cache-first with network update
-  if (url.pathname.startsWith('/_framework/')) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // Blazor WASM .NET assemblies (.dll / .dat / .pdb in _framework)
-  if (url.pathname.match(/\.(dll|dat|pdb)$/)) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request);
-      })
-    );
-    return;
-  }
-
-  // SPA navigation fallback — serve index.html for Blazor routes
+  // For navigation requests, serve index.html (SPA fallback)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('/index.html')
@@ -100,35 +71,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets (CSS, JS, images, fonts)
+  // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Update in background (stale-while-revalidate)
-        fetch(event.request).then((networkResponse) => {
+        // Return cached, but update in background
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            const clone = networkResponse.clone();
-            caches.open(RUNTIME).then((cache) => cache.put(event.request, clone));
+            const responseClone = networkResponse.clone();
+            caches.open(RUNTIME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
-        }).catch(() => {});
+          return networkResponse;
+        }).catch(() => cachedResponse);
         return cachedResponse;
       }
 
+      // Not in cache — fetch from network
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
-          const clone = networkResponse.clone();
-          caches.open(RUNTIME).then((cache) => cache.put(event.request, clone));
+          const responseClone = networkResponse.clone();
+          caches.open(RUNTIME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
         return networkResponse;
       }).catch(() => {
         // Offline fallback for images
         if (event.request.destination === 'image') {
           return new Response(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#1a1a1a" width="200" height="200"/><text fill="#c9a96a" x="100" y="115" text-anchor="middle" font-family="Georgia,serif" font-size="56">M</text></svg>',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect fill="#1a1a1a" width="200" height="200"/><text fill="#d4a04c" x="100" y="105" text-anchor="middle" font-size="48">M</text></svg>',
             { headers: { 'Content-Type': 'image/svg+xml' } }
           );
         }
-        return new Response('Offline', { status: 503 });
       });
     })
   );
