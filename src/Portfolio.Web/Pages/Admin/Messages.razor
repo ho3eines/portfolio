@@ -2,45 +2,97 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
+@inject TranslationService T
 
-<PageTitle>Messages — Admin</PageTitle>
-<h1 style="font-weight:700;margin-bottom:24px;">Contact Messages (@unread unread)</h1>
+<PageTitle>@T["admin.messages"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+<header class="admin-page-header">
+    <div>
+        <p class="admin-eyebrow">@T["admin.messages"] / 07</p>
+        <h1>@T["admin.contact_messages"]</h1>
+        <p>@string.Format(T["admin.unread_count"], unread)</p>
+    </div>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
 else
 {
-    <div class="mb-3">
-        <button @onclick="LoadAll" class="btn btn-sm btn-outline-light me-2">All</button>
-        <button @onclick="LoadUnread" class="btn btn-sm" style="background:#d4a04c;color:#000;">Unread</button>
+    <div class="admin-filter-bar" role="group" aria-label="@T["admin.messages"]">
+        <button type="button" @onclick="LoadAll" class="@(showUnread ? "btn btn-outline-light" : "btn btn-primary")">@T["common.all"]</button>
+        <button type="button" @onclick="LoadUnread" class="@(!showUnread ? "btn btn-outline-light" : "btn btn-primary")">@T["admin.unread"] <span>@unread</span></button>
     </div>
 
-    @foreach (var m in messages)
+    <section class="message-list">
+        @foreach (var message in messages)
+        {
+            <article class="message-card @(message.IsRead ? "" : "is-unread")">
+                <header>
+                    <div class="message-sender"><span>@Initials(message.Name)</span><div><h2>@message.Name</h2><a href="mailto:@message.Email" dir="ltr">@message.Email</a></div></div>
+                    <div class="message-meta"><time>@message.CreatedAt.ToString("yyyy-MM-dd HH:mm")</time><div class="admin-item-actions compact">@if (!message.IsRead) { <button type="button" @onclick="() => MarkRead(message.Id)" class="btn btn-outline-warning">@T["admin.mark_read"]</button> }<button type="button" @onclick="() => Delete(message.Id)" class="btn btn-outline-danger">@T["common.delete"]</button></div></div>
+                </header>
+                @if (!string.IsNullOrWhiteSpace(message.Subject)) { <h3>@message.Subject</h3> }
+                <p>@message.Message</p>
+            </article>
+        }
+    </section>
+
+    @if (messages.Count == 0)
     {
-        <div class="card-dark p-3 mb-2 @(m.IsRead ? "" : "border-warning")" style="@(m.IsRead ? "" : "border-color:#d4a04c !important;")">
-            <div class="d-flex justify-content-between">
-                <div><strong class="text-light">@m.Name</strong> <small style="color:#9a9a9a;">@m.Email</small></div>
-                <div class="d-flex gap-2 align-items-center">
-                    <small style="color:#9a9a9a;">@m.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
-                    @if (!m.IsRead) { <button @onclick="()=>MarkRead(m.Id)" class="btn btn-sm btn-outline-warning">Mark Read</button> }
-                    <button @onclick="()=>Delete(m.Id)" class="btn btn-sm btn-outline-danger">Del</button>
-                </div>
-            </div>
-            @if (!string.IsNullOrEmpty(m.Subject)) { <div style="color:#d4a04c;font-weight:500;margin-top:4px;">@m.Subject</div> }
-            <div style="color:#ccc;margin-top:4px;">@m.Message</div>
-        </div>
+        <div class="admin-empty-state"><span>✉</span><p>@T["admin.no_messages"]</p></div>
     }
 }
-
-<style>.card-dark { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px; }</style>
 
 @code {
     private List<Data.Models.ContactMessage> messages = new();
     private int unread;
-    private bool loaded, showUnread;
+    private bool loaded;
+    private bool showUnread;
 
-    protected override async Task OnInitializedAsync() { messages = await Admin.GetMessagesAsync(); unread = messages.Count(m=>!m.IsRead); loaded = true; }
-    private async Task LoadAll() { messages = await Admin.GetMessagesAsync(); showUnread = false; }
-    private async Task LoadUnread() { messages = await Admin.GetMessagesAsync(true); showUnread = true; }
-    private async Task MarkRead(int id) { await Admin.MarkReadAsync(id); messages = await Admin.GetMessagesAsync(showUnread); unread = messages.Count(m=>!m.IsRead); }
-    private async Task Delete(int id) { await Admin.DeleteMessageAsync(id); messages = await Admin.GetMessagesAsync(showUnread); unread = messages.Count(m=>!m.IsRead); }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAll();
+        loaded = true;
+    }
+
+    private async Task LoadAll()
+    {
+        messages = await Admin.GetMessagesAsync();
+        unread = messages.Count(message => !message.IsRead);
+        showUnread = false;
+    }
+
+    private async Task LoadUnread()
+    {
+        var allMessages = await Admin.GetMessagesAsync();
+        unread = allMessages.Count(message => !message.IsRead);
+        messages = allMessages.Where(message => !message.IsRead).ToList();
+        showUnread = true;
+    }
+
+    private async Task MarkRead(int id)
+    {
+        await Admin.MarkReadAsync(id);
+        if (showUnread)
+            await LoadUnread();
+        else
+            await LoadAll();
+    }
+
+    private async Task Delete(int id)
+    {
+        await Admin.DeleteMessageAsync(id);
+        if (showUnread)
+            await LoadUnread();
+        else
+            await LoadAll();
+    }
+
+    private static string Initials(string name)
+    {
+        var initials = string.Join(string.Empty, name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => part[0]));
+        return string.IsNullOrWhiteSpace(initials) ? "?" : initials.ToUpperInvariant();
+    }
 }

@@ -63,7 +63,8 @@
 
         function go(i) {
             cur = (i + total) % total;
-            track.style.transform = 'translateX(-' + (cur * 100) + '%)';
+            var rtl = document.documentElement.dir === 'rtl';
+            track.style.transform = 'translateX(' + ((rtl ? cur : -cur) * 100) + '%)';
         }
         function rst() { clearInterval(timer); timer = setInterval(function () { go(cur + 1); }, 5500); }
 
@@ -74,7 +75,11 @@
         track.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
         track.addEventListener('touchend', function (e) {
             var dx = sx - e.changedTouches[0].clientX;
-            if (Math.abs(dx) > 35) { dx > 0 ? go(cur + 1) : go(cur - 1); rst(); }
+            if (Math.abs(dx) > 35) {
+                var rtl = document.documentElement.dir === 'rtl';
+                (rtl ? dx < 0 : dx > 0) ? go(cur + 1) : go(cur - 1);
+                rst();
+            }
         });
         rst();
     }
@@ -85,8 +90,10 @@
         if (!btn || !nav || mark(btn, 'mm')) return;
         function set(open) {
             nav.classList.toggle('open', open);
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
             document.body.style.overflow = open ? 'hidden' : '';
         }
+        btn.setAttribute('aria-expanded', 'false');
         btn.addEventListener('click', function () { set(!nav.classList.contains('open')); });
         $$('a', nav).forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
@@ -94,7 +101,7 @@
 
     function heroProgress() {
         var fill = document.querySelector('.hero-progress .fill');
-        if (!fill) return;
+        if (!fill || mark(fill, 'hp')) return;
         var ticking = false;
         function update() {
             var dh = document.documentElement.scrollHeight - window.innerHeight;
@@ -117,8 +124,19 @@
         heroProgress();
     }
 
+    function applyDocumentLanguage(language, direction) {
+        var root = document.documentElement;
+        var lang = language === 'fa' ? 'fa' : 'en';
+        var dir = direction === 'rtl' || lang === 'fa' ? 'rtl' : 'ltr';
+        root.lang = lang;
+        root.dir = dir;
+        root.classList.toggle('rtl', dir === 'rtl');
+        root.classList.toggle('ltr', dir !== 'rtl');
+    }
+
     window.portfolio = window.portfolio || {};
     window.portfolio.init = init;
+    window.portfolio.applyDocumentLanguage = applyDocumentLanguage;
 
     // Auto-run once DOM is ready (safe no-op if Blazor re-runs later).
     if (document.readyState === 'loading') {
@@ -135,7 +153,8 @@ window.PortfolioToast = (function () {
         if (container) return;
         container = document.createElement('div');
         container.id = 'toastContainer';
-        container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:380px;';
+        var isRtl = document.documentElement.dir === 'rtl';
+        container.style.cssText = 'position:fixed;bottom:24px;' + (isRtl ? 'left:24px;' : 'right:24px;') + 'z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:380px;';
         document.body.appendChild(container);
     }
     function show(msg, type) {

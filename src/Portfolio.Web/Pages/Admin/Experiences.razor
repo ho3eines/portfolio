@@ -2,60 +2,97 @@
 @layout MainLayout
 @attribute [Authorize(Roles = "Admin,Editor")]
 @inject AdminService Admin
+@inject TranslationService T
 
-<PageTitle>Experiences — Admin</PageTitle>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 style="font-weight:700;margin:0;">Experiences</h1>
-    <button @onclick="Add" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ Add</button>
-</div>
+<PageTitle>@T["admin.experiences"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading…</p> }
+<header class="admin-page-header admin-page-header-actions">
+    <div>
+        <p class="admin-eyebrow">@T["admin.manage"] / 05</p>
+        <h1>@T["admin.experiences"]</h1>
+        <p>@T["about.bio_2"]</p>
+    </div>
+    <button type="button" @onclick="Add" class="btn btn-primary">+ @T["admin.add_experience"]</button>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
 else
 {
-    <div class="row g-3">
-        @foreach (var e in experiences)
+    <section class="experience-list">
+        @foreach (var experience in experiences)
         {
-            <div class="col-lg-6">
-                <div class="card-dark p-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <strong class="text-light">@e.Role</strong>
-                            <div style="color:#d4a04c;font-size:.85rem;">@e.Company · @e.StartDate.Year — @(e.EndDate?.Year.ToString()??"Present")</div>
-                            @if (!string.IsNullOrEmpty(e.Description)) { <small style="color:#9a9a9a;display:block;margin-top:6px;">@e.Description</small> }
-                        </div>
-                        <div class="d-flex gap-1">
-                            <button @onclick="()=>Edit(e)" class="btn btn-sm btn-outline-light">Edit</button>
-                            <button @onclick="()=>Delete(e.Id)" class="btn btn-sm btn-outline-danger">Del</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <article class="experience-card">
+                <div class="experience-date"><span>@experience.StartDate.Year</span><i></i><span>@(experience.EndDate?.Year.ToString() ?? T["common.present"])</span></div>
+                <div class="experience-copy"><span>@experience.Company</span><h2>@experience.Role</h2>@if (!string.IsNullOrWhiteSpace(experience.Description)) { <p>@experience.Description</p> }</div>
+                <div class="admin-item-actions compact"><button type="button" @onclick="() => Edit(experience)" class="btn btn-outline-light">@T["common.edit"]</button><button type="button" @onclick="() => Delete(experience.Id)" class="btn btn-outline-danger">@T["common.delete"]</button></div>
+            </article>
         }
-    </div>
+    </section>
 
-    @if (editing != null)
+    @if (experiences.Count == 0 && editing is null)
     {
-        <div class="card-dark p-4 mt-3" style="max-width:600px;">
-            <h5 class="text-light mb-3">@(editing.Id==0?"New":"Edit") Experience</h5>
-            <div class="row mb-2"><div class="col"><input @bind="editing.Company" class="form-control bg-dark text-light border-secondary" placeholder="Company" /></div><div class="col"><input @bind="editing.Role" class="form-control bg-dark text-light border-secondary" placeholder="Role" /></div></div>
-            <div class="mb-2"><textarea @bind="editing.Description" rows="2" class="form-control bg-dark text-light border-secondary" placeholder="Description"></textarea></div>
-            <div class="row mb-2"><div class="col"><label class="text-light small">Start</label><input @bind="editing.StartDate" type="date" class="form-control bg-dark text-light border-secondary" /></div><div class="col"><label class="text-light small">End (blank=Present)</label><input @bind="editing.EndDate" type="date" class="form-control bg-dark text-light border-secondary" /></div></div>
-            <div class="d-flex gap-2"><button @onclick="Save" class="btn px-3" style="background:#d4a04c;color:#000;">Save</button><button @onclick="Cancel" class="btn btn-outline-light">Cancel</button></div>
-        </div>
+        <div class="admin-empty-state"><span>↗</span><p>@T["common.no_data"]</p><button type="button" class="btn btn-primary" @onclick="Add">@T["admin.add_experience"]</button></div>
+    }
+
+    @if (editing is not null)
+    {
+        <section class="admin-editor" aria-labelledby="experience-editor-title">
+            <header class="editor-header"><div><span>@T["common.edit"]</span><h2 id="experience-editor-title">@(editing.Id == 0 ? T["admin.new_experience"] : T["admin.edit_experience"])</h2></div><button type="button" class="editor-close" @onclick="Cancel" aria-label="@T["common.close"]">×</button></header>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">@T["admin.company"]</label><input @bind="editing.Company" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.role"]</label><input @bind="editing.Role" class="form-control" /></div>
+                <div class="col-12"><label class="form-label">@T["admin.description"]</label><textarea @bind="editing.Description" rows="3" class="form-control"></textarea></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.start_date"]</label><input @bind="editing.StartDate" type="date" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.end_date"] <span class="form-label-note">@T["admin.end_date_present"]</span></label><input @bind="editing.EndDate" type="date" class="form-control" /></div>
+            </div>
+            <footer class="editor-actions"><button type="button" @onclick="Save" class="btn btn-primary">@T["common.save"]</button><button type="button" @onclick="Cancel" class="btn btn-outline-light">@T["common.cancel"]</button></footer>
+        </section>
     }
 }
-
-<style>.card-dark { background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px; }</style>
 
 @code {
     private List<Data.Models.Experience> experiences = new();
     private Data.Models.Experience? editing;
     private bool loaded;
 
-    protected override async Task OnInitializedAsync() { experiences = await Admin.GetExperiencesAsync(); loaded = true; }
-    private void Edit(Data.Models.Experience e) => editing = new() { Id=e.Id, Company=e.Company, Role=e.Role, Description=e.Description, StartDate=e.StartDate, EndDate=e.EndDate };
-    private void Add() => editing = new Data.Models.Experience { StartDate=DateTime.Today };
+    protected override async Task OnInitializedAsync()
+    {
+        try { experiences = await Admin.GetExperiencesAsync(); }
+        catch { experiences = new(); }
+        loaded = true;
+    }
+
+    private void Edit(Data.Models.Experience experience) => editing = new()
+    {
+        Id = experience.Id,
+        Company = experience.Company,
+        Role = experience.Role,
+        Description = experience.Description,
+        StartDate = experience.StartDate,
+        EndDate = experience.EndDate
+    };
+
+    private void Add() => editing = new Data.Models.Experience { StartDate = DateTime.Today };
     private void Cancel() => editing = null;
-    private async Task Save() { if (editing==null)return; if (editing.Id==0) await Admin.CreateExperienceAsync(editing); else await Admin.UpdateExperienceAsync(editing.Id, editing); editing=null;experiences=await Admin.GetExperiencesAsync(); }
-    private async Task Delete(int id) { await Admin.DeleteExperienceAsync(id); experiences=await Admin.GetExperiencesAsync(); }
+
+    private async Task Save()
+    {
+        if (editing is null)
+            return;
+        if (editing.Id == 0)
+            await Admin.CreateExperienceAsync(editing);
+        else
+            await Admin.UpdateExperienceAsync(editing.Id, editing);
+        editing = null;
+        experiences = await Admin.GetExperiencesAsync();
+    }
+
+    private async Task Delete(int id)
+    {
+        await Admin.DeleteExperienceAsync(id);
+        experiences = await Admin.GetExperiencesAsync();
+    }
 }

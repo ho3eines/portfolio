@@ -1,18 +1,19 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthState
+@inject TranslationService T
 
 @if (isAuthenticated)
 {
-    <div class="text-center py-5" style="font-family:var(--font-body);min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
-        <div style="font-size:2.5rem;">🔒</div>
-        <h2 style="color:var(--accent);font-family:var(--font-display);">Access Denied</h2>
-        <p style="color:#9a9a9a;max-width:420px;">Your account doesn't have permission to view this page. Contact the administrator if you believe this is a mistake.</p>
-        <a href="/" style="background:var(--accent);color:#000;text-decoration:none;padding:10px 22px;border-radius:8px;font-weight:600;">← Back to Home</a>
+    <div class="app-state access-denied">
+        <div class="access-denied-mark" aria-hidden="true">!</div>
+        <h1>@T["admin.access_denied"]</h1>
+        <p>@T["admin.access_denied_text"]</p>
+        <a href="/" class="btn-solid">@T["common.go_home"]</a>
     </div>
 }
 else
 {
-    <div style="padding:40px;text-align:center;color:#9a9a9a;">Checking authorization…</div>
+    <div class="app-state" role="status">@T["common.checking_authorization"]</div>
 }
 
 @code {
@@ -22,9 +23,8 @@ else
     {
         var state = await AuthState.GetAuthenticationStateAsync();
         isAuthenticated = state.User.Identity?.IsAuthenticated == true;
-        // Only redirect to the login page when the user is NOT signed in.
-        // Signed-in users without the required role see the "Access Denied"
-        // panel above instead of bouncing between /login and /admin forever.
+        // Signed-in users without the required role stay here and receive a
+        // clear explanation instead of being bounced through the login route.
         if (!isAuthenticated)
             Nav.NavigateTo("/login", forceLoad: true);
     }

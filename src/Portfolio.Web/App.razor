@@ -10,23 +10,21 @@
                         <RedirectToLogin />
                     </NotAuthorized>
                     <Authorizing>
-                        <div class="d-flex align-items-center justify-content-center" style="min-height:80vh;color:#9a9a9a;font-family:var(--font-body);">
-                            <div style="text-align:center;">
-                                <div style="width:40px;height:40px;border:3px solid rgba(201,169,106,0.15);border-top-color:#c9a96a;border-radius:50%;animation:spin 0.9s linear infinite;margin:0 auto 16px;"></div>
-                                <span>Checking authorization…</span>
-                            </div>
+                        <div class="app-state" role="status">
+                            <div class="app-state-spinner"></div>
+                            <span>@T["common.checking_authorization"]</span>
                         </div>
                     </Authorizing>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             </Found>
             <NotFound>
-                <PageTitle>Not Found</PageTitle>
+                <PageTitle>404 — @T["common.page_not_found"]</PageTitle>
                 <LayoutView Layout="@typeof(MainLayout)">
-                    <div class="text-center py-5" style="font-family:var(--font-body);">
-                        <h2 style="color:var(--accent);font-family:var(--font-display);">404</h2>
-                        <p style="color:#9a9a9a;">Page not found.</p>
-                        <a href="/" style="color:var(--accent);">Go Home</a>
+                    <div class="app-state app-not-found">
+                        <span class="app-state-code">404</span>
+                        <h1>@T["common.page_not_found"]</h1>
+                        <a href="/" class="btn-solid">@T["common.go_home"]</a>
                     </div>
                 </LayoutView>
             </NotFound>

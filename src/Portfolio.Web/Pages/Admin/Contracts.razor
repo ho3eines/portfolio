@@ -6,75 +6,148 @@
 @inject TranslationService T
 @implements IDisposable
 
-<PageTitle>Contracts — Admin</PageTitle>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 style="font-weight:700;margin:0;">Contracts</h1>
-    <button @onclick="Add" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ Add Contract</button>
-</div>
+<PageTitle>@T["admin.contracts"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
+<header class="admin-page-header admin-page-header-actions">
+    <div>
+        <p class="admin-eyebrow">@T["admin.manage"] / 03</p>
+        <h1>@T["admin.contracts"]</h1>
+        <p>@T["admin.contracts"] · @contracts.Count</p>
+    </div>
+    <button type="button" @onclick="Add" class="btn btn-primary">+ @T["admin.add_contract"]</button>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
 else
 {
-    <div class="row g-3">
-        @foreach (var c in contracts)
+    <section class="admin-list-grid">
+        @foreach (var contract in contracts)
         {
-            var badge = c.Status switch { "Active" => "bg-success", "Completed" => "bg-primary", "Cancelled" => "bg-danger", _ => "bg-warning text-dark" };
-            <div class="col-lg-6">
-                <div class="card-dark p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <strong class="text-light">@c.Title</strong>
-                        <span class="badge @badge">@c.Status</span>
+            <article class="admin-item-card contract-card">
+                <header>
+                    <div>
+                        <span class="item-overline">@contract.ClientName</span>
+                        <h2>@contract.Title</h2>
                     </div>
-                    @if (!string.IsNullOrEmpty(c.ClientName)) { <small style="color:#d4a04c;">@c.ClientName</small> }
-                    @if (c.Amount != null) { <small style="color:#9a9a9a;display:block;">@c.Amount?.ToString("N0") @c.Currency</small> }
-                    @if (c.StartDate != null) { <small style="color:#9a9a9a;">@c.StartDate?.ToString("yyyy-MM-dd") — @(c.EndDate?.ToString("yyyy-MM-dd") ?? "Ongoing")</small> }
-                    <div class="mt-2 d-flex gap-2">
-                        <button @onclick="()=>Edit(c)" class="btn btn-sm btn-outline-light">Edit</button>
-                        <button @onclick="()=>Delete(c.Id)" class="btn btn-sm btn-outline-danger">Del</button>
-                    </div>
+                    <span class="status-badge @StatusClass(contract.Status)">@StatusText(contract.Status)</span>
+                </header>
+                <div class="contract-meta">
+                    @if (contract.Amount is not null) { <span><b>@contract.Amount?.ToString("N0")</b> @contract.Currency</span> }
+                    @if (contract.StartDate is not null) { <span>@contract.StartDate?.ToString("yyyy-MM-dd") <i>—</i> @(contract.EndDate?.ToString("yyyy-MM-dd") ?? T["common.present"])</span> }
                 </div>
-            </div>
+                @if (!string.IsNullOrWhiteSpace(contract.Description)) { <p>@contract.Description</p> }
+                <footer class="admin-item-actions">
+                    <button type="button" @onclick="() => Edit(contract)" class="btn btn-outline-light">@T["common.edit"]</button>
+                    <button type="button" @onclick="() => Delete(contract.Id)" class="btn btn-outline-danger">@T["common.delete"]</button>
+                </footer>
+            </article>
         }
-    </div>
+    </section>
 
-    @if (editing != null)
+    @if (contracts.Count == 0 && editing is null)
     {
-        <div class="card-dark p-4 mt-3" style="max-width:700px;">
-            <h5 class="text-light mb-3">@(editing.Id == 0 ? "New" : "Edit") Contract</h5>
-            <div class="row g-2 mb-2">
-                <div class="col-md-8"><input @bind="editing.Title" class="form-control bg-dark text-light border-secondary" placeholder="Title" /></div>
-                <div class="col-md-4"><select @bind="editing.Status" class="form-select bg-dark text-light border-secondary"><option value="Pending">Pending</option><option value="Active">Active</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option></select></div>
+        <div class="admin-empty-state"><span>□</span><p>@T["common.no_data"]</p><button type="button" class="btn btn-primary" @onclick="Add">@T["admin.add_contract"]</button></div>
+    }
+
+    @if (editing is not null)
+    {
+        <section class="admin-editor" aria-labelledby="contract-editor-title">
+            <header class="editor-header">
+                <div><span>@T["common.edit"]</span><h2 id="contract-editor-title">@(editing.Id == 0 ? T["admin.new_contract"] : T["admin.edit_contract"])</h2></div>
+                <button type="button" class="editor-close" @onclick="Cancel" aria-label="@T["common.close"]">×</button>
+            </header>
+            <div class="row g-3">
+                <div class="col-md-8"><label class="form-label">@T["admin.title"]</label><input @bind="editing.Title" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.status"]</label><select @bind="editing.Status" class="form-select"><option value="Pending">@T["admin.status_pending"]</option><option value="Active">@T["admin.status_active"]</option><option value="Completed">@T["admin.status_completed"]</option><option value="Cancelled">@T["admin.status_cancelled"]</option></select></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.client_name"]</label><input @bind="editing.ClientName" class="form-control" /></div>
+                <div class="col-md-6"><label class="form-label">@T["admin.client_email"]</label><input @bind="editing.ClientEmail" dir="ltr" type="email" class="form-control" /></div>
+                <div class="col-md-4"><label class="form-label">@T["admin.amount"]</label><input @bind="editing.Amount" type="number" step="0.01" class="form-control" /></div>
+                <div class="col-md-2"><label class="form-label">@T["admin.currency"]</label><select @bind="editing.Currency" class="form-select"><option>EUR</option><option>USD</option><option>IRR</option></select></div>
+                <div class="col-md-3"><label class="form-label">@T["admin.start_date"]</label><input @bind="editing.StartDate" type="date" class="form-control" /></div>
+                <div class="col-md-3"><label class="form-label">@T["admin.end_date"]</label><input @bind="editing.EndDate" type="date" class="form-control" /></div>
+                <div class="col-12"><label class="form-label">@T["admin.description"]</label><textarea @bind="editing.Description" rows="3" class="form-control"></textarea></div>
             </div>
-            <div class="row g-2 mb-2">
-                <div class="col-md-6"><input @bind="editing.ClientName" class="form-control bg-dark text-light border-secondary" placeholder="Client Name" /></div>
-                <div class="col-md-6"><input @bind="editing.ClientEmail" class="form-control bg-dark text-light border-secondary" placeholder="Client Email" /></div>
-            </div>
-            <div class="row g-2 mb-2">
-                <div class="col-md-4"><input @bind="editing.Amount" type="number" step="0.01" class="form-control bg-dark text-light border-secondary" placeholder="Amount" /></div>
-                <div class="col-md-2"><select @bind="editing.Currency" class="form-select bg-dark text-light border-secondary"><option>EUR</option><option>USD</option><option>IRR</option></select></div>
-                <div class="col-md-3"><input @bind="editing.StartDate" type="date" class="form-control bg-dark text-light border-secondary" /></div>
-                <div class="col-md-3"><input @bind="editing.EndDate" type="date" class="form-control bg-dark text-light border-secondary" /></div>
-            </div>
-            <div class="mb-2"><textarea @bind="editing.Description" rows="2" class="form-control bg-dark text-light border-secondary" placeholder="Description"></textarea></div>
-            <div class="d-flex gap-2"><button @onclick="Save" class="btn px-3" style="background:#d4a04c;color:#000;">Save</button><button @onclick="Cancel" class="btn btn-outline-light">Cancel</button></div>
-        </div>
+            <footer class="editor-actions"><button type="button" @onclick="Save" class="btn btn-primary">@T["common.save"]</button><button type="button" @onclick="Cancel" class="btn btn-outline-light">@T["common.cancel"]</button></footer>
+        </section>
     }
 }
-
-<style>.card-dark{background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px;}</style>
 
 @code {
     private List<Portfolio.Data.Models.Contract> contracts = new();
     private Portfolio.Data.Models.Contract? editing;
     private bool loaded;
 
-    protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
-    private async void Load() { try { contracts = await Admin.GetContractsAsync(); } catch { } loaded = true; StateHasChanged(); }
-    private void Edit(Portfolio.Data.Models.Contract c) => editing = new Portfolio.Data.Models.Contract { Id = c.Id, Title = c.Title, ClientName = c.ClientName, ClientEmail = c.ClientEmail, Amount = c.Amount, Currency = c.Currency, StartDate = c.StartDate, EndDate = c.EndDate, Status = c.Status, Description = c.Description };
+    protected override void OnInitialized()
+    {
+        T.OnChange += Refresh;
+        Load();
+    }
+
+    private async void Load()
+    {
+        try { contracts = await Admin.GetContractsAsync(); }
+        catch { contracts = new(); }
+        loaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Edit(Portfolio.Data.Models.Contract contract) => editing = new Portfolio.Data.Models.Contract
+    {
+        Id = contract.Id,
+        Title = contract.Title,
+        ClientName = contract.ClientName,
+        ClientEmail = contract.ClientEmail,
+        Amount = contract.Amount,
+        Currency = contract.Currency,
+        StartDate = contract.StartDate,
+        EndDate = contract.EndDate,
+        Status = contract.Status,
+        Description = contract.Description
+    };
+
     private void Add() => editing = new Portfolio.Data.Models.Contract();
     private void Cancel() => editing = null;
-    private async Task Save() { if (editing == null) return; var h = editing.Id == 0 ? await Http.PostAsJsonAsync("api/admin/contracts", editing) : await Http.PutAsJsonAsync("api/admin/contracts/" + editing.Id, editing); if (h.IsSuccessStatusCode) { editing = null; Load(); } }
-    private async Task Delete(int id) { await Http.DeleteAsync("api/admin/contracts/" + id); Load(); }
+
+    private async Task Save()
+    {
+        if (editing is null)
+            return;
+
+        var response = editing.Id == 0
+            ? await Http.PostAsJsonAsync("api/admin/contracts", editing)
+            : await Http.PutAsJsonAsync($"api/admin/contracts/{editing.Id}", editing);
+        if (response.IsSuccessStatusCode)
+        {
+            editing = null;
+            Load();
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        await Http.DeleteAsync($"api/admin/contracts/{id}");
+        Load();
+    }
+
+    private string StatusText(string status) => status switch
+    {
+        "Active" => T["admin.status_active"],
+        "Completed" => T["admin.status_completed"],
+        "Cancelled" => T["admin.status_cancelled"],
+        _ => T["admin.status_pending"]
+    };
+
+    private static string StatusClass(string status) => status.ToLowerInvariant() switch
+    {
+        "active" => "is-active",
+        "completed" => "is-completed",
+        "cancelled" => "is-cancelled",
+        _ => "is-pending"
+    };
+
     private void Refresh() => InvokeAsync(StateHasChanged);
     public void Dispose() => T.OnChange -= Refresh;
 }

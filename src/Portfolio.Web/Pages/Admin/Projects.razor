@@ -5,79 +5,79 @@
 @inject TranslationService T
 @implements IDisposable
 
-<PageTitle>Projects — Admin</PageTitle>
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 style="font-weight:700;margin:0;">Projects</h1>
-    <button @onclick="()=>editing=new Data.Models.Project()" class="btn btn-sm px-3" style="background:#d4a04c;color:#000;font-weight:600;">+ New</button>
-</div>
+<PageTitle>@T["admin.projects"] — @T["auth.admin_portal"]</PageTitle>
 
-@if (!loaded) { <p style="color:#9a9a9a;">Loading...</p> }
-else if (editing == null)
-{
-    <div class="row g-3">
-        @foreach (var p in projects)
-        {
-            var ct = p.ContractId != null ? contracts.FirstOrDefault(c => c.Id == p.ContractId) : null;
-            <div class="col-lg-4 col-md-6">
-                <div class="card-dark p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div><strong class="text-light">@p.Title</strong>
-                        @if (ct != null) { <small style="color:#d4a04c;display:block;">📋 @ct.Title (@ct.Status)</small> }
-                        @if (!string.IsNullOrEmpty(p.ClientName)) { <small style="color:#9a9a9a;">@p.ClientName</small> }</div>
-                        @if (!p.IsPublished) { <span class="badge bg-warning text-dark">Draft</span> }
-                    </div>
-                    <small style="color:#9a9a9a;">@p.Category · @p.ShortDesc</small>
-                    <div class="mt-2 d-flex gap-2">
-                        <button @onclick="()=>Edit(p)" class="btn btn-sm btn-outline-light">Edit</button>
-                        <a href="/admin/phases/@p.Id" class="btn btn-sm btn-outline-light">📊 Phases</a>
-                        <button @onclick="()=>Delete(p.Id)" class="btn btn-sm btn-outline-danger">Del</button>
-                    </div>
-                </div>
-            </div>
-        }
+<header class="admin-page-header admin-page-header-actions">
+    <div>
+        <p class="admin-eyebrow">@T["admin.manage"] / 02</p>
+        <h1>@T["admin.projects"]</h1>
+        <p>@T["work.description"]</p>
     </div>
+    <button type="button" @onclick="Add" class="btn btn-primary">+ @T["admin.add_project"]</button>
+</header>
+
+@if (!loaded)
+{
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
+}
+else if (editing is null)
+{
+    <section class="admin-list-grid project-list-grid">
+        @foreach (var project in projects)
+        {
+            var contract = project.ContractId is not null ? contracts.FirstOrDefault(item => item.Id == project.ContractId) : null;
+            <article class="admin-item-card project-admin-card">
+                <header>
+                    <div>
+                        <span class="item-overline">@project.Category</span>
+                        <h2>@project.Title</h2>
+                    </div>
+                    @if (!project.IsPublished) { <span class="status-badge is-pending">@T["admin.draft"]</span> }
+                    else { <span class="status-badge is-completed">@T["admin.published"]</span> }
+                </header>
+                @if (contract is not null) { <div class="project-contract">□ @contract.Title <span>@StatusText(contract.Status)</span></div> }
+                @if (!string.IsNullOrWhiteSpace(project.ClientName)) { <span class="project-client">@project.ClientName</span> }
+                @if (!string.IsNullOrWhiteSpace(project.ShortDesc)) { <p>@project.ShortDesc</p> }
+                <footer class="admin-item-actions">
+                    <button type="button" @onclick="() => Edit(project)" class="btn btn-outline-light">@T["common.edit"]</button>
+                    <a href="/admin/phases/@project.Id" class="btn btn-outline-light">@T["admin.phases"] <span aria-hidden="true">→</span></a>
+                    <button type="button" @onclick="() => Delete(project.Id)" class="btn btn-outline-danger">@T["common.delete"]</button>
+                </footer>
+            </article>
+        }
+    </section>
+
+    @if (projects.Count == 0)
+    {
+        <div class="admin-empty-state"><span>▣</span><p>@T["common.no_data"]</p><button type="button" class="btn btn-primary" @onclick="Add">@T["admin.add_project"]</button></div>
+    }
 }
 else
 {
-    <div class="card-dark p-4" style="max-width:700px;">
-        <h5 class="text-light mb-3">@(editing.Id == 0 ? "New Project" : "Edit Project")</h5>
-        <div class="row g-2 mb-2">
-            <div class="col-md-8"><input @bind="editing.Title" class="form-control bg-dark text-light border-secondary" placeholder="Title" /></div>
-            <div class="col-md-4"><input @bind="editing.Slug" class="form-control bg-dark text-light border-secondary" placeholder="slug" /></div>
+    <section class="admin-editor admin-editor-wide" aria-labelledby="project-editor-title">
+        <header class="editor-header">
+            <div><span>@T["common.edit"]</span><h2 id="project-editor-title">@(editing.Id == 0 ? T["admin.new_project"] : T["admin.edit_project"])</h2></div>
+            <button type="button" class="editor-close" @onclick="Cancel" aria-label="@T["common.close"]">×</button>
+        </header>
+        <div class="row g-3">
+            <div class="col-md-8"><label class="form-label">@T["admin.title"]</label><input @bind="editing.Title" class="form-control" /></div>
+            <div class="col-md-4"><label class="form-label">@T["admin.slug"]</label><input @bind="editing.Slug" dir="ltr" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">@T["admin.category"]</label><input @bind="editing.Category" class="form-control" /></div>
+            <div class="col-md-6"><label class="form-label">@T["admin.client_name"]</label><input @bind="editing.ClientName" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">@T["admin.short_description"]</label><input @bind="editing.ShortDesc" class="form-control" /></div>
+            <div class="col-12"><label class="form-label">@T["admin.full_description"]</label><textarea @bind="editing.Description" rows="4" class="form-control"></textarea></div>
+            <div class="col-12"><label class="form-label">@T["admin.technologies"]</label><input @bind="editing.Technologies" dir="ltr" class="form-control" placeholder='["Blazor", "SQL"]' /></div>
+            <div class="col-md-4"><label class="form-label">@T["admin.contract"]</label><select @bind="editing.ContractId" class="form-select"><option value="">— @T["common.none"] —</option>@foreach (var contract in contracts) { <option value="@contract.Id">@contract.Title (@StatusText(contract.Status))</option> }</select></div>
+            <div class="col-md-4"><label class="form-label">@T["admin.mockup"]</label><select @bind="editing.MockupClass" class="form-select"><option value="mockup-dark">@T["admin.mockup_dark"]</option><option value="mockup-light">@T["admin.mockup_light"]</option><option value="mockup-brand">@T["admin.mockup_brand"]</option></select></div>
+            <div class="col-md-4"><label class="form-label">@T["admin.rotation"]</label><input @bind="editing.CardRotation" dir="ltr" class="form-control" placeholder="-6deg, 3deg" /></div>
         </div>
-        <div class="row g-2 mb-2">
-            <div class="col-md-6"><input @bind="editing.Category" class="form-control bg-dark text-light border-secondary" placeholder="Category" /></div>
-            <div class="col-md-6"><input @bind="editing.ClientName" class="form-control bg-dark text-light border-secondary" placeholder="Client Name" /></div>
+        <div class="editor-switches">
+            <label class="form-check form-switch"><input class="form-check-input" type="checkbox" @bind="editing.IsFeatured" /><span class="form-check-label">@T["admin.featured"]</span></label>
+            <label class="form-check form-switch"><input class="form-check-input" type="checkbox" @bind="editing.IsPublished" /><span class="form-check-label">@T["admin.published"]</span></label>
         </div>
-        <div class="mb-2"><input @bind="editing.ShortDesc" class="form-control bg-dark text-light border-secondary" placeholder="Short description" /></div>
-        <div class="mb-2"><textarea @bind="editing.Description" rows="3" class="form-control bg-dark text-light border-secondary" placeholder="Full description"></textarea></div>
-        <div class="mb-2"><input @bind="editing.Technologies" class="form-control bg-dark text-light border-secondary" placeholder='Technologies JSON: ["Blazor","SQL"]' /></div>
-        <div class="row g-2 mb-2">
-            <div class="col-md-4">
-                <label class="text-light small">Contract</label>
-                <select @bind="editing.ContractId" class="form-select bg-dark text-light border-secondary">
-                    <option value="">— None —</option>
-                    @foreach (var ct in contracts) { <option value="@ct.Id">@ct.Title (@ct.Status)</option> }
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label class="text-light small">Mockup</label>
-                <select @bind="editing.MockupClass" class="form-select bg-dark text-light border-secondary">
-                    <option value="mockup-dark">Dark</option><option value="mockup-light">Light</option><option value="mockup-brand">Brand</option>
-                </select>
-            </div>
-            <div class="col-md-4"><label class="text-light small">Rotation</label><input @bind="editing.CardRotation" class="form-control bg-dark text-light border-secondary" placeholder="-6deg, 3deg" /></div>
-        </div>
-        <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" @bind="editing.IsFeatured" id="f1" /><label class="form-check-label text-light" for="f1">Featured (shows on landing page)</label></div>
-        <div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" @bind="editing.IsPublished" id="f2" /><label class="form-check-label text-light" for="f2">Published</label></div>
-        <div class="d-flex gap-2">
-            <button @onclick="Save" class="btn px-4" style="background:#d4a04c;color:#000;font-weight:600;">Save</button>
-            <button @onclick="()=>editing=null" class="btn btn-outline-light">Cancel</button>
-        </div>
-    </div>
+        <footer class="editor-actions"><button type="button" @onclick="Save" class="btn btn-primary">@T["common.save"]</button><button type="button" @onclick="Cancel" class="btn btn-outline-light">@T["common.cancel"]</button></footer>
+    </section>
 }
-
-<style>.card-dark{background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:12px;}</style>
 
 @code {
     private List<Data.Models.Project> projects = new();
@@ -85,11 +85,76 @@ else
     private Data.Models.Project? editing;
     private bool loaded;
 
-    protected override void OnInitialized() { T.OnChange += Refresh; Load(); }
-    private async void Load() { try { projects = await Admin.GetProjectsAsync(); contracts = await Admin.GetContractsAsync(); } catch { } loaded = true; StateHasChanged(); }
-    private void Edit(Data.Models.Project p) => editing = new Data.Models.Project { Id = p.Id, Title = p.Title, Slug = p.Slug, Category = p.Category, ClientName = p.ClientName, ContractId = p.ContractId, ShortDesc = p.ShortDesc, Description = p.Description, Technologies = p.Technologies, MockupClass = p.MockupClass, CardRotation = p.CardRotation, IsFeatured = p.IsFeatured, IsPublished = p.IsPublished };
-    private async Task Save() { if (editing == null) return; if (editing.Id == 0) await Admin.CreateProjectAsync(editing); else await Admin.UpdateProjectAsync(editing.Id, editing); editing = null; Load(); }
-    private async Task Delete(int id) { await Admin.DeleteProjectAsync(id); Load(); }
+    protected override void OnInitialized()
+    {
+        T.OnChange += Refresh;
+        Load();
+    }
+
+    private async void Load()
+    {
+        try
+        {
+            projects = await Admin.GetProjectsAsync();
+            contracts = await Admin.GetContractsAsync();
+        }
+        catch
+        {
+            projects = new();
+            contracts = new();
+        }
+        loaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void Add() => editing = new Data.Models.Project();
+
+    private void Edit(Data.Models.Project project) => editing = new Data.Models.Project
+    {
+        Id = project.Id,
+        Title = project.Title,
+        Slug = project.Slug,
+        Category = project.Category,
+        ClientName = project.ClientName,
+        ContractId = project.ContractId,
+        ShortDesc = project.ShortDesc,
+        Description = project.Description,
+        Technologies = project.Technologies,
+        MockupClass = project.MockupClass,
+        CardRotation = project.CardRotation,
+        IsFeatured = project.IsFeatured,
+        IsPublished = project.IsPublished
+    };
+
+    private void Cancel() => editing = null;
+
+    private async Task Save()
+    {
+        if (editing is null)
+            return;
+
+        if (editing.Id == 0)
+            await Admin.CreateProjectAsync(editing);
+        else
+            await Admin.UpdateProjectAsync(editing.Id, editing);
+        editing = null;
+        Load();
+    }
+
+    private async Task Delete(int id)
+    {
+        await Admin.DeleteProjectAsync(id);
+        Load();
+    }
+
+    private string StatusText(string status) => status switch
+    {
+        "Active" => T["admin.status_active"],
+        "Completed" => T["admin.status_completed"],
+        "Cancelled" => T["admin.status_cancelled"],
+        _ => T["admin.status_pending"]
+    };
+
     private void Refresh() => InvokeAsync(StateHasChanged);
     public void Dispose() => T.OnChange -= Refresh;
 }

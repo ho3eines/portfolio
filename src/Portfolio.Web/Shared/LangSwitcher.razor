@@ -1,19 +1,32 @@
 @inject TranslationService T
 @implements IDisposable
 
-<button type="button" class="lang-switch" @onclick="Toggle"
-        title="@(T.Lang == "en" ? "Switch to Persian" : "Switch to English")"
-        aria-label="Switch language">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+<button type="button" class="lang-switch" @onclick="Toggle" disabled="@changing"
+        title="@(T.IsRtl ? "Switch to English" : "تغییر به فارسی")"
+        aria-label="@(T.IsRtl ? "Switch to English" : "تغییر به فارسی")">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
         <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" stroke="currentColor" stroke-width="1.4" />
     </svg>
-    @(T.Lang == "en" ? "فا" : "EN")
+    <span>@(T.IsRtl ? "EN" : "فا")</span>
 </button>
 
 @code {
+    private bool changing;
+
     protected override void OnInitialized() => T.OnChange += Refresh;
     public void Dispose() => T.OnChange -= Refresh;
+
     private void Refresh() => InvokeAsync(StateHasChanged);
-    private async Task Toggle() => await T.ToggleAsync();
+
+    private async Task Toggle()
+    {
+        if (changing)
+            return;
+
+        changing = true;
+        await T.ToggleAsync();
+        changing = false;
+        await InvokeAsync(StateHasChanged);
+    }
 }

@@ -5,66 +5,66 @@
 @inject PortfolioService Portfolio
 @inject HttpClient Http
 @inject AuthenticationStateProvider AuthState
+@inject TranslationService T
 
-<PageTitle>Admin Dashboard — Mahbod Pour</PageTitle>
+<PageTitle>@T["admin.dashboard"] — @T["auth.admin_portal"]</PageTitle>
 
-<div class="admin-topbar">
+<header class="admin-page-header">
     <div>
-        <h1 class="admin-title">Admin Dashboard</h1>
-        <div class="admin-sub">Signed in as <span style="color:var(--accent)">@displayName</span></div>
+        <p class="admin-eyebrow">@T["admin.dashboard"] / 01</p>
+        <h1 class="admin-title">@T["admin.dashboard_heading"]</h1>
+        <p class="admin-sub">@T["admin.signed_in_as"] <span>@displayName</span></p>
     </div>
-</div>
+    <div class="admin-header-mark" aria-hidden="true"><span>01</span></div>
+</header>
 
 @if (!loaded)
 {
-    <p class="admin-sub">Loading…</p>
+    <div class="admin-loading" role="status"><span></span>@T["common.loading"]</div>
 }
 else
 {
     @if (isStaff && unresolvedErrors > 0)
     {
         <div class="health-banner warn">
-            <span>⚠ @unresolvedErrors unresolved error(s)</span>
-            <a href="/admin/errors">View Errors →</a>
+            <span><b>!</b> @string.Format(T["admin.unresolved_errors"], unresolvedErrors) — @T["admin.errors_warning"]</span>
+            <a href="/admin/errors">@T["admin.view_errors"] <span aria-hidden="true">→</span></a>
         </div>
     }
     else if (isStaff)
     {
-        <div class="health-banner ok">✅ All systems operational — no unresolved errors.</div>
+        <div class="health-banner ok"><span><b>✓</b> @T["admin.errors_ok"]</span></div>
     }
 
-    <div class="admin-grid">
-        <div class="stat-card"><div class="stat-num">@totalProjects</div><div class="stat-label">Projects</div></div>
-        <div class="stat-card"><div class="stat-num">@totalSkills</div><div class="stat-label">Skills</div></div>
-        @if (isStaff)
-        {
-            <div class="stat-card"><div class="stat-num @(unreadMessages > 0 ? "danger" : null)">@unreadMessages</div><div class="stat-label">Unread Messages</div></div>
-        }
-        else
-        {
-            <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Unread Messages</div></div>
-        }
-        <div class="stat-card"><div class="stat-num">@totalTestimonials</div><div class="stat-label">Testimonials</div></div>
-    </div>
+    <section class="admin-grid" aria-label="@T["admin.dashboard"]">
+        <article class="stat-card"><span class="stat-index">01</span><div class="stat-num">@totalProjects</div><div class="stat-label">@T["admin.total_projects"]</div></article>
+        <article class="stat-card"><span class="stat-index">02</span><div class="stat-num">@totalSkills</div><div class="stat-label">@T["admin.total_skills"]</div></article>
+        <article class="stat-card"><span class="stat-index">03</span><div class="stat-num @(unreadMessages > 0 ? "danger" : null)">@(isStaff ? unreadMessages.ToString() : "—")</div><div class="stat-label">@T["admin.unread_messages"]</div></article>
+        <article class="stat-card"><span class="stat-index">04</span><div class="stat-num">@totalTestimonials</div><div class="stat-label">@T["admin.total_testimonials"]</div></article>
+    </section>
 
     @if (isStaff)
     {
-        <div class="admin-card">
-            <h3 style="font-family:var(--font-display);font-size:1.15rem;margin-bottom:14px;color:#fff">Quick Actions</h3>
-            <div class="quick-actions">
-                <a href="/admin/profile">Edit Profile</a>
-                <a href="/admin/projects">Projects</a>
-                <a href="/admin/resources">Run SQL Scripts</a>
-                <a href="/admin/messages">Messages (@unreadMessages)</a>
-                <a href="/admin/errors">Error Logs</a>
+        <section class="admin-card dashboard-actions">
+            <div class="admin-card-heading">
+                <span class="admin-card-icon">✦</span>
+                <h2>@T["admin.quick_actions"]</h2>
             </div>
-        </div>
+            <div class="quick-actions">
+                <a href="/admin/profile"><span>01</span>@T["admin.edit_profile"] <b>→</b></a>
+                <a href="/admin/projects"><span>02</span>@T["admin.projects"] <b>→</b></a>
+                <a href="/admin/resources"><span>03</span>@T["admin.run_sql"] <b>→</b></a>
+                <a href="/admin/messages"><span>04</span>@T["admin.messages"] <em>@unreadMessages</em><b>→</b></a>
+                <a href="/admin/errors"><span>05</span>@T["admin.error_logs"] <b>→</b></a>
+            </div>
+        </section>
     }
     else
     {
-        <div class="admin-card">
-            <p style="color:#9a9a9a;margin:0;">You have read-only access. Contact an administrator to get edit permissions.</p>
-        </div>
+        <section class="admin-card admin-empty-note">
+            <span aria-hidden="true">◌</span>
+            <p>@T["admin.read_only"]</p>
+        </section>
     }
 }
 
@@ -88,25 +88,30 @@ else
             {
                 totalProjects = (await Admin.GetProjectsAsync()).Count;
                 totalSkills = (await Admin.GetSkillsAsync()).Count;
-                var msgs = await Admin.GetMessagesAsync();
-                unreadMessages = msgs.Count(m => !m.IsRead);
+                var messages = await Admin.GetMessagesAsync();
+                unreadMessages = messages.Count(message => !message.IsRead);
                 totalTestimonials = (await Admin.GetTestimonialsAsync()).Count;
 
-                var errResp = await Http.GetFromJsonAsync<ErrorCountResp>("api/admin/errors/count");
-                unresolvedErrors = errResp?.unresolved ?? 0;
+                var errorResponse = await Http.GetFromJsonAsync<ErrorCountResponse>("api/admin/errors/count");
+                unresolvedErrors = errorResponse?.unresolved ?? 0;
             }
             else
             {
-                // Viewer: read-only stats from the public endpoints (published content).
                 totalProjects = (await Portfolio.GetProjectsAsync()).Count;
                 var (bars, tags) = await Portfolio.GetSkillsAsync();
                 totalSkills = bars.Count + tags.Count;
                 totalTestimonials = (await Portfolio.GetTestimonialsAsync()).Count;
             }
         }
-        catch { }
+        catch
+        {
+            // The screen still presents a stable zero-state when the API is offline.
+        }
         loaded = true;
     }
 
-    private class ErrorCountResp { public int unresolved { get; set; } public int total { get; set; } }
+    private sealed class ErrorCountResponse
+    {
+        public int unresolved { get; set; }
+    }
 }

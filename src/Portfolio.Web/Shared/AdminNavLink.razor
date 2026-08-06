@@ -1,8 +1,8 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-<a href="@Href" class="admin-nav-link @(IsActive ? "active" : "")">
-    <span class="ico">@Icon</span>
+<a href="@Href" class="admin-nav-link @(IsActive ? "active" : "")" @onclick="HandleNavigate">
+    <span class="ico" aria-hidden="true">@Icon</span>
     <span>@Label</span>
 </a>
 
@@ -10,6 +10,7 @@
     [Parameter] public string Href { get; set; } = "";
     [Parameter] public string Icon { get; set; } = "";
     [Parameter] public string Label { get; set; } = "";
+    [Parameter] public EventCallback OnNavigate { get; set; }
 
     private bool IsActive =>
         Nav.Uri.Equals(Nav.BaseUri.TrimEnd('/') + Href, StringComparison.OrdinalIgnoreCase) ||
@@ -18,8 +19,10 @@
 
     protected override void OnInitialized() => Nav.LocationChanged += OnLocationChanged;
 
+    private Task HandleNavigate() => OnNavigate.InvokeAsync();
+
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-        => StateHasChanged();
+        => InvokeAsync(StateHasChanged);
 
     public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
 }

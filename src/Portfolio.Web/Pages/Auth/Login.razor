@@ -3,51 +3,56 @@
 @inject AuthService Auth
 @inject NavigationManager Nav
 @inject PortfolioService Portfolio
+@inject TranslationService T
 
-<PageTitle>Login — @(profile?.FullName ?? "Mahbod Pour")</PageTitle>
+<PageTitle>@T["auth.sign_in"] — @(profile?.FullName ?? T["site.logo"])</PageTitle>
 
 <div class="auth-shell">
-    <div class="auth-card">
+    <div class="auth-orb auth-orb-one"></div>
+    <div class="auth-orb auth-orb-two"></div>
+    <section class="auth-card" aria-labelledby="login-heading">
+        <div class="auth-card-top"><LangSwitcher /></div>
         <div class="auth-brand">
-            <div class="mark">@(profile?.FullName ?? "Mahbod Pour")</div>
-            <div class="sub">Admin Panel</div>
+            <div class="auth-brand-mark">M</div>
+            <div class="mark">@(profile?.FullName ?? T["site.logo"])</div>
+            <div class="sub">@T["auth.admin_portal"]</div>
         </div>
 
         @if (!string.IsNullOrEmpty(error))
         {
-            <div class="auth-error">@error</div>
+            <div class="auth-error" role="alert">@error</div>
         }
 
         <form @onsubmit:preventDefault="true" @onsubmit="HandleLogin">
+            <h1 id="login-heading" class="auth-heading">@T["auth.sign_in"]</h1>
             <div class="auth-field">
-                <label for="username">Username</label>
-                <input @bind="username" id="username" class="auth-input"
+                <label for="username">@T["auth.username"]</label>
+                <input @bind="username" id="username" class="auth-input" dir="ltr"
                        placeholder="admin" autocomplete="username" required />
             </div>
             <div class="auth-field">
-                <label for="password">Password</label>
-                <input @bind="password" @bind:event="oninput" id="password"
-                       type="password" class="auth-input"
-                       placeholder="••••••••" autocomplete="current-password" required />
+                <label for="password">@T["auth.password"]</label>
+                <input @bind="password" @bind:event="oninput" id="password" dir="ltr"
+                       type="password" class="auth-input" placeholder="••••••••" autocomplete="current-password" required />
             </div>
 
             <button type="submit" disabled="@loading" class="auth-btn">
                 @if (loading)
                 {
-                    <span class="auth-spinner"></span><span>Signing in…</span>
+                    <span class="auth-spinner"></span><span>@T["common.loading"]</span>
                 }
                 else
                 {
-                    <span>Sign In</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    <span>@T["auth.sign_in"]</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 }
             </button>
         </form>
 
         <div class="auth-foot">
-            <a href="/">← Back to site</a>
+            <a href="/">← @T["auth.back_to_site"]</a>
         </div>
-    </div>
+    </section>
 </div>
 
 @code {
@@ -63,7 +68,7 @@
         }
         catch
         {
-            // Keep the bundled fallback name when the API is unavailable.
+            // The identity mark has a bundled fallback when the public API is unavailable.
         }
     }
 
@@ -71,7 +76,7 @@
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            error = "Please enter both username and password.";
+            error = T["auth.enter_credentials"];
             return;
         }
 
@@ -80,21 +85,21 @@
 
         try
         {
-            var r = await Auth.Login(username, password);
-            if (r != null)
+            var result = await Auth.Login(username, password);
+            if (result is not null)
             {
                 Nav.NavigateTo("/admin", forceLoad: false);
                 return;
             }
-            error = "Invalid credentials. Please check your username and password.";
+            error = T["auth.invalid_credentials"];
         }
         catch (HttpRequestException)
         {
-            error = "Cannot reach the API server. Make sure Portfolio.Api is running.";
+            error = T["auth.api_unavailable"];
         }
-        catch (Exception ex)
+        catch
         {
-            error = $"Connection error: {ex.Message}";
+            error = T["auth.connection_error"];
         }
         finally
         {

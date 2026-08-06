@@ -4,43 +4,46 @@
 
 @if (visible)
 {
-    <div class="help-overlay" @onclick="Close"></div>
-    <aside class="help-panel @(visible ? "open" : "")">
-        <div class="help-header">
-            <h3>@data?.GetValueOrDefault("title")?.ToString()</h3>
-            <button class="help-close" @onclick="Close" aria-label="Close help">✕</button>
-        </div>
+    <button type="button" class="help-overlay" aria-label="@T["help.close"]" @onclick="Close"></button>
+    <aside class="help-panel open" dir="@Direction" aria-modal="true" role="dialog" aria-labelledby="help-title">
+        <header class="help-header">
+            <div>
+                <span class="help-eyebrow">@T["admin.help"]</span>
+                <h3 id="help-title">@data?.GetValueOrDefault("title")?.ToString()</h3>
+            </div>
+            <button type="button" class="help-close" @onclick="Close" aria-label="@T["help.close"]">×</button>
+        </header>
         <div class="help-body">
             @if (loading)
             {
-                <div class="text-center py-5" style="color:#9a9a9a;">Loading guide...</div>
+                <div class="help-state"><span class="lang-loader"></span><span>@T["help.loading"]</span></div>
             }
-            else if (data == null)
+            else if (data is null)
             {
-                <p style="color:#9a9a9a;">No guide available for this section.</p>
+                <p class="help-empty">@T["help.unavailable"]</p>
             }
             else
             {
                 @if (data.ContainsKey("what"))
                 {
-                    <div class="help-section">
-                        <h4>📖 What is this?</h4>
+                    <section class="help-section">
+                        <h4>@T["help.what"]</h4>
                         <p>@data["what"]?.ToString()</p>
-                    </div>
+                    </section>
                 }
 
                 @if (data.ContainsKey("how"))
                 {
-                    <div class="help-section">
-                        <h4>🪜 How to Use It</h4>
-                        @if (data["how"] is JsonElement howEl && howEl.ValueKind == JsonValueKind.Array)
+                    <section class="help-section">
+                        <h4>@T["help.how"]</h4>
+                        @if (data["how"] is JsonElement howElement && howElement.ValueKind == JsonValueKind.Array)
                         {
                             <ol class="help-steps">
-                                @foreach (var step in howEl.EnumerateArray())
+                                @foreach (var step in howElement.EnumerateArray())
                                 {
-                                    if (step.ValueKind == JsonValueKind.Object && step.TryGetProperty("step", out var s) && step.TryGetProperty("desc", out var d))
+                                    if (step.ValueKind == JsonValueKind.Object && step.TryGetProperty("step", out var stepTitle) && step.TryGetProperty("desc", out var stepDescription))
                                     {
-                                        <li><strong>@s.GetString()</strong><br/><span class="help-step-desc">@d.GetString()</span></li>
+                                        <li><strong>@stepTitle.GetString()</strong><span class="help-step-desc">@stepDescription.GetString()</span></li>
                                     }
                                     else
                                     {
@@ -49,200 +52,106 @@
                                 }
                             </ol>
                         }
-                    </div>
+                    </section>
                 }
 
                 @if (data.ContainsKey("tips"))
                 {
-                    <div class="help-section">
-                        <h4>💡 Pro Tips</h4>
-                        @if (data["tips"] is JsonElement tipsEl && tipsEl.ValueKind == JsonValueKind.Array)
+                    <section class="help-section">
+                        <h4>@T["help.tips"]</h4>
+                        @if (data["tips"] is JsonElement tipsElement && tipsElement.ValueKind == JsonValueKind.Array)
                         {
                             <ul class="help-tips">
-                                @foreach (var tip in tipsEl.EnumerateArray())
+                                @foreach (var tip in tipsElement.EnumerateArray())
                                 {
                                     <li>@tip.GetString()</li>
                                 }
                             </ul>
                         }
-                    </div>
+                    </section>
                 }
 
                 @if (section == "getting_started" && data.ContainsKey("steps"))
                 {
-                    <div class="help-section">
-                        <h4>🚀 Quick Start Steps</h4>
-                        @if (data["steps"] is JsonElement stEl && stEl.ValueKind == JsonValueKind.Array)
+                    <section class="help-section">
+                        <h4>@T["help.quick_start"]</h4>
+                        @if (data["steps"] is JsonElement stepsElement && stepsElement.ValueKind == JsonValueKind.Array)
                         {
                             <ol class="help-steps">
-                                @foreach (var step in stEl.EnumerateArray())
+                                @foreach (var step in stepsElement.EnumerateArray())
                                 {
-                                    if (step.TryGetProperty("title", out var t) && step.TryGetProperty("desc", out var d))
+                                    if (step.TryGetProperty("title", out var title) && step.TryGetProperty("desc", out var description))
                                     {
-                                        <li><strong>@t.GetString()</strong><br/><span class="help-step-desc">@d.GetString()</span></li>
+                                        <li><strong>@title.GetString()</strong><span class="help-step-desc">@description.GetString()</span></li>
                                     }
                                 }
                             </ol>
                         }
-                    </div>
+                    </section>
                 }
             }
         </div>
     </aside>
 }
 
-<style>
-    .help-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 998;
-    }
-    .help-panel {
-        position: fixed;
-        top: 0; right: 0;
-        width: 100%;
-        max-width: 420px;
-        height: 100vh;
-        background: #111;
-        border-left: 1px solid rgba(255,255,255,0.08);
-        color: #fff;
-        z-index: 999;
-        display: flex;
-        flex-direction: column;
-        transform: translateX(100%);
-        transition: transform 0.35s cubic-bezier(0.25,0.1,0.25,1);
-    }
-    .help-panel.open {
-        transform: translateX(0) translateZ(0);
-    }
-    .help-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 24px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        flex-shrink: 0;
-    }
-    .help-header h3 {
-        font-size: 1rem;
-        font-weight: 700;
-        margin: 0;
-        color: #d4a04c;
-    }
-    .help-close {
-        width: 32px; height: 32px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.06);
-        border: none;
-        color: #9a9a9a;
-        font-size: 1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .2s;
-        touch-action: manipulation;
-    }
-    .help-close:hover { background: rgba(244,67,54,0.2); color: #f44336; }
-    .help-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 24px;
-    }
-    .help-body::-webkit-scrollbar { width: 3px; }
-    .help-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-    .help-section {
-        margin-bottom: 24px;
-    }
-    .help-section h4 {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: #d4a04c;
-        margin-bottom: 10px;
-    }
-    .help-section p {
-        color: #ccc;
-        font-size: 0.88rem;
-        line-height: 1.7;
-    }
-    .help-steps {
-        padding-left: 18px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    .help-steps li {
-        color: #ccc;
-        font-size: 0.85rem;
-        line-height: 1.6;
-    }
-    .help-steps li strong {
-        color: #fff;
-        display: block;
-        margin-bottom: 2px;
-    }
-    .help-step-desc {
-        color: #9a9a9a;
-    }
-    .help-tips {
-        padding-left: 18px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-    .help-tips li {
-        color: #9a9a9a;
-        font-size: 0.82rem;
-        line-height: 1.6;
-    }
-    .help-tips li::marker { color: #d4a04c; }
-
-    @@media (max-width: 480px) {
-        .help-panel { max-width: 100%; }
-    }
-</style>
-
 @code {
     [Parameter] public string? section { get; set; }
+    [Parameter] public string Direction { get; set; } = "ltr";
     [Parameter] public EventCallback<bool> OnClose { get; set; }
 
     private bool visible;
     private bool loading;
     private Dictionary<string, object?>? data;
 
-    public async Task Open(string? sec = null)
+    public async Task Open(string? requestedSection = null)
     {
-        if (sec != null) section = sec;
-        visible = true; loading = true; data = null;
-        StateHasChanged();
+        if (requestedSection is not null)
+            section = requestedSection;
 
-        var lang = T.Lang ?? "en";
-        var key = section ?? "getting_started";
-        try
-        {
-            var json = await Http.GetStringAsync($"lang/help/{lang}.json");
-            using var doc = System.Text.Json.JsonDocument.Parse(json);
-            var root = doc.RootElement;
-            if (root.TryGetProperty(key, out var sectionData))
-            {
-                data = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(sectionData.GetRawText());
-            }
-        }
-        catch { data = null; }
-        loading = false;
+        visible = true;
+        await LoadCurrentSectionAsync();
     }
 
     public async Task Close()
     {
         visible = false;
         await OnClose.InvokeAsync(false);
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadCurrentSectionAsync()
+    {
+        loading = true;
+        data = null;
+        await InvokeAsync(StateHasChanged);
+
+        var key = section ?? "getting_started";
+        try
+        {
+            var json = await Http.GetStringAsync($"lang/help/{T.Lang}.json");
+            using var document = JsonDocument.Parse(json);
+            if (document.RootElement.TryGetProperty(key, out var sectionData))
+                data = JsonSerializer.Deserialize<Dictionary<string, object?>>(sectionData.GetRawText());
+        }
+        catch
+        {
+            data = null;
+        }
+        finally
+        {
+            loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Refresh()
+    {
+        if (visible)
+            _ = InvokeAsync(LoadCurrentSectionAsync);
+        else
+            _ = InvokeAsync(StateHasChanged);
     }
 
     protected override void OnInitialized() => T.OnChange += Refresh;
-    private void Refresh() => InvokeAsync(StateHasChanged);
     public void Dispose() => T.OnChange -= Refresh;
 }
