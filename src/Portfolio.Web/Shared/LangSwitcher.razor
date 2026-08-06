@@ -1,11 +1,31 @@
 @inject TranslationService T
 @implements IDisposable
 
-<button type="button" class="btn-lang" @onclick="Toggle" 
+<button type="button" class="btn-lang" @onclick="Toggle"
         title="@(T.Lang == "en" ? "Switch to Persian" : "Switch to English")"
         aria-label="Switch language">
     @(T.Lang == "en" ? "فا" : "EN")
 </button>
+
+<style>
+    .btn-lang {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        padding: 9px 14px;
+        border-radius: 9px;
+        border: 1px solid var(--line);
+        background: transparent;
+        cursor: pointer;
+        transition: color .2s, border-color .2s, background .2s;
+        font-family: var(--font-body);
+    }
+    .btn-lang:hover {
+        color: var(--accent);
+        border-color: var(--accent-soft);
+        background: var(--accent-soft);
+    }
+</style>
 
 @code {
     protected override void OnInitialized() => T.OnChange += Refresh;
