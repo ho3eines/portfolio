@@ -58,6 +58,58 @@
         })();
     </script>
     <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        /* Diagnostic shown when _framework/blazor.webassembly.js fails (wrong port) */
+        #blazorFailed { display:none; max-width:720px; margin:40px auto; padding:28px; background:#111c2e; border:1px solid rgba(224,235,250,.10); border-radius:24px; color:#f5f7fb; font-family:Manrope,system-ui,sans-serif; box-shadow:0 24px 70px rgba(0,0,0,.30); }
+        #blazorFailed h2 { margin:0 0 10px; font-family:'DM Serif Display',Georgia,serif; font-weight:400; font-size:26px; }
+        #blazorFailed code { background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; font-size:13px; }
+        #blazorFailed .btn { display:inline-flex; align-items:center; gap:8px; background:#f5f7fb; color:#080e19; padding:10px 18px; border-radius:999px; text-decoration:none; font-weight:700; }
+        #blazorFailed .btn2 { display:inline-flex; align-items:center; gap:8px; background:transparent; color:#f5f7fb; border:1px solid rgba(224,235,250,.18); padding:10px 18px; border-radius:999px; text-decoration:none; }
+    </style>
+    <script>
+        // Global handler: if _framework/blazor.webassembly.js 404s, show a helpful message
+        // instead of leaving the spinner forever. The stub at _framework/blazor.webassembly.js
+        // already handles static-preview and API-host cases, but this is a safety net
+        // for network failures or misconfigured hosts (e.g. opening https://localhost:49325
+        // which is the API, not https://localhost:49323 which is the Web UI).
+        (function () {
+            var failed = false;
+            window.__portfolioBlazorFailed = function (msg) {
+                if (failed) return; failed = true;
+                var app = document.getElementById('app');
+                var panel = document.getElementById('blazorFailed');
+                if (panel) panel.style.display = 'block';
+                if (app) {
+                    var loader = app.querySelector('.boot-loader');
+                    if (loader) loader.style.display = 'none';
+                }
+                console.error('[Portfolio] Blazor boot failed:', msg);
+            };
+            window.addEventListener('error', function (e) {
+                var target = e.target;
+                if (target && target.tagName === 'SCRIPT' && target.src && target.src.indexOf('blazor.webassembly.js') !== -1) {
+                    var isApiPort = location.port === '49325' || location.port === '49326';
+                    var detail = isApiPort
+                        ? 'You opened the API server (port 49325). The portfolio UI is at https://localhost:49323 — open that URL instead (run both `Portfolio.Api` and `Portfolio.Web`).'
+                        : 'Blazor WebAssembly failed to load (' + target.src + '). If you are on a static file server, the stub should have rendered a preview — otherwise run `cd src/Portfolio.Web && dotnet run` and open https://localhost:49323.';
+                    window.__portfolioBlazorFailed(detail);
+                }
+            }, true);
+            // Also detect a stalled loader (framework never executed)
+            setTimeout(function () {
+                var loader = document.querySelector('#app .boot-loader');
+                var hasApp = document.querySelector('#app .bento-grid');
+                if (loader && loader.offsetParent !== null && !hasApp) {
+                    // If the stub is present it would have already replaced the loader;
+                    // this catches the case where the script 404d and no stub ran.
+                    var isApi = location.port === '49325' || location.port === '49326';
+                    if (isApi || !hasApp) {
+                        window.__portfolioBlazorFailed('Loader still visible after 6s — framework did not boot. Check DevTools Network tab for 404 on _framework/blazor.webassembly.js.');
+                    }
+                }
+            }, 6000);
+        })();
+    </script>
 </head>
 <body>
     <!-- Blazor mounts here. No static markup, no redirects — routing is handled in-app. -->
@@ -68,11 +120,34 @@
         </div>
     </div>
 
+    <!-- Shown only when Blazor fails to boot (e.g. opened API port 49325) -->
+    <div id="blazorFailed" role="alert">
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#f0b45e;margin-bottom:8px">Portfolio — Blazor didn’t start</div>
+        <h2>Couldn’t load <code>_framework/blazor.webassembly.js</code></h2>
+        <p style="color:#9aaac0;line-height:1.6">This usually means you opened the <strong style="color:#f5f7fb">API server</strong> (<code>https://localhost:49325</code>) instead of the <strong style="color:#f5f7fb">Blazor UI</strong> (<code>https://localhost:49323</code>), or you’re serving <code>wwwroot</code> without running <code>dotnet build</code>.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:14px 0">
+            <a class="btn" href="https://localhost:49323">Open portfolio — https://localhost:49323</a>
+            <a class="btn2" href="http://localhost:49324">http://localhost:49324</a>
+            <a class="btn2" href="/swagger">API → /swagger</a>
+        </div>
+        <div style="background:rgba(240,180,94,.08);border:1px solid rgba(240,180,94,.18);border-radius:12px;padding:12px 14px">
+            <div style="font-weight:700;color:#f0b45e;margin-bottom:6px">Quick fix</div>
+            <code style="display:block;white-space:pre-wrap;line-height:1.6"># Terminal 1 — API
+cd src/Portfolio.Api && dotnet run   # → https://localhost:49325
+# Terminal 2 — Web
+cd src/Portfolio.Web && dotnet run   # → https://localhost:49323  ← open this
+# Static preview without dotnet
+npx serve src/Portfolio.Web/wwwroot -l 5173</code>
+        </div>
+        <p style="margin:12px 0 0;font-size:12px;color:#6f819b">In production both are same-origin via a reverse proxy that forwards <code>/api</code> to the API. The stub at <code>/_framework/blazor.webassembly.js</code> now prevents the 404 and renders a static preview when dotnet isn’t running.</p>
+    </div>
+
+    <script src="js/config.js"></script>
     <script src="js/animations.js"></script>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_framework/blazor.webassembly.js" onerror="window.__portfolioBlazorFailed && window.__portfolioBlazorFailed('onerror for blazor.webassembly.js — see Network tab')"></script>
     <script>
-        // PWA service worker
-        if ('serviceWorker' in navigator) {
+        // PWA service worker — skip on API host (49325) where Blazor isn't served
+        if ('serviceWorker' in navigator && location.port !== '49325' && location.port !== '49326') {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then((reg) => console.log('PWA registered', reg.scope))

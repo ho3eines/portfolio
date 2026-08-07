@@ -1,0 +1,18 @@
+{
+  "name": "portfolio-preview",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-dependency preview for Mahbod Pour Portfolio — serves Blazor wwwroot with mock API",
+  "type": "module",
+  "scripts": {
+    "preview": "node preview-server.mjs",
+    "preview:api": "PORT=49325 node preview-server.mjs",
+    "preview:web": "PORT=49323 node preview-server.mjs",
+    "serve": "node preview-server.mjs",
+    "health": "curl -s http://localhost:5173/health | python3 -m json.tool"
+  },
+  "keywords": ["portfolio", "blazor", "preview"],
+  "engines": {
+    "node": ">=18"
+  }
+}
