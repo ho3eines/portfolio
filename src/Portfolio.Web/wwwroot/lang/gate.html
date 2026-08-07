@@ -31,6 +31,8 @@
   .opt .info small{font-size:.75rem;color:#9aaac0}
   .opt .arr{color:#9aaac0;transition:all .3s ease;flex-shrink:0}
   .opt:hover .arr{color:#f0b45e;transform:translateX(4px)}
+  .opt-fa{font-family:'Vazirmatn','Tahoma',sans-serif}
+  .opt-fa strong{font-family:'Vazirmatn','Tahoma',sans-serif;font-weight:700;font-size:1rem}
   .loading{display:flex;align-items:center;justify-content:center;gap:10px;color:#f0b45e;font-size:.85rem;margin-top:12px;display:none}
   .loading.show{display:flex}
   .spinner{width:20px;height:20px;border:2px solid rgba(212,160,76,.2);border-top-color:#f0b45e;border-radius:50%;animation:spin .7s linear infinite}
@@ -52,7 +54,7 @@
       <div class="info"><strong>English</strong><small>United States · English</small></div>
       <svg class="arr" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <button class="opt" onclick="selectLang('fa')">
+    <button class="opt opt-fa" onclick="selectLang('fa')">
       <span class="flag">🇮🇷</span>
       <div class="info"><strong>فارسی</strong><small>Iran · Persian</small></div>
       <svg class="arr" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>

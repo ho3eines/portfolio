@@ -3,8 +3,8 @@
  * Caches static assets for offline access & fast load
  * Version: 2026.08.04
  */
-const CACHE_NAME = 'portfolio-v20260806-i18n-responsive';
-const RUNTIME = 'portfolio-runtime-i18n-responsive';
+const CACHE_NAME = 'portfolio-v20260807-farsi-fonts-sri-fix';
+const RUNTIME = 'portfolio-runtime-v20260807';
 
 // Assets to pre-cache on install
 const PRECACHE_URLS = [
@@ -60,8 +60,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API calls
-  if (event.request.url.includes('/api/')) return;
+  // Skip API calls and Blazor framework / debug resources to prevent SRI integrity mismatch
+  if (event.request.url.includes('/api/') ||
+      event.request.url.includes('/_framework/') ||
+      event.request.url.includes('/_content/') ||
+      event.request.url.includes('/_vs/') ||
+      event.request.url.endsWith('.pdb') ||
+      event.request.url.endsWith('.wasm')) {
+    return;
+  }
 
   // For navigation requests, serve index.html (SPA fallback)
   if (event.request.mode === 'navigate') {
