@@ -42,8 +42,8 @@
     var port = location.port;
     var isApiHost = port === '49325' || port === '49326';
     // preview hosts look like 49325-xxx.e2b.app / 49323-xxx.e2b.app — detect by port in subdomain
-    var isPreview = /^\d+-/.test(host) || host.indexOf('.e2b.app') !== -1 || host.indexOf('.github.dev') !== -1;
-    var originPort = (host.match(/^(\d+)-/) || [])[1] || port;
+    var isPreview = /^\\d+-/.test(host) || host.indexOf('.e2b.app') !== -1 || host.indexOf('.github.dev') !== -1;
+    var originPort = (host.match(/^(\\d+)-/) || [])[1] || port;
 
     // If we are on a preview host and the subdomain port is the API, treat as API
     if (isPreview && originPort === '49325') isApiHost = true;
@@ -55,25 +55,25 @@
         var app = $('#app');
         if (app) {
             app.innerHTML = ''
-                + '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;background:#080e19;color:#f5f7fb;font-family:Manrope,system-ui,sans-serif">'
-                + '  <div style="max-width:720px;width:100%;background:#111c2e;border:1px solid rgba(224,235,250,.10);border-radius:24px;padding:32px 28px;box-shadow:0 24px 70px rgba(0,0,0,.30)">'
-                + '    <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#f0b45e;margin-bottom:12px">Portfolio API · ' + host + ':' + port + '</div>'
-                + '    <h1 style="margin:0 0 10px;font-family:DM Serif Display,Georgia,serif;font-size:28px;line-height:1.15;font-weight:400">This is the API server.</h1>'
-                + '    <p style="margin:0 0 18px;color:#9aaac0;line-height:1.6">You opened <code style="background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px">https://' + host + ':' + port + '/_framework/blazor.webassembly.js</code> — the <strong style="color:#f5f7fb">API</strong> (port 49325) does not serve the Blazor UI. The portfolio UI is served by <strong style="color:#f5f7fb">Portfolio.Web</strong>.</p>'
-                + '    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px">'
-                + '      <a href="https://localhost:49323" style="display:inline-flex;align-items:center;gap:8px;background:#f5f7fb;color:#080e19;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700">Open the portfolio — https://localhost:49323</a>'
-                + '      <a href="http://localhost:49324" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:#f5f7fb;border:1px solid rgba(224,235,250,.18);padding:10px 18px;border-radius:999px;text-decoration:none">http://localhost:49324 (no TLS)</a>'
+                + '<div style=\"min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;background:#080e19;color:#f5f7fb;font-family:Manrope,system-ui,sans-serif\">'
+                + '  <div style=\"max-width:720px;width:100%;background:#111c2e;border:1px solid rgba(224,235,250,.10);border-radius:24px;padding:32px 28px;box-shadow:0 24px 70px rgba(0,0,0,.30)\">'
+                + '    <div style=\"font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#f0b45e;margin-bottom:12px\">Portfolio API · ' + host + ':' + port + '</div>'
+                + '    <h1 style=\"margin:0 0 10px;font-family:DM Serif Display,Georgia,serif;font-size:28px;line-height:1.15;font-weight:400\">This is the API server.</h1>'
+                + '    <p style=\"margin:0 0 18px;color:#9aaac0;line-height:1.6\">You opened <code style=\"background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px\">https://' + host + ':' + port + '/_framework/blazor.webassembly.js</code> — the <strong style=\"color:#f5f7fb\">API</strong> (port 49325) does not serve the Blazor UI. The portfolio UI is served by <strong style=\"color:#f5f7fb\">Portfolio.Web</strong>.</p>'
+                + '    <div style=\"display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px\">'
+                + '      <a href=\"https://localhost:49323\" style=\"display:inline-flex;align-items:center;gap:8px;background:#f5f7fb;color:#080e19;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700\">Open the portfolio — https://localhost:49323</a>'
+                + '      <a href=\"http://localhost:49324\" style=\"display:inline-flex;align-items:center;gap:8px;background:transparent;color:#f5f7fb;border:1px solid rgba(224,235,250,.18);padding:10px 18px;border-radius:999px;text-decoration:none\">http://localhost:49324 (no TLS)</a>'
                 + '    </div>'
-                + '    <div style="background:rgba(240,180,94,.08);border:1px solid rgba(240,180,94,.18);border-radius:12px;padding:14px 16px;margin-bottom:16px">'
-                + '      <div style="font-weight:700;color:#f0b45e;margin-bottom:6px">How to run locally</div>'
-                + '      <code style="display:block;white-space:pre-wrap;font-family:Consolas,monospace;font-size:13px;color:#f5f7fb;line-height:1.6"># Terminal 1 — API (port 49325)\ncd src/Portfolio.Api && dotnet run\n\n# Terminal 2 — Blazor UI (port 49323)\ncd src/Portfolio.Web && dotnet run\n\n# Then open the Web URL above, not the API URL.\n# Static preview without dotnet:\n# npx serve src/Portfolio.Web/wwwroot -l 5173</code>'
+                + '    <div style=\"background:rgba(240,180,94,.08);border:1px solid rgba(240,180,94,.18);border-radius:12px;padding:14px 16px;margin-bottom:16px\">'
+                + '      <div style=\"font-weight:700;color:#f0b45e;margin-bottom:6px\">How to run locally</div>'
+                + '      <code style=\"display:block;white-space:pre-wrap;font-family:Consolas,monospace;font-size:13px;color:#f5f7fb;line-height:1.6\"># Terminal 1 — API (port 49325)\\ncd src/Portfolio.Api && dotnet run\\n\\n# Terminal 2 — Blazor UI (port 49323)\\ncd src/Portfolio.Web && dotnet run\\n\\n# Then open the Web URL above, not the API URL.\\n# Static preview without dotnet:\\n# npx serve src/Portfolio.Web/wwwroot -l 5173</code>'
                 + '    </div>'
-                + '    <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px">'
-                + '      <a href="/swagger" style="color:#73ddcf;text-decoration:none">Swagger → /swagger</a>'
-                + '      <a href="/api/portfolio/profile" style="color:#73ddcf;text-decoration:none">API → /api/portfolio/profile</a>'
-                + '      <a href="/lang/en.json" style="color:#73ddcf;text-decoration:none">Static → /lang/en.json</a>'
+                + '    <div style=\"display:flex;gap:12px;flex-wrap:wrap;font-size:13px\">'
+                + '      <a href=\"/swagger\" style=\"color:#73ddcf;text-decoration:none\">Swagger → /swagger</a>'
+                + '      <a href=\"/api/portfolio/profile\" style=\"color:#73ddcf;text-decoration:none\">API → /api/portfolio/profile</a>'
+                + '      <a href=\"/lang/en.json\" style=\"color:#73ddcf;text-decoration:none\">Static → /lang/en.json</a>'
                 + '    </div>'
-                + '    <p style="margin:16px 0 0;font-size:12px;color:#6f819b">In production both are same-origin behind a reverse proxy that forwards <code>/api</code> to the API. In hosted previews set <code>ApiBaseUrl</code> to an absolute, browser-reachable HTTPS URL.</p>'
+                + '    <p style=\"margin:16px 0 0;font-size:12px;color:#6f819b\">In production both are same-origin behind a reverse proxy that forwards <code>/api</code> to the API. In hosted previews set <code>ApiBaseUrl</code> to an absolute, browser-reachable HTTPS URL.</p>'
                 + '  </div>'
                 + '</div>';
         }
@@ -103,11 +103,11 @@
             s.src = 'js/config.js';
             s.onload = function () { renderStaticPreview(); };
             s.onerror = function () {
-                appNode.innerHTML = '<div style="max-width:720px;margin:60px auto;padding:32px;background:#111c2e;border:1px solid rgba(224,235,250,.10);border-radius:24px;color:#f5f7fb;font-family:Manrope,sans-serif">'
-                    + '<h2 style="font-family:DM Serif Display,serif">Portfolio — static preview</h2>'
-                    + '<p style="color:#9aaac0">Blazor WebAssembly has not been built yet (<code>dotnet run</code> not executed). The full UI requires <code>dotnet build</code>.</p>'
-                    + '<p style="color:#9aaac0">To view the portfolio locally:</p><pre style="background:#0c1422;padding:12px;border-radius:10px;overflow:auto">cd src/Portfolio.Web && dotnet run\n# then open https://localhost:49323</pre>'
-                    + '<p style="color:#9aaac0">Or serve this static preview: <code>npx serve src/Portfolio.Web/wwwroot -l 5173</code></p></div>';
+                appNode.innerHTML = '<div style=\"max-width:720px;margin:60px auto;padding:32px;background:#111c2e;border:1px solid rgba(224,235,250,.10);border-radius:24px;color:#f5f7fb;font-family:Manrope,sans-serif\">'
+                    + '<h2 style=\"font-family:DM Serif Display,serif\">Portfolio — static preview</h2>'
+                    + '<p style=\"color:#9aaac0\">Blazor WebAssembly has not been built yet (<code>dotnet run</code> not executed). The full UI requires <code>dotnet build</code>.</p>'
+                    + '<p style=\"color:#9aaac0\">To view the portfolio locally:</p><pre style=\"background:#0c1422;padding:12px;border-radius:10px;overflow:auto\">cd src/Portfolio.Web && dotnet run\\n# then open https://localhost:49323</pre>'
+                    + '<p style=\"color:#9aaac0\">Or serve this static preview: <code>npx serve src/Portfolio.Web/wwwroot -l 5173</code></p></div>';
             };
             document.head.appendChild(s);
             return;
@@ -127,64 +127,64 @@
         var tsts = cfg.testimonials || [];
 
         var html = ''
-            + '<div class="bento-grid" style="padding:28px;max-width:1480px;margin:0 auto">'
-            + '  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;padding:0 4px">'
-            + '    <a href="/" style="font-family:DM Serif Display,serif;font-size:20px;color:#f5f7fb;text-decoration:none">' + (cfg.profile.name || 'Mahbod Pour') + '</a>'
-            + '    <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#f0b45e;border:1px solid rgba(240,180,94,.18);background:rgba(240,180,94,.10);padding:6px 10px;border-radius:999px">Static preview — no WASM</span>'
+            + '<div class=\"bento-grid\" style=\"padding:28px;max-width:1480px;margin:0 auto\">'
+            + '  <div style=\"display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;padding:0 4px\">'
+            + '    <a href=\"/\" style=\"font-family:DM Serif Display,serif;font-size:20px;color:#f5f7fb;text-decoration:none\">' + (cfg.profile.name || 'Mahbod Pour') + '</a>'
+            + '    <span style=\"font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#f0b45e;border:1px solid rgba(240,180,94,.18);background:rgba(240,180,94,.10);padding:6px 10px;border-radius:999px\">Static preview — no WASM</span>'
             + '  </div>'
-            + '  <div style="background:#f0b45e;color:#211508;padding:10px 14px;border-radius:999px;font-size:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:18px">'
+            + '  <div style=\"background:#f0b45e;color:#211508;padding:10px 14px;border-radius:999px;font-size:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:18px\">'
             + '    <span>Blazor WebAssembly not built. This is a static fallback rendered from <code>js/config.js</code>.</span>'
-            + '    <code style="background:rgba(33,21,8,.12);padding:2px 8px;border-radius:999px">cd src/Portfolio.Web && dotnet run → https://localhost:49323</code>'
+            + '    <code style=\"background:rgba(33,21,8,.12);padding:2px 8px;border-radius:999px\">cd src/Portfolio.Web && dotnet run → https://localhost:49323</code>'
             + '  </div>';
 
         // Hero
         html += ''
-            + '<section class="bento-box box-hero" style="min-height:unset;padding:28px">'
-            + '  <header class="hero-header" style="position:relative;display:flex;justify-content:space-between;align-items:center;margin-bottom:22px">'
-            + '    <span style="font-weight:800;letter-spacing:-.02em">' + (cfg.profile.name || '') + '</span>'
-            + '    <span style="color:#9aaac0;font-size:13px">' + (cfg.profile.title || '') + '</span>'
+            + '<section class=\"bento-box box-hero\" style=\"min-height:unset;padding:28px\">'
+            + '  <header class=\"hero-header\" style=\"position:relative;display:flex;justify-content:space-between;align-items:center;margin-bottom:22px\">'
+            + '    <span style=\"font-weight:800;letter-spacing:-.02em\">' + (cfg.profile.name || '') + '</span>'
+            + '    <span style=\"color:#9aaac0;font-size:13px\">' + (cfg.profile.title || '') + '</span>'
             + '  </header>'
-            + '  <h1 style="font-family:DM Serif Display,serif;font-size:42px;line-height:.95;margin:0 0 12px">Crafting digital<br>experiences<br><span style="color:#f0b45e">with purpose.</span></h1>'
-            + '  <p style="color:#9aaac0;max-width:560px;line-height:1.6">' + (cfg.profile.bio || '') + '</p>'
-            + '  <div style="margin-top:16px;display:flex;gap:10px">'
-            + '    <a href="#work" style="background:#f5f7fb;color:#080e19;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:700">Explore selected work</a>'
-            + '    <a href="/login" style="border:1px solid rgba(224,235,250,.18);color:#f5f7fb;padding:10px 16px;border-radius:999px;text-decoration:none">Admin → /login</a>'
+            + '  <h1 style=\"font-family:DM Serif Display,serif;font-size:42px;line-height:.95;margin:0 0 12px\">Crafting digital<br>experiences<br><span style=\"color:#f0b45e\">with purpose.</span></h1>'
+            + '  <p style=\"color:#9aaac0;max-width:560px;line-height:1.6\">' + (cfg.profile.bio || '') + '</p>'
+            + '  <div style=\"margin-top:16px;display:flex;gap:10px\">'
+            + '    <a href=\"#work\" style=\"background:#f5f7fb;color:#080e19;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:700\">Explore selected work</a>'
+            + '    <a href=\"/login\" style=\"border:1px solid rgba(224,235,250,.18);color:#f5f7fb;padding:10px 16px;border-radius:999px;text-decoration:none\">Admin → /login</a>'
             + '  </div>'
             + '</section>';
 
         // Work
-        html += '<section class="bento-box box-work" id="work" style="margin-top:18px"><div class="box-label">Selected work</div><h2 class="box-title">Ideas, made tangible.</h2><div class="project-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">';
+        html += '<section class=\"bento-box box-work\" id=\"work\" style=\"margin-top:18px\"><div class=\"box-label\">Selected work</div><h2 class=\"box-title\">Ideas, made tangible.</h2><div class=\"project-cards\" style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px\">';
         projects.forEach(function (p, i) {
             var img = 'images/project-' + (i + 1) + '.png';
-            html += '<div class="project-card" style="background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:17px;overflow:hidden">'
-                + '<div style="height:170px;background:#0c1422;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>'
-                + '<div style="padding:14px"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9aaac0">' + (p.category || '') + '</div><div style="font-weight:700;margin-top:4px">' + (p.title || '') + '</div><div style="color:#9aaac0;font-size:13px;margin-top:6px">' + (p.desc || '') + '</div></div></div>';
+            html += '<div class=\"project-card\" style=\"background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:17px;overflow:hidden\">'
+                + '<div style=\"height:170px;background:#0c1422;display:flex;align-items:center;justify-content:center;overflow:hidden\"><img src=\"' + img + '\" alt=\"\" style=\"width:100%;height:100%;object-fit:cover\" onerror=\"this.style.display=\\'none\\'\\\"></div>'
+                + '<div style=\"padding:14px\"><div style=\"font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#9aaac0\">' + (p.category || '') + '</div><div style=\"font-weight:700;margin-top:4px\">' + (p.title || '') + '</div><div style=\"color:#9aaac0;font-size:13px;margin-top:6px\">' + (p.desc || '') + '</div></div></div>';
         });
         html += '</div></section>';
 
         // About
-        html += '<section class="bento-box box-about" id="about" style="margin-top:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px">'
-            + '<div><div class="box-label">About</div><h2 class="box-title">Designing with clarity. Building with care.</h2><p style="color:#9aaac0;line-height:1.6">' + (cfg.profile.bio || '') + '</p>'
-            + '<div style="display:flex;gap:14px;margin-top:14px"><div style="text-align:center"><div style="font-weight:800">4+</div><div style="color:#9aaac0;font-size:12px">Years</div></div><div style="text-align:center"><div style="font-weight:800">20+</div><div style="color:#9aaac0;font-size:12px">Projects</div></div><div style="text-align:center"><div style="font-weight:800">10+</div><div style="color:#9aaac0;font-size:12px">Clients</div></div></div></div>'
-            + '<div style="background:#0c1422;border-radius:17px;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center"><img src="images/about-photo.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'"></div>'
+        html += '<section class=\"bento-box box-about\" id=\"about\" style=\"margin-top:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px\">'
+            + '<div><div class=\"box-label\">About</div><h2 class=\"box-title\">Designing with clarity. Building with care.</h2><p style=\"color:#9aaac0;line-height:1.6\">' + (cfg.profile.bio || '') + '</p>'
+            + '<div style=\"display:flex;gap:14px;margin-top:14px\"><div style=\"text-align:center\"><div style=\"font-weight:800\">4+</div><div style=\"color:#9aaac0;font-size:12px\">Years</div></div><div style=\"text-align:center\"><div style=\"font-weight:800\">20+</div><div style=\"color:#9aaac0;font-size:12px\">Projects</div></div><div style=\"text-align:center\"><div style=\"font-weight:800\">10+</div><div style=\"color:#9aaac0;font-size:12px\">Clients</div></div></div></div>'
+            + '<div style=\"background:#0c1422;border-radius:17px;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center\"><img src=\"images/about-photo.png\" alt=\"\" style=\"width:100%;height:100%;object-fit:cover\" onerror=\"this.style.display=\\'none\\'\\\"></div>'
             + '</section>';
 
         // Skills
-        html += '<section class="bento-box box-skills" id="skills" style="margin-top:18px"><div class="box-label">Skills</div><h2 class="box-title">Stack & craft</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px">';
+        html += '<section class=\"bento-box box-skills\" id=\"skills\" style=\"margin-top:18px\"><div class=\"box-label\">Skills</div><h2 class=\"box-title\">Stack & craft</h2><div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:10px\">';
         skills.slice(0, 12).forEach(function (s) {
-            html += '<div style="background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:11px;padding:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>' + s.name + '</span><span style="color:#9aaac0">' + s.pct + '%</span></div><div style="height:6px;background:rgba(255,255,255,.08);border-radius:999px;margin-top:8px;overflow:hidden"><div style="height:100%;width:' + s.pct + '%;background:#f0b45e"></div></div></div>';
+            html += '<div style=\"background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:11px;padding:10px\"><div style=\"display:flex;justify-content:space-between;font-size:13px\"><span>' + s.name + '</span><span style=\"color:#9aaac0\">' + s.pct + '%</span></div><div style=\"height:6px;background:rgba(255,255,255,.08);border-radius:999px;margin-top:8px;overflow:hidden\"><div style=\"height:100%;width:' + s.pct + '%;background:#f0b45e\"></div></div></div>';
         });
         html += '</div></section>';
 
         // Testimonials / contact
-        html += '<section class="bento-box box-contact" id="contact" style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px">'
-            + '<div><div class="box-label">Testimonials</div><h2 style="margin:6px 0">What clients say</h2>';
+        html += '<section class=\"bento-box box-contact\" id=\"contact\" style=\"margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px\">'
+            + '<div><div class=\"box-label\">Testimonials</div><h2 style=\"margin:6px 0\">What clients say</h2>';
         tsts.forEach(function (t) {
-            html += '<div style="background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:11px;padding:14px;margin-top:10px"><div style="color:#f0b45e">★★★★★</div><div style="margin:8px 0;color:#f5f7fb">"' + t.text + '"</div><div style="font-weight:700">' + t.name + '</div><div style="color:#9aaac0;font-size:12px">' + t.role + '</div></div>';
+            html += '<div style=\"background:#16243a;border:1px solid rgba(224,235,250,.08);border-radius:11px;padding:14px;margin-top:10px\"><div style=\"color:#f0b45e\">★★★★★</div><div style=\"margin:8px 0;color:#f5f7fb\">\"' + t.text + '\"</div><div style=\"font-weight:700\">' + t.name + '</div><div style=\"color:#9aaac0;font-size:12px\">' + t.role + '</div></div>';
         });
-        html += '</div><div><div class="box-label">Contact</div><h2 style="margin:6px 0">Let’s talk</h2><p style="color:#9aaac0">' + (cfg.profile.email || 'mahbod@example.com') + ' · ' + (cfg.profile.location || '') + '</p><form onsubmit="event.preventDefault();alert(\'Static preview — contact requires API (port 49325). Run dotnet for full functionality.\')" style="display:grid;gap:10px;margin-top:10px"><input placeholder="Name" required style="background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px"><input placeholder="Email" type="email" required style="background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px"><textarea placeholder="Message" rows="4" style="background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px"></textarea><button type="submit" style="background:#f5f7fb;color:#080e19;padding:12px;border-radius:999px;border:0;font-weight:700">Send message</button></form></div></section>';
+        html += '</div><div><div class=\"box-label\">Contact</div><h2 style=\"margin:6px 0\">Let’s talk</h2><p style=\"color:#9aaac0\">' + (cfg.profile.email || 'mahbod@example.com') + ' · ' + (cfg.profile.location || '') + '</p><form onsubmit=\"event.preventDefault();alert(\\'Static preview — contact requires API (port 49325). Run dotnet for full functionality.\\')\" style=\"display:grid;gap:10px;margin-top:10px\"><input placeholder=\"Name\" required style=\"background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px\"><input placeholder=\"Email\" type=\"email\" required style=\"background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px\"><textarea placeholder=\"Message\" rows=\"4\" style=\"background:#0c1422;border:1px solid rgba(224,235,250,.10);color:#f5f7fb;padding:12px;border-radius:10px\"></textarea><button type=\"submit\" style=\"background:#f5f7fb;color:#080e19;padding:12px;border-radius:999px;border:0;font-weight:700\">Send message</button></form></div></section>';
 
-        html += '<footer class="site-footer" style="margin:18px 0;color:#6f819b;text-align:center;font-size:13px">' + (cfg.profile.name || 'Mahbod Pour') + ' · Static preview — build with <code>dotnet run</code> for full Blazor interactivity, auth & admin.</footer>';
+        html += '<footer class=\"site-footer\" style=\"margin:18px 0;color:#6f819b;text-align:center;font-size:13px\">' + (cfg.profile.name || 'Mahbod Pour') + ' · Static preview — build with <code>dotnet run</code> for full Blazor interactivity, auth & admin.</footer>';
         html += '</div>';
 
         // Inject

@@ -21,4 +21,19 @@
     <ProjectReference Include="..\Portfolio.Data\Portfolio.Data.csproj" />
   </ItemGroup>
 
+  <!-- 
+    Exclude the static-preview stub for blazor.webassembly.js from Static Web Assets discovery.
+    The file must remain in wwwroot so that:
+      - npx serve / preview-server can serve it (prevents 404 on /_framework/blazor.webassembly.js)
+      - Static hosting / GitHub Pages / Arena previews work without dotnet build
+    But the Blazor SDK + GenerateStaticWebAssets* tasks assume they are the sole provider of _framework files.
+    Including the checked-in stub causes:
+      Sequence contains more than one element (SingleOrDefault in ComputeManifestAssets / ComputeDevelopmentManifest)
+  -->
+  <ItemGroup>
+    <Content Remove="wwwroot/_framework/blazor.webassembly.js" />
+    <!-- Also ensure it is never copied during publish (the real framework comes from the SDK) -->
+    <None Include="wwwroot/_framework/blazor.webassembly.js" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>
